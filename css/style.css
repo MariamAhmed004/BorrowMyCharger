@@ -768,7 +768,7 @@ https://templatemo.com/tm-516-known
 
   footer {
     background: #252020;
-    padding: 120px 0;
+    padding: 35px 0;
   }
 
   footer .section-title {
@@ -1283,4 +1283,77 @@ https://templatemo.com/tm-516-known
     padding: 0;
 }
 
+.nav-logo {
+    display: flex;
+    align-items: center;
+}
 
+.nav-logo-img {
+    padding-top: 14px;
+    height: 55px;
+}
+.nav-user-wrapper {
+    position: absolute;
+    right: 20px;
+    top: 0px;
+}
+
+.nav-user {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-user-link {
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Spacing between icon and text */
+}
+
+.nav-user-img {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%; /* Circular icon */
+    margin-right: 2px;
+}
+
+.nav-user-menu {
+    background: #fff;
+    padding: 5px 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-user-item {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+}
+
+.nav-user-item:hover {
+    background: #f5f5f5;
+}
+.nav-section {
+    width: 100%;
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    color: #fff;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+
+}
+
+.nav-section h1,p{
+    color: whitesmoke;
+    
+}
