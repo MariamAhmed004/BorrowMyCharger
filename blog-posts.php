@@ -1,5 +1,5 @@
 <?php
-//login controller
+//bp controller
 //handle from the header navigation to the html page
 $view = new stdClass();
 $view->pageTitle = '';
