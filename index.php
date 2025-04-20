@@ -3,4 +3,4 @@
 //handle from the header navigation to the html page
 $view = new stdClass();
 $view->pageTitle = '';
-require_once 'Views/register.phtml';
+require_once 'Views/index.phtml';
