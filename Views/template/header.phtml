@@ -1,15 +1,19 @@
 <?php
-// Assume the role is set dynamically from the session or database
-$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'HomeOwner';
-// Check if $pageTitle is set, otherwise use a default title
-$pageTitle = isset($pageTitle) ? $pageTitle : "Borrow My Charger";
+session_start();
 
+// Set the role dynamically from session or default to 'Guest'
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Admin';
+
+// Ensure $view exists and contains the active page data
+$view = isset($view) ? $view : new stdClass();
+$view->pageTitle = isset($view->pageTitle) ? $view->pageTitle : "Borrow My Charger";
+$view->activePage = isset($view->activePage) ? $view->activePage : "home";
 ?>
-<!-- Header -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title><?php echo htmlspecialchars($pageTitle); ?></title>
+    <title><?php echo htmlspecialchars($view->pageTitle); ?></title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -37,31 +41,46 @@ $pageTitle = isset($pageTitle) ? $pageTitle : "Borrow My Charger";
             <!-- MENU LINKS -->
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-nav-first">
-                    <li class="active"><a href="index.php">Home</a></li>
+                    <li class="<?php echo ($view->activePage == 'home' || $view->activePage == 'dashboard') ? 'active' : ''; ?>">
+                        <a href="<?php  
+                            if ($role == 'HomeOwner') { 
+                                echo 'home_homeowner.php'; 
+                            } elseif ($role == 'RentalUser') { 
+                                echo 'home_rentaluser.php'; 
+                            } elseif ($role == 'Admin') { 
+                                echo 'dashboard_admin.php'; 
+                            } else { 
+                                echo 'index.php'; 
+                            }
+                        ?>">
+                            <?php echo ($role == 'Admin') ? 'Dashboard' : 'Home'; ?>
+                        </a>
+                    </li>
 
                     <?php
                     if ($role == 'HomeOwner') {
-                        echo '<li><a href="borrow-request.php">Borrow Request</a></li>';
-                        echo '<li><a href="charge-points.php">Charge Points</a></li>';
+                        echo '<li class="' . (($view->activePage == 'borrow-request') ? 'active' : '') . '"><a href="borrow-request.php">Borrow Request</a></li>';
+                        echo '<li class="' . (($view->activePage == 'charge-points') ? 'active' : '') . '"><a href="charge-points.php">Charge Points</a></li>';
                     } elseif ($role == 'RentalUser') {
-                        echo '<li><a href="booking-history.php">Booking History</a></li>';
-                        echo '<li><a href="book-now.php">Book Now</a></li>';
+                        echo '<li class="' . (($view->activePage == 'booking-history') ? 'active' : '') . '"><a href="booking-history.php">Booking History</a></li>';
+                        echo '<li class="' . (($view->activePage == 'book-now') ? 'active' : '') . '"><a href="book-now.php">Book Now</a></li>';
                     } elseif ($role == 'Admin') {
-    echo '<li><a href="dashboard.php">Dashboard</a></li>';
-    
-    // User Management Dropdown
-    echo '<li class="dropdown">';
-    echo '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Management <span class="caret"></span></a>';
-    echo '<ul class="dropdown-menu">';
-    echo '<li><a href="view-all-profiles.php">View All Profiles</a></li>';
-    echo '<li><a href="manage-homeowner-registration.php">Manage Homeowner Registration</a></li>';
-    echo '</ul>';
-    echo '</li>';
-    
-    echo '<li><a href="charge-point-management.php">Charge Point Management</a></li>';
-    echo '<li><a href="system-reports.php">System Reports</a></li>';
-} else {
-                        echo '<li><a href="contact.php">Contact Us</a></li>';
+                        // User Management Dropdown
+                        echo '<li class="dropdown ' . (($view->activePage == 'view-all-profiles' || $view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '">';
+                        echo '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Management <span class="caret"></span></a>';
+                        echo '<ul class="dropdown-menu">';
+                        echo '<li class="' . (($view->activePage == 'view-all-profiles') ? 'active' : '') . '"><a href="view-all-profiles.php">View All Profiles</a></li>';
+                        echo '<li class="' . (($view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '"><a href="manage-homeowner-registration.php">Manage Homeowner Registration</a></li>';
+                        echo '</ul>';
+                        echo '</li>';
+
+                        echo '<li class="' . (($view->activePage == 'charge-point-management') ? 'active' : '') . '"><a href="charge-point-management.php">Charge Point Management</a></li>';
+                        echo '<li class="' . (($view->activePage == 'system-reports') ? 'active' : '') . '"><a href="system-reports.php">System Reports</a></li>';
+                    } else {
+                        
+                        //else means the guest situation and will deal with it later
+                        
+                        echo '<li class="' . (($view->activePage == 'contact') ? 'active' : '') . '"><a href="contact.php">Contact Us</a></li>';
                     }
                     ?>
                 </ul>
