@@ -1357,3 +1357,31 @@ https://templatemo.com/tm-516-known
     color: whitesmoke;
     
 }
+
+/*banner*/
+   .banner {
+
+      background-size: cover;
+      background-position: center;
+      padding: 100px 0;
+      color: white;
+      text-align: center;
+    }
+
+    .status-approved {
+    color: green;
+}
+
+.status-pending {
+    color: orange;
+}
+
+.status-declined {
+    color: red;
+}
+
+.logged-in {
+     color: blue; /* Blue text for currently logged-in status */
+ }
+
+ 

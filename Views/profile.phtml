@@ -1,6 +1,44 @@
-<?php require('template/header.phtml') ?>
+<?php require_once('template/header.phtml') ?>
 
-<p>This is the profile page</p>
+<div class="container mt-5">
 
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button class="btn btn-primary btn-sm">Edit Profile</button>
+    </div>
 
-<?php require('template/footer.phtml') ?>
+    <!-- Profile Image -->
+    <div class="text-center mb-4">
+        <img src="path/to/your/image.jpg" alt="Profile Image" class="rounded-circle" style="width: 150px; height: 150px;">
+    </div>
+
+    <!-- Profile Information (Read-Only) -->
+    <form>
+        <!-- First Name -->
+        <div class="form-group mb-3">
+            <label for="first-name"><strong>First Name:</strong></label>
+            <input type="text" class="form-control" id="first-name" value="John" readonly>
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group mb-3">
+            <label for="last-name"><strong>Last Name:</strong></label>
+            <input type="text" class="form-control" id="last-name" value="Doe" readonly>
+        </div>
+
+        <!-- Other Fields -->
+        <div class="form-group mb-3">
+            <label for="email"><strong>Email:</strong></label>
+            <input type="email" class="form-control" id="email" value="john.doe@example.com" readonly>
+        </div>
+        <div class="form-group mb-3">
+            <label for="country"><strong>Country:</strong></label>
+            <input type="text" class="form-control" id="country" value="USA" readonly>
+        </div>
+        <div class="form-group mb-3">
+            <label for="phone"><strong>Phone Number:</strong></label>
+            <input type="tel" class="form-control" id="phone" value="123-456-7890" readonly>
+        </div>
+    </form>
+</div>
+
+<?php require_once('template/footer.phtml') ?>

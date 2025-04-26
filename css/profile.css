@@ -1,0 +1,15 @@
+ .container {
+      margin-top: 50px;
+    }
+
+.profile-image {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 20px auto; /* Center the image horizontally */
+    }
+    
+.form-group {
+      text-align: left;
+      margin-bottom: 15px; /* Spacing between labels */
+    }

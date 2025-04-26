@@ -3,19 +3,53 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/blog-post-details.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/about-us.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/contact.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/blog-posts.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/testimonials.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/.git/config</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/team.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/terms.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/fleet.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/index.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/css/style.css</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Views/offers.phtml</file>
-            <file>file:/C:/Users/mario/Desktop/BorrowMyCharger/Models/Database.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/booking-history.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/book-charger.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/manage-homeowner-registration.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/charge-point-details.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/login.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg6.png</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/browse-charger.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/charge-points-details.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg5.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/index.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/template/header.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg1.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/profile.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/charge-points.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/home_homeowner.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/view-all-profiles.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/dashboard_admin.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/home_rentaluser.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/login-bg.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/login.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/charge-point-management.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/Database.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/index.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/browse-charger.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/dashboard_admin.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/view-all-profiles.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/charge-details.css</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/style.css</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg2.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/profile.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/profile.css</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/font-awesome.min.css</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/charge-point-management.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/home_homeowner.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/system-reports.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/borrow-request.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/logo.png</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/CustomerDashboard.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/borrow-request.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/booking-history.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/owl.theme.default.min.css</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/template/footer.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/home_rentaluser.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/register.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/register.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/charge-points.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/book-charger.phtml</file>
         </group>
     </open-files>
 </project-private>

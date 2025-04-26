@@ -1,62 +1,54 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <title>Sign Up</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-     <meta charset="UTF-8">
-     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-     <meta name="description" content="">
-     <meta name="keywords" content="">
-     <meta name="author" content="">
-     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-     <link rel="stylesheet" href="css/bootstrap.min.css">
-     <link rel="stylesheet" href="css/font-awesome.min.css">
-     <link rel="stylesheet" href="css/owl.carousel.css">
-     <link rel="stylesheet" href="css/owl.theme.default.min.css">
-
-     <!-- MAIN CSS -->
-     <link rel="stylesheet" href="css/style.css">
-    
-    
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/owl.carousel.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body class="nopadding">
     <div class="reg-container">
         <div class="reg-box">
             <h1>Sign Up</h1>
-            <p>Already have an account? <a href="#">Login</a></p>
+            <p>Already have an account? <a href="login.php">Login</a></p>
             <form>
                 <div class="reg-form-row">
                     <div class="reg-input-group">
                         <label for="firstname">Firstname</label>
-                        <input type="text" id="firstname" name="firstname" class="reg-input">
+                        <input type="text" id="firstname" name="firstname" class="reg-input" required>
                     </div>
                     <div class="reg-input-group">
                         <label for="lastname">Lastname</label>
-                        <input type="text" id="lastname" name="lastname" class="reg-input">
+                        <input type="text" id="lastname" name="lastname" class="reg-input" required>
                     </div>
                 </div>
                 <div class="reg-form-row">
                     <div class="reg-input-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" class="reg-input">
+                        <input type="email" id="email" name="email" class="reg-input" required>
                     </div>
                     <div class="reg-input-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" class="reg-input">
+                        <input type="password" id="password" name="password" class="reg-input" required>
                     </div>
                 </div>
                 <div class="reg-form-row">
                     <div class="reg-input-group">
                         <label for="country">Country</label>
-                        <input type="text" id="country" name="country" class="reg-input">
+                        <select id="country" name="country" class="reg-input" required>
+                            <option value="" selected>Select Country</option>
+                        </select>
                     </div>
                     <div class="reg-input-group">
                         <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" class="reg-input">
+                        <input type="tel" id="phone" name="phone" class="reg-input" required>
                     </div>
                 </div>
                 <div class="reg-input-group">
@@ -71,7 +63,25 @@
             </form>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // GCC countries
+            const gccCountries = [
+                { name: "Bahrain", code: "BH" },
+                { name: "Kuwait", code: "KW" },
+                { name: "Oman", code: "OM" },
+                { name: "Qatar", code: "QA" },
+                { name: "Saudi Arabia", code: "SA" },
+                { name: "United Arab Emirates", code: "AE" }
+            ];
+
+            // Populate the country dropdown
+            gccCountries.forEach(function(country) {
+                $('#country').append(`<option value="${country.code}">${country.name}</option>`);
+            });
+        });
+    </script>
 </body>
-
-
 </html>

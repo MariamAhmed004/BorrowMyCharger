@@ -1,0 +1,174 @@
+<head>
+  <style>
+    .container-custom {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 2rem auto;
+      width: 90%;
+      max-width: 1200px;
+    }
+
+    .left-panel {
+      width: 100%;
+      padding: 20px;
+      background-color: white;
+      border: 1px solid black;
+      margin-bottom: 20px;
+    }
+
+    .form-control {
+      border-radius: 0;
+      margin-bottom: 1rem;
+    }
+
+    .btn-search {
+      background-color: #0099cc;
+      color: white;
+      border-radius: 0;
+      width: 100%;
+    }
+
+    .btn-search:hover {
+      background-color: #0077aa;
+    }
+
+    .map-box {
+      width: 100%;
+      height: 400px;
+      background-color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    #map {
+      height: 100%;
+    }
+
+    .charge-point {
+      display: flex;
+      align-items: center;
+      width: calc(33.333% - 20px);
+      padding: 20px;
+      background-color: white;
+      border: 1px solid black;
+      margin: 10px;
+      color: black;
+    }
+
+    .charge-point img {
+      width: 80px;
+      height: 80px;
+      margin-right: 20px;
+    }
+
+    
+    .filter-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .filter-item {
+      margin-right: 10px;
+    }
+
+    .filter-item:last-child {
+      margin-right: 0;
+    }
+
+    .btn {
+      border-radius: 20px; /* Rounded buttons */
+    }
+
+    .form-control {
+      width: auto; /* Allow dropdown widths to be auto */
+    }
+  </style>
+</head>
+<body>
+<?php require('template/header.phtml') ?>
+<!-- Main Content -->
+<div class="container-custom">
+  <!-- Left Panel -->
+  <div class="left-panel">
+    <h5><strong>Filters</strong></h5>
+    <div class="filter-row">
+      <select class="form-control filter-item">
+        <option>Location</option>
+        <option>Budaiya</option>
+        <option>Manama</option>
+        <option>Riffa</option>
+      </select>
+      <select class="form-control filter-item">
+        <option>Price: Low to High</option>
+        <option>Price: High to Low</option>
+      </select>
+      <select class="form-control filter-item">
+        <option>Availability</option>
+        <option>Available</option>
+        <option>Not Available</option>
+      </select>
+      <button class="btn btn-primary filter-item">Apply</button>
+      <button class="btn btn-secondary filter-item" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="map-box mb-4" id="map"></div>
+
+  <!-- Charge Points -->
+  <div class="charge-point">
+    <img src="images/chargePoint1.png" alt="Charge Point Image">
+    <div>
+      <h5><strong>Charge Point</strong></h5>
+      <p>123 Main St</p>
+      <p>$0.20 per kWh · 0.21 · Available</p>
+      <button class="btn btn-success">View</button>
+    </div>
+  </div>
+  <div class="charge-point">
+    <img src="images/chargePoint1.png" alt="Charge Point Image">
+    <div>
+      <h5><strong>Charge Point</strong></h5>
+      <p>456 Second St</p>
+      <p>$0.20 per kWh · 0.21 · Available</p>
+      <button class="btn btn-success">View</button>
+    </div>
+  </div>
+  <div class="charge-point">
+    <img src="images/chargePoint1.png" alt="Charge Point Image">
+    <div>
+      <h5><strong>Charge Point</strong></h5>
+      <p>789 Third St</p>
+      <p>$0.20 per kWh · 0.21 · Available</p>
+      <button class="btn btn-success">View</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Map init
+  var map = L.map('map').setView([26.0667, 50.5577], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  L.marker([26.0667, 50.5577]).addTo(map).bindPopup('Budaiya, Bahrain').openPopup();
+
+  // Reset button functionality
+  document.getElementById('resetBtn').addEventListener('click', function() {
+    document.querySelector('select').selectedIndex = 0; // Reset location dropdown
+    document.querySelectorAll('select')[1].selectedIndex = 0; // Reset price dropdown
+    document.querySelectorAll('select')[2].selectedIndex = 0; // Reset availability dropdown
+  });
+</script>
+<?php require('template/footer.phtml') ?>
+</body>
+
+
+
+

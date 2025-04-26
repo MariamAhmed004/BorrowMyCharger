@@ -1,11 +1,310 @@
 <?php require('template/header.phtml') ?>
+    <style>
 
-<p>This is the view-all-profiles page for homeowners</p>
+        th, td {
+            text-align: center;
+            padding: 10px;
+        }
 
+        .link {
+            text-decoration: none; /* Remove underline */
+            padding: 5px 10px; /* Add some padding */
+        }
+
+        .view-link {
+            color: blue; /* Blue color for view link */
+        }
+
+        .delete-link {
+            color: red; /* Red color for delete link */
+        }
+
+        .suspend-link {
+            color: orange; /* Orange color for suspend link */
+        }
+
+        .logged-in {
+            color: blue; /* Blue text for currently logged-in status */
+        }
+
+     
+        .modal-content {
+            border-radius: 10px; /* Rounded corners for modal */
+        }
+
+        .modal-header {
+            border: none; /* Remove borders */
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column; /* Stack elements vertically */
+            align-items: center; /* Center align items */
+            text-align: center; /* Center-aligned text */
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center; /* Align items vertically centered */
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .profile-picture {
+            width: 100px; /* Fixed size for profile picture */
+            height: 100px;
+            border-radius: 50%; /* Circular picture */
+            border: 2px solid #007bff; /* Border color */
+            margin-right: 20px; /* Space between picture and name */
+        }
+
+        .info-box {
+            background-color: #e9ecef; /* Light grey background */
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px; /* Margins around boxes */
+            flex: 1; /* Flex to make them equal width */
+            text-align: center; /* Center text within the box */
+        }
+
+        .red-text {
+            color: red; /* Red text for important information */
+        }
+
+        .black-text {
+            color: black; /* Black text for titles */
+        }
+
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .filter-container select {
+            width: 30%; /* Adjust width as necessary */
+        }
+    </style>
+
+<div class="container mt-5">
+    <h1>All Profiles</h1>
+
+    <div class="filter-container">
+        <select id="nameFilter" onchange="filterTable()">
+            <option value="">Select Name</option>
+            <option value="Jon Doe">Jon Doe</option>
+            <option value="Jane Smith">Jane Smith</option>
+            <option value="Emily Davis">Emily Davis</option>
+            <option value="Michael Brown">Michael Brown</option>
+            <option value="Sarah Wilson">Sarah Wilson</option>
+        </select>
+
+        <select id="roleFilter" onchange="filterTable()">
+            <option value="">Select Role</option>
+            <option value="Homeowner">Homeowner</option>
+            <option value="Customer">Customer</option>
+        </select>
+
+        <select id="activityFilter" onchange="filterTable()">
+            <option value="">Select Last Activity</option>
+            <option value="Currently logged in">Currently logged in</option>
+            <option value="Last Login 1 Hour Ago">Last Login 1 Hour Ago</option>
+            <option value="Last Login 2 Days Ago">Last Login 2 Days Ago</option>
+            <option value="Last Login 3 Hours Ago">Last Login 3 Hours Ago</option>
+            <option value="Last Login 4 Days Ago">Last Login 4 Days Ago</option>
+            <option value="Last Login 5 Hours Ago">Last Login 5 Hours Ago</option>
+        </select>
+
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+    </div>
+
+    <table class="table table-bordered" id="profilesTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Last Activity</th>
+                <th>Account Details</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Jon Doe</td>
+                <td>jon.doe@outlook.com</td>
+                <td>Homeowner</td>
+                <td><span class="logged-in">Currently logged in</span></td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showHomeownerDetails('Jon Doe', 'Updated charge point on April 18, 2025', '2 new booking requests')">View</a>
+                </td>
+                <td>
+                    <a href="#" class="link suspend-link" onclick="suspendAccount('Jon Doe')">Suspend</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Jon Doe')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Jane Smith</td>
+                <td>jane.smith@outlook.com</td>
+                <td>Customer</td>
+                <td>Last Login 1 Hour Ago</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showCustomerDetails('Jane Smith', '19/4/2025 at 10:44 p.m.', '5 Total Bookings')">View</a>
+                </td>
+                <td>
+                    <a href="#" class="link suspend-link" onclick="suspendAccount('Jane Smith')">Suspend</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Jane Smith')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Emily Davis</td>
+                <td>emily.davis@example.com</td>
+                <td>Customer</td>
+                <td>Last Login 3 Hours Ago</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showCustomerDetails('Emily Davis', '19/4/2025 at 9:30 p.m.', '3 Total Bookings')">View</a>
+                </td>
+                <td>
+                    <a href="#" class="link suspend-link" onclick="suspendAccount('Emily Davis')">Suspend</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Emily Davis')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Michael Brown</td>
+                <td>michael.brown@example.com</td>
+                <td>Homeowner</td>
+                <td>Last Login 4 Days Ago</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showHomeownerDetails('Michael Brown', 'Updated charge point on April 10, 2025', '3 new booking requests')">View</a>
+                </td>
+                <td>
+                    <a href="#" class="link suspend-link" onclick="suspendAccount('Michael Brown')">Suspend</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Michael Brown')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Sarah Wilson</td>
+                <td>sarah.wilson@example.com</td>
+                <td>Customer</td>
+                <td>Last Login 5 Hours Ago</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showCustomerDetails('Sarah Wilson', '19/4/2025 at 8:15 p.m.', '2 Total Bookings')">View</a>
+                </td>
+                <td>
+                    <a href="#" class="link suspend-link" onclick="suspendAccount('Sarah Wilson')">Suspend</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Sarah Wilson')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>David Lee</td>
+                <td>david.lee@example.com</td>
+                <td>Homeowner</td>
+                <td>Last Login 2 Days Ago</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showHomeownerDetails('David Lee', 'Updated charge point on April 15, 2025', '1 new booking request')">View</a>
+                </td>
+                <td>
+                    <a href="#" class="link suspend-link" onclick="suspendAccount('David Lee')">Suspend</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('David Lee')">Delete</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-info">
+                    <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-picture">
+                    <h5 id="modalUserName"></h5>
+                </div>
+                <div class="d-flex">
+                    <div class="info-box" id="modalChargePointContainer">
+                        <h5 class="black-text">Total Last Charge Point</h5>
+                        <p id="modalChargePoint" class="red-text"></p>
+                    </div>
+                    <div class="info-box" id="modalBookingRequestsContainer">
+                        <h5 class="black-text">Number of Booking Requests</h5>
+                        <p id="modalBookingRequests" class="red-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function showHomeownerDetails(name, chargePoint, bookingRequests) {
+        document.getElementById('modalUserName').textContent = name;
+        document.getElementById('modalChargePoint').textContent = chargePoint; // Display charge point detail
+        document.getElementById('modalBookingRequests').textContent = bookingRequests; // Display booking requests
+        $('#detailsModal').modal('show'); // Show the modal
+    }
+
+    function showCustomerDetails(name, lastBooking, totalBookings) {
+        document.getElementById('modalUserName').textContent = name;
+        document.getElementById('modalChargePointContainer').innerHTML = 
+            `<h5 class="black-text">Last Booking Made</h5><p class="red-text">${lastBooking}</p>`;
+        document.getElementById('modalBookingRequestsContainer').innerHTML = 
+            `<h5 class="black-text">Total Bookings Made</h5><p class="red-text">${totalBookings}</p>`;
+        $('#detailsModal').modal('show'); // Show the modal
+    }
+
+    function deleteAccount(name) {
+        if (confirm(`Are you sure you want to delete the account for ${name}?`)) {
+            alert(`${name}'s account has been deleted.`);
+            // Add your actual delete function here
+        }
+    }
+
+    function suspendAccount(name) {
+        if (confirm(`Are you sure you want to suspend the account for ${name}?`)) {
+            alert(`${name}'s account has been suspended.`);
+            // Add your actual suspend function here
+        }
+    }
+
+    function filterTable() {
+        const nameFilter = document.getElementById("nameFilter").value.toLowerCase();
+        const roleFilter = document.getElementById("roleFilter").value.toLowerCase();
+        const activityFilter = document.getElementById("activityFilter").value.toLowerCase();
+
+        const table = document.getElementById("profilesTable");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            const name = cells[0].textContent.toLowerCase();
+            const role = cells[2].textContent.toLowerCase();
+            const activity = cells[3].textContent.toLowerCase();
+
+            const nameMatch = nameFilter === "" || name.includes(nameFilter);
+            const roleMatch = roleFilter === "" || role.includes(roleFilter);
+            const activityMatch = activityFilter === "" || activity.includes(activityFilter);
+
+            if (nameMatch && roleMatch && activityMatch) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+
+    function clearFilters() {
+        document.getElementById("nameFilter").selectedIndex = 0;
+        document.getElementById("roleFilter").selectedIndex = 0;
+        document.getElementById("activityFilter").selectedIndex = 0;
+        filterTable(); // Reset the table display
+    }
+</script>
 <?php require('template/footer.phtml') ?>
-
-
-
-
-
-

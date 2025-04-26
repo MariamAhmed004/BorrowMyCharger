@@ -1,12 +1,280 @@
-<?php require('template/header.phtml') ?>
+<?php require_once('template/header.phtml') ?>
+    <style>
+  
+        .link {
+            text-decoration: none; /* Remove underline */
+            padding: 5px 10px; /* Add some padding */
+        }
 
-<p>This is the manage-homeowner-registration page for homeowners</p>
+        .view-link {
+            color: blue; /* Blue color for view link */
+        }
 
-<?php require('template/footer.phtml') ?>
+        .delete-link {
+            color: red; /* Red color for delete link */
+        }
 
+        .approve-link {
+            color: green; /* Green color for approve link */
+        }
 
+        .suspended {
+            color: red; /* Red text for suspended status */
+        }
 
+     
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
 
+        .filter-container select {
+            width: 30%; /* Adjust width as necessary */
+        }
 
+        .modal-content {
+            border-radius: 10px; /* Rounded corners for modal */
+        }
 
+        .modal-header {
+            border: none; /* Remove borders */
+        }
 
+        .profile-info {
+            display: flex;
+            align-items: center; /* Align items vertically centered */
+            margin-bottom: 20px; /* Space below profile info */
+        }
+
+        .profile-picture {
+            width: 100px; /* Fixed size for profile picture */
+            height: 100px;
+            border-radius: 50%; /* Circular picture */
+            margin-right: 20px; /* Space between picture and text */
+        }
+
+        .info-box {
+            background-color: #e9ecef; /* Light grey background */
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px; /* Margins around boxes */
+            flex: 1; /* Flex to make them equal width */
+            text-align: center; /* Center text within the box */
+        }
+
+        .red-text {
+            color: red; /* Red text for important information */
+        }
+
+        .black-text {
+            color: black; /* Black text for titles */
+        }
+    </style>
+
+<div class="container mt-5">
+    <h1>Pending Registrations Requests</h1>
+
+    <div class="filter-container">
+        <select id="nameFilter" onchange="filterTable()">
+            <option value="">Select Name</option>
+            <option value="Jon Doe">Jon Doe</option>
+            <option value="Jane Smith">Jane Smith</option>
+            <option value="Emily Davis">Emily Davis</option>
+            <option value="Michael Brown">Michael Brown</option>
+            <option value="Sarah Wilson">Sarah Wilson</option>
+        </select>
+
+        <select id="roleFilter" onchange="filterTable()">
+            <option value="">Select Role</option>
+            <option value="Homeowner">Homeowner</option>
+            <option value="Customer">Customer</option>
+        </select>
+
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+    </div>
+
+    <table class="table table-bordered" id="registrationsTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Registration Status</th>
+                <th>Account Details</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Jon Doe</td>
+                <td>jon.doe@outlook.com</td>
+                <td>Homeowner</td>
+                <td class="suspended">Suspended</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showDetails('Jon Doe', 'jon.doe@outlook.com', 'Homeowner', 'Updated charge point on April 18, 2025', '2 new booking requests')">View Details</a>
+                </td>
+                <td>
+                    <a href="#" class="link approve-link" onclick="approveAccount('Jon Doe')">Approve</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Jon Doe')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Jane Smith</td>
+                <td>jane.smith@outlook.com</td>
+                <td>Customer</td>
+                <td class="suspended">Suspended</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showDetails('Jane Smith', 'jane.smith@outlook.com', 'Customer', '19/4/2025 at 10:44 p.m.', '5 Total Bookings')">View Details</a>
+                </td>
+                <td>
+                    <a href="#" class="link approve-link" onclick="approveAccount('Jane Smith')">Approve</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Jane Smith')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Emily Davis</td>
+                <td>emily.davis@example.com</td>
+                <td>Customer</td>
+                <td class="suspended">Suspended</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showDetails('Emily Davis', 'emily.davis@example.com', 'Customer', '19/4/2025 at 9:30 p.m.', '3 Total Bookings')">View Details</a>
+                </td>
+                <td>
+                    <a href="#" class="link approve-link" onclick="approveAccount('Emily Davis')">Approve</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Emily Davis')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Michael Brown</td>
+                <td>michael.brown@example.com</td>
+                <td>Homeowner</td>
+                <td class="suspended">Suspended</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showDetails('Michael Brown', 'michael.brown@example.com', 'Homeowner', 'Updated charge point on April 10, 2025', '3 new booking requests')">View Details</a>
+                </td>
+                <td>
+                    <a href="#" class="link approve-link" onclick="approveAccount('Michael Brown')">Approve</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Michael Brown')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Sarah Wilson</td>
+                <td>sarah.wilson@example.com</td>
+                <td>Customer</td>
+                <td class="suspended">Suspended</td>
+                <td>
+                    <a href="#" class="link view-link" onclick="showDetails('Sarah Wilson', 'sarah.wilson@example.com', 'Customer', '19/4/2025 at 8:15 p.m.', '2 Total Bookings')">View Details</a>
+                </td>
+                <td>
+                    <a href="#" class="link approve-link" onclick="approveAccount('Sarah Wilson')">Approve</a>
+                    <a href="#" class="link delete-link" onclick="deleteAccount('Sarah Wilson')">Delete</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-info">
+                    <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-picture">
+                    <h5 id="modalUserName"></h5>
+                </div>
+                <div id="modalDetails"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function showDetails(name, email, role, chargePoint, bookingRequests) {
+        document.getElementById('modalUserName').textContent = name;
+
+        let detailsHtml = '';
+        if (role === 'Homeowner') {
+            detailsHtml = `
+                <div class="d-flex">
+                    <div class="info-box">
+                        <h5 class="black-text">Total Last Charge Point</h5>
+                        <p class="red-text">${chargePoint}</p>
+                    </div>
+                    <div class="info-box">
+                        <h5 class="black-text">Number of Booking Requests</h5>
+                        <p class="red-text">${bookingRequests}</p>
+                    </div>
+                </div>
+            `;
+        } else if (role === 'Customer') {
+            detailsHtml = `
+                <div class="d-flex">
+                    <div class="info-box">
+                        <h5 class="black-text">Last Booking Made</h5>
+                        <p class="red-text">${chargePoint}</p>
+                    </div>
+                    <div class="info-box">
+                        <h5 class="black-text">Total Bookings Made</h5>
+                        <p class="red-text">${bookingRequests}</p>
+                    </div>
+                </div>
+            `;
+        }
+        document.getElementById('modalDetails').innerHTML = detailsHtml;
+
+        $('#detailsModal').modal('show'); // Show the modal
+    }
+
+    function approveAccount(name) {
+        if (confirm(`Are you sure you want to approve the account for ${name}?`)) {
+            alert(`${name}'s account has been approved.`);
+            // Add your actual approve function here
+        }
+    }
+
+    function deleteAccount(name) {
+        if (confirm(`Are you sure you want to delete the account for ${name}?`)) {
+            alert(`${name}'s account has been deleted.`);
+            // Add your actual delete function here
+        }
+    }
+
+    function filterTable() {
+        const nameFilter = document.getElementById("nameFilter").value.toLowerCase();
+        const roleFilter = document.getElementById("roleFilter").value.toLowerCase();
+        
+        const table = document.getElementById("registrationsTable");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            const name = cells[0].textContent.toLowerCase();
+            const role = cells[2].textContent.toLowerCase();
+
+            const nameMatch = nameFilter === "" || name.includes(nameFilter);
+            const roleMatch = roleFilter === "" || role.includes(roleFilter);
+
+            if (nameMatch && roleMatch) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+
+    function clearFilters() {
+        document.getElementById("nameFilter").selectedIndex = 0;
+        document.getElementById("roleFilter").selectedIndex = 0;
+        filterTable(); // Reset the table display
+    }
+</script>
+<?php require_once('template/footer.phtml') ?>

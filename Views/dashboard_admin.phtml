@@ -1,10 +1,147 @@
 <?php require('template/header.phtml') ?>
+    <style>
 
-<p>This is the dashboard_admin page for homeowners</p>
 
+        .stat-card {
+            margin: 10px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            text-align: center;
+        }
+
+        .calendar {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: #ffffff;
+            cursor: pointer; /* Change cursor to pointer for clickable days */
+            transition: background-color 0.3s;
+        }
+
+        .day:hover {
+            background-color: #e9ecef; /* Highlight on hover */
+        }
+
+  
+    </style>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Total Users -->
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h5>Total Users</h5>
+                <p>170</p>
+            </div>
+        </div>
+        <!-- Total Homeowners -->
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h5>Total Homeowners</h5>
+                <p>170</p>
+            </div>
+        </div>
+        <!-- Total Charge Points -->
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h5>Total Charge Points</h5>
+                <p>170</p>
+            </div>
+        </div>
+        <!-- Pending Approval -->
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h5>Pending Approval</h5>
+                <p>170</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Section -->
+    <div class="calendar">
+        <h4>My Calendar</h4>
+        <div class="calendar-header">
+            <button id="prevMonth" class="btn btn-secondary">Previous</button>
+            <h5 id="monthYear"></h5>
+            <button id="nextMonth" class="btn btn-secondary">Next</button>
+        </div>
+        <div class="calendar-grid" id="calendar"></div>
+    </div>
+</div>
+    <br><br><br><br>
+
+
+<script>
+    const monthYear = document.getElementById('monthYear');
+    const calendar = document.getElementById('calendar');
+    const prevMonth = document.getElementById('prevMonth');
+    const nextMonth = document.getElementById('nextMonth');
+
+    let currentDate = new Date();
+
+    function renderCalendar() {
+        calendar.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // Set month and year title
+        monthYear.textContent = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+        // Get the first day of the month
+        const firstDay = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Get the index of the first day of the month
+        const firstDayIndex = firstDay.getDay();
+
+        // Fill the calendar with empty cells before the first day
+        for (let i = 0; i < firstDayIndex; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.classList.add('day');
+            calendar.appendChild(emptyCell);
+        }
+
+        // Fill the calendar with the days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayCell = document.createElement('div');
+            dayCell.classList.add('day');
+            dayCell.textContent = day;
+            dayCell.onclick = () => alert(`Selected date: ${day} ${currentDate.toLocaleString('default', { month: 'long' })} ${year}`);
+            calendar.appendChild(dayCell);
+        }
+    }
+
+    prevMonth.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    nextMonth.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+    });
+
+    // Initial render
+    renderCalendar();
+</script>
 <?php require('template/footer.phtml') ?>
-
-
-
-
-
