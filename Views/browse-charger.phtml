@@ -60,7 +60,6 @@
       margin-right: 20px;
     }
 
-    
     .filter-row {
       display: flex;
       align-items: center;
@@ -92,15 +91,19 @@
   <div class="left-panel">
     <h5><strong>Filters</strong></h5>
     <div class="filter-row">
-      <select class="form-control filter-item">
-        <option>Location</option>
-        <option>Budaiya</option>
-        <option>Manama</option>
-        <option>Riffa</option>
+      <select class="form-control filter-item" id="locationSelect">
+        <option value="">Location</option>
+        <?php foreach ($view->cities as $city): ?>
+          <option value="<?= htmlspecialchars($city['city_id']) ?>"><?= htmlspecialchars($city['city_name']) ?></option>
+        <?php endforeach; ?>
       </select>
       <select class="form-control filter-item">
-        <option>Price: Low to High</option>
-        <option>Price: High to Low</option>
+        <option value="">Price Range (BHD)</option>
+        <option value="0-2">0 BHD - 2 BHD</option>
+        <option value="2-5">2 BHD - 5 BHD</option>
+        <option value="5-10">5 BHD - 10 BHD</option>
+        <option value="10-20">10 BHD - 20 BHD</option>
+        <option value="20+">20 BHD+</option>
       </select>
       <select class="form-control filter-item">
         <option>Availability</option>
@@ -121,7 +124,7 @@
     <div>
       <h5><strong>Charge Point</strong></h5>
       <p>123 Main St</p>
-      <p>$0.20 per kWh · 0.21 · Available</p>
+      <p>0.200 BHD per kWh · Available</p>
       <button class="btn btn-success">View</button>
     </div>
   </div>
@@ -130,7 +133,7 @@
     <div>
       <h5><strong>Charge Point</strong></h5>
       <p>456 Second St</p>
-      <p>$0.20 per kWh · 0.21 · Available</p>
+      <p>0.200 BHD per kWh · Available</p>
       <button class="btn btn-success">View</button>
     </div>
   </div>
@@ -139,16 +142,13 @@
     <div>
       <h5><strong>Charge Point</strong></h5>
       <p>789 Third St</p>
-      <p>$0.20 per kWh · 0.21 · Available</p>
+      <p>0.200 BHD per kWh · Available</p>
       <button class="btn btn-success">View</button>
     </div>
   </div>
 </div>
 
-
-
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -160,15 +160,11 @@
   L.marker([26.0667, 50.5577]).addTo(map).bindPopup('Budaiya, Bahrain').openPopup();
 
   // Reset button functionality
-  document.getElementById('resetBtn').addEventListener('click', function() {
-    document.querySelector('select').selectedIndex = 0; // Reset location dropdown
+  document.getElementById('resetBtn').onclick = function() {
+    document.getElementById('locationSelect').selectedIndex = 0; // Reset location dropdown
     document.querySelectorAll('select')[1].selectedIndex = 0; // Reset price dropdown
     document.querySelectorAll('select')[2].selectedIndex = 0; // Reset availability dropdown
-  });
+  };
 </script>
 <?php require('template/footer.phtml') ?>
 </body>
-
-
-
-

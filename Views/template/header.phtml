@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Get the current hour
 $currentHour = date('G'); // 24-hour format (0-23)
@@ -13,9 +15,9 @@ if ($currentHour >= 5 && $currentHour < 12) {
     $greeting = "Good Evening";
 }
 
-
 // Set the role dynamically from session or default to 'Guest'
-$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Admin';
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Guest';
+
 // Dummy user name for testing
 $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
 
@@ -23,7 +25,6 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
 $view = isset($view) ? $view : new stdClass();
 $view->pageTitle = isset($view->pageTitle) ? $view->pageTitle : "Borrow My Charger";
 $view->activePage = isset($view->activePage) ? $view->activePage : "";
-
 
 // Define dynamic section content for each page
 $pageBackgrounds = [
@@ -41,28 +42,28 @@ $pageBackgrounds = [
 ];
 
 $pageHeadings = [
-    "home" => "Hello, Username ",
+    "home" => "$greeting , $username",
     "browse-charger" => "Browse Charger",
     "booking-history" => "Booking History",
     "borrow-request" => "Borrow Request",
     "charge-point-management" => "Charge Point Management",
     "charge-points" => "My Charge Point",
     "profile" => "User Profile",
-    "dashboard" => "Welcome Back Admin",
+    "dashboard" => "$greeting , $username",
     "manage-homeowner-registration" => "Manage HomeOwners Registration",
     "system-reports" => "System Reports",
     "view-all-profiles" => "View All Profiles"
 ];
 
 $pageDescriptions = [
-    "home" => "Nice to see you here. ",
+    "home" => "Nice to see you here.",
     "browse-charger" => "Choose a Charge Point and Book.",
     "booking-history" => "Find all of your Bookings.",
     "borrow-request" => "Find all Requests to your Charge Point.",
     "charge-point-management" => "Manage System Charge Points.",
     "charge-points" => "Your Charge Point Details.",
     "profile" => "Find all your user information.",
-    "dashboard" => "Nice to see you here. ",
+    "dashboard" => "Nice to see you here.",
     "manage-homeowner-registration" => "Review all HomeOwners Registration.",
     "system-reports" => "Generate, Export system related reports.",
     "view-all-profiles" => "View and Manage all users in the system."
@@ -70,7 +71,7 @@ $pageDescriptions = [
 
 // Use defaults if active page isn't mapped
 $backgroundImage = isset($pageBackgrounds[$view->activePage]) ? $pageBackgrounds[$view->activePage] : "/images/HeaderBg1.jpg";
-$pageHeading = isset($pageHeadings[$view->activePage]) ? $pageHeadings[$view->activePage] : "Welcome";
+$pageHeading = isset($pageHeadings[$view->activePage]) ? $pageHeadings[$view->activePage] : "Welcome to Borrow My Charger";
 $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptions[$view->activePage] : "Providing the best service for charging needs.";
 
 ?>
@@ -88,101 +89,109 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css">
-
 </head>
 <body>
 
-    <!-- MENU -->
-    <section class="navbar custom-navbar navbar-fixed-top" role="navigation">
-        <div class="container">
-            <div class="navbar-header">
-                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon icon-bar"></span>
-                    <span class="icon icon-bar"></span>
-                    <span class="icon icon-bar"></span>
-                </button>
+<!-- MENU -->
+<section class="navbar custom-navbar navbar-fixed-top" role="navigation">
+    <div class="container">
 
-                <!-- Logo (Left-most item) -->
-                <a href="index.php" class="navbar-brand nav-logo">
-                    <img src="/images/logo.png" alt="Borrow My Charger" class="nav-logo-img">
-                </a>
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
 
-                <a href="#" class="navbar-brand">Borrow My Charger</a>
-            </div>
+            <!-- Logo -->
+            <a href="index.php" class="navbar-brand nav-logo">
+                <img src="/images/logo.png" alt="Borrow My Charger" class="nav-logo-img">
+            </a>
 
-            <!-- MENU LINKS -->
-            <div class="collapse navbar-collapse">
-                <ul class="nav navbar-nav navbar-nav-first">
-                    <li class="<?php echo ($view->activePage == 'home' || $view->activePage == 'dashboard') ? 'active' : ''; ?>">
-                        <a href="<?php  
-                            if ($role == 'HomeOwner') { 
-                                echo 'home_homeowner.php'; 
-                            } elseif ($role == 'RentalUser') { 
-                                echo 'home_rentaluser.php'; 
-                            } elseif ($role == 'Admin') { 
-                                echo 'dashboard_admin.php'; 
-                            } else { 
-                                echo 'index.php'; 
-                            }
-                        ?>">
-                            <?php echo ($role == 'Admin') ? 'Dashboard' : 'Home'; ?>
-                        </a>
-                    </li>
-
-                    <?php
-                    if ($role == 'HomeOwner') {
-                        echo '<li class="' . (($view->activePage == 'borrow-request') ? 'active' : '') . '"><a href="borrow-request.php">Borrow Request</a></li>';
-                        echo '<li class="' . (($view->activePage == 'charge-points') ? 'active' : '') . '"><a href="charge-points.php">Charge Points</a></li>';
-                    } elseif ($role == 'RentalUser') {
-                        echo '<li class="' . (($view->activePage == 'booking-history') ? 'active' : '') . '"><a href="booking-history.php">Booking History</a></li>';
-                        echo '<li class="' . (($view->activePage == 'browse-charger') ? 'active' : '') . '"><a href="browse-charger.php">Browse Charger</a></li>';
-                    } elseif ($role == 'Admin') {
-                        // User Management Dropdown
-                        echo '<li class="dropdown ' . (($view->activePage == 'view-all-profiles' || $view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '">';
-                        echo '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Management <span class="caret"></span></a>';
-                        echo '<ul class="dropdown-menu">';
-                        echo '<li class="' . (($view->activePage == 'view-all-profiles') ? 'active' : '') . '"><a href="view-all-profiles.php">View All Profiles</a></li>';
-                        echo '<li class="' . (($view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '"><a href="manage-homeowner-registration.php">Manage Homeowner Registration</a></li>';
-                        echo '</ul>';
-                        echo '</li>';
-
-                        echo '<li class="' . (($view->activePage == 'charge-point-management') ? 'active' : '') . '"><a href="charge-point-management.php">Charge Point Management</a></li>';
-                        echo '<li class="' . (($view->activePage == 'system-reports') ? 'active' : '') . '"><a href="system-reports.php">System Reports</a></li>';
-                    } else {
-                        
-                        //else means the guest situation and will deal with it later
-                        
-                        echo '<li class="' . (($view->activePage == 'contact') ? 'active' : '') . '"><a href="contact.php">Contact Us</a></li>';
-                    }
-                    ?>
-                </ul>
-                
-                <!-- USER DROPDOWN (Far Right) -->
-<div class="nav-user-wrapper">
-    <ul class="nav navbar-nav nav-user">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle nav-user-link" data-toggle="dropdown">
-    <img src="/images/user.png" alt="User" class="nav-user-img">
-    <?php echo htmlspecialchars($greeting . ", " . $username); ?> <span class="caret"></span>
-</a>
-            <ul class="dropdown-menu nav-user-menu">
-                <li><a href="profile.php" class="nav-user-item">My Profile</a></li>
-                <li><a href="login.php" class="nav-user-item">Logout</a></li>
-            </ul>
-        </li>
-    </ul>
-</div>    
-            </div>
+            <a href="#" class="navbar-brand">Borrow My Charger</a>
         </div>
-    </section>
-    
-    <!-- Dynamic Section -->
-<section class="nav-section banner" style="background-image: url('<?php echo $backgroundImage; ?>'); ">
+
+        <!-- MENU LINKS -->
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-nav-first">
+                <li class="<?php echo ($view->activePage == 'home' || $view->activePage == 'dashboard') ? 'active' : ''; ?>">
+                    <a href="<?php  
+                        if ($role == 'HomeOwner') { 
+                            echo 'home_homeowner.php'; 
+                        } elseif ($role == 'RentalUser') { 
+                            echo 'home_rentaluser.php'; 
+                        } elseif ($role == 'Admin') { 
+                            echo 'dashboard_admin.php'; 
+                        } else { 
+                            echo 'index.php'; 
+                        }
+                    ?>">
+                    <?php echo ($role == 'Admin') ? 'Dashboard' : 'Home'; ?>
+                    </a>
+                </li>
+
+                <?php
+                if ($role == 'HomeOwner') {
+                    echo '<li class="' . (($view->activePage == 'borrow-request') ? 'active' : '') . '"><a href="borrow-request.php">Borrow Request</a></li>';
+                    echo '<li class="' . (($view->activePage == 'charge-points') ? 'active' : '') . '"><a href="charge-points.php">Charge Points</a></li>';
+                } elseif ($role == 'RentalUser') {
+                    echo '<li class="' . (($view->activePage == 'booking-history') ? 'active' : '') . '"><a href="booking-history.php">Booking History</a></li>';
+                    echo '<li class="' . (($view->activePage == 'browse-charger') ? 'active' : '') . '"><a href="browse-charger.php">Browse Charger</a></li>';
+                } elseif ($role == 'Admin') {
+                    echo '<li class="dropdown ' . (($view->activePage == 'view-all-profiles' || $view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '">';
+                    echo '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Management <span class="caret"></span></a>';
+                    echo '<ul class="dropdown-menu">';
+                    echo '<li class="' . (($view->activePage == 'view-all-profiles') ? 'active' : '') . '"><a href="view-all-profiles.php">View All Profiles</a></li>';
+                    echo '<li class="' . (($view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '"><a href="manage-homeowner-registration.php">Manage Homeowner Registration</a></li>';
+                    echo '</ul>';
+                    echo '</li>';
+                    echo '<li class="' . (($view->activePage == 'charge-point-management') ? 'active' : '') . '"><a href="charge-point-management.php">Charge Point Management</a></li>';
+                    echo '<li class="' . (($view->activePage == 'system-reports') ? 'active' : '') . '"><a href="system-reports.php">System Reports</a></li>';
+                } else {
+                    echo '<li class="' . (($view->activePage == 'browse-charger') ? 'active' : '') . '"><a href="browse-charger.php">Browse Charger</a></li>';
+                   // echo '<li class="' . (($view->activePage == 'contact') ? 'active' : '') . '"><a href="contact.php">Contact Us</a></li>';
+                }
+                ?>
+            </ul>
+
+            <!-- USER DROPDOWN -->
+            <div class="nav-user-wrapper">
+                <ul class="nav navbar-nav nav-user">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle nav-user-link" data-toggle="dropdown">
+                            <img src="/images/user.png" alt="User" class="nav-user-img">
+                            <?php echo ($role == 'Guest') ? "Guest" : htmlspecialchars($username); ?>
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu nav-user-menu">
+                            <?php
+                            if ($role == 'Guest') {
+                                echo '<li><a href="login.php" class="nav-user-item">Login</a></li>';
+                                echo '<li><a href="register.php" class="nav-user-item">Sign Up</a></li>';
+                            } else {
+                                echo '<li><a href="profile.php" class="nav-user-item">My Profile</a></li>';
+                                echo '<li><a href="logout.php" class="nav-user-item">Logout</a></li>';
+                            }
+                            ?>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Dynamic Section with Greeting under Welcome -->
+<section class="nav-section banner" style="background-image: url('<?php echo $backgroundImage; ?>');">
     <div class="container">
         <div>
             <h1><?php echo htmlspecialchars($pageHeading); ?></h1>
-            <br>
+            <br>          
             <p class="lead"><?php echo htmlspecialchars($pageDescription); ?></p>
         </div>
     </div>
 </section>
+
+</body>
+</html>

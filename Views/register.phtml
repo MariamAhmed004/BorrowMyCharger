@@ -1,42 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Sign Up</title>
+    <title><?= htmlspecialchars($view->pageTitle) ?></title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/owl.carousel.css">
     <link rel="stylesheet" href="css/owl.theme.default.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
 </head>
-
 <body class="nopadding">
     <div class="reg-container">
         <div class="reg-box">
             <h1>Sign Up</h1>
             <p>Already have an account? <a href="login.php">Login</a></p>
-            <form>
+            <?php if (!empty($view->errorMessage)) : ?>
+                <div class="alert alert-danger"><?= htmlspecialchars($view->errorMessage) ?></div>
+            <?php endif; ?>
+            <form action="" method="POST">
                 <div class="reg-form-row">
+                    <div class="reg-input-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" class="reg-input" required>
+                        <div class="error-message"></div>
+                    </div>
                     <div class="reg-input-group">
                         <label for="firstname">Firstname</label>
                         <input type="text" id="firstname" name="firstname" class="reg-input" required>
-                    </div>
-                    <div class="reg-input-group">
-                        <label for="lastname">Lastname</label>
-                        <input type="text" id="lastname" name="lastname" class="reg-input" required>
+                        <div class="error-message"></div>
                     </div>
                 </div>
                 <div class="reg-form-row">
                     <div class="reg-input-group">
+                        <label for="lastname">Lastname</label>
+                        <input type="text" id="lastname" name="lastname" class="reg-input" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="reg-input-group">
                         <label for="email">Email</label>
                         <input type="email" id="email" name="email" class="reg-input" required>
+                        <div class="error-message"></div>
                     </div>
+                </div>
+                <div class="reg-form-row">
                     <div class="reg-input-group">
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" class="reg-input" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="reg-input-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="reg-input" required>
+                        <div class="error-message"></div>
                     </div>
                 </div>
                 <div class="reg-form-row">
@@ -45,29 +69,26 @@
                         <select id="country" name="country" class="reg-input" required>
                             <option value="" selected>Select Country</option>
                         </select>
+                        <div class="error-message"></div>
                     </div>
                     <div class="reg-input-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" class="reg-input" required>
+                        <label for="user-type">User Type</label>
+                        <select id="user-type" name="user_type" class="reg-input" required>
+                            <option value="" selected>Select User Type</option>
+                            <option value="home-owner">Home Owner</option>
+                            <option value="rental-user">Rental User</option>
+                        </select>
+                        <div class="error-message"></div>
                     </div>
-                </div>
-                <div class="reg-input-group">
-                    <label for="user-type">User Type</label>
-                    <select id="user-type" name="user-type" class="reg-input">
-                        <option value="" selected>Select User Type</option>
-                        <option value="home-owner">Home Owner</option>
-                        <option value="rental-user">Rental User</option>
-                    </select>
                 </div>
                 <button type="submit" class="reg-button">Register</button>
             </form>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="js/register.js"></script>
     <script>
-        $(document).ready(function() {
-            // GCC countries
+        document.addEventListener("DOMContentLoaded", function () {
             const gccCountries = [
                 { name: "Bahrain", code: "BH" },
                 { name: "Kuwait", code: "KW" },
@@ -77,9 +98,8 @@
                 { name: "United Arab Emirates", code: "AE" }
             ];
 
-            // Populate the country dropdown
             gccCountries.forEach(function(country) {
-                $('#country').append(`<option value="${country.code}">${country.name}</option>`);
+                document.getElementById('country').append(new Option(country.name, country.code));
             });
         });
     </script>
