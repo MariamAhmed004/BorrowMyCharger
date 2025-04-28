@@ -11,6 +11,8 @@
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/home_homeowner.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/dashboard_admin.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/login-bg.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/homepage/home-charger-2.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/homepage/marker-icon.png</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/login.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/login.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/Database.php</file>
@@ -19,10 +21,12 @@
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/view-all-profiles.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/browseCharger.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/profile.php</file>
-            <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/jquery.js</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/test.js</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/system-reports.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/borrow-request.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/bootstrap.min.js</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/system-reports.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/homepage/charger-9.jpg</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/template/footer.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/login.js</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/register.phtml</file>
@@ -30,12 +34,15 @@
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/charge-points.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/book-charger.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/manage-homeowner-registration.phtml</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/faq.js</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/login.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg6.png</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/browse-charger.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/charge-points-details.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/index.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg1.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/map.js</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/owl.carousel.css</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/profile.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/view-all-profiles.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/home_rentaluser.php</file>
@@ -44,20 +51,26 @@
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/dashboard_admin.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/charge-details.css</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/style.css</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/login/login-img.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/update_charge_points.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg2.jpg</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/check_user.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/contactForm.js</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/profile.css</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/register.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/font-awesome.min.css</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/homepage/testimonial-img-2.jpg</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/charge-point-management.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/home_homeowner.phtml</file>
-            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/logo.png</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/Cities.php</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/logo.png</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Models/CustomerDashboard.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/borrow-request.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/booking-history.php</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/css/owl.theme.default.min.css</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/js/register.js</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/homepage/home-charger-8.jpg</file>
+            <file>file:/C:/xampp/htdocs/BorrowMyCharger/images/HeaderBg4.jpg</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/home_rentaluser.phtml</file>
             <file>file:/C:/xampp/htdocs/BorrowMyCharger/Views/book-charger.phtml</file>
         </group>

@@ -28,12 +28,12 @@ $view->activePage = isset($view->activePage) ? $view->activePage : "";
 
 // Define dynamic section content for each page
 $pageBackgrounds = [
-    "home" => "/images/HeaderBg2.jpg",
-    "browse-charger" => "/images/HeaderBg3.jpg",
-    "booking-history" => "/images/HeaderBg5.jpg",
-    "borrow-request" => "/images/HeaderBg3.jpg",
-    "charge-point-management" => "/images/HeaderBg5.jpg",
-    "charge-points" => "/images/HeaderBg2.jpg",
+    "home" => "images/banners/home-banner.jpg",
+    "browse-charger" => "images/HeaderBg3.jpg",
+    "booking-history" => "images/HeaderBg5.jpg",
+    "borrow-request" => "images/HeaderBg3.jpg",
+    "charge-point-management" => "images/HeaderBg5.jpg",
+    "charge-points" => "images/HeaderBg2.jpg",
     "profile" => "/images/HeaderBg5.jpg",
     "dashboard" => "/images/HeaderBg1.jpg",
     "manage-homeowner-registration" => "/images/HeaderBg2.jpg",
@@ -70,8 +70,8 @@ $pageDescriptions = [
 ];
 
 // Use defaults if active page isn't mapped
-$backgroundImage = isset($pageBackgrounds[$view->activePage]) ? $pageBackgrounds[$view->activePage] : "/images/HeaderBg1.jpg";
-$pageHeading = isset($pageHeadings[$view->activePage]) ? $pageHeadings[$view->activePage] : "Welcome to Borrow My Charger";
+$backgroundImage = isset($pageBackgrounds[$view->activePage]) ? $pageBackgrounds[$view->activePage] : "images/banners/home-banner.jpg";
+$pageHeading = isset($pageHeadings[$view->activePage]) ? $pageHeadings[$view->activePage] : "Index";
 $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptions[$view->activePage] : "Providing the best service for charging needs.";
 
 ?>
@@ -89,6 +89,14 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css">
+    <!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
 </head>
 <body>
 
@@ -105,10 +113,9 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
 
             <!-- Logo -->
             <a href="index.php" class="navbar-brand nav-logo">
-                <img src="/images/logo.png" alt="Borrow My Charger" class="nav-logo-img">
+                <img src="images/logo.png" alt="Borrow My Charger" class="nav-logo-img">
             </a>
-
-            <a href="#" class="navbar-brand">Borrow My Charger</a>
+ 
         </div>
 
         <!-- MENU LINKS -->
@@ -159,7 +166,7 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
                 <ul class="nav navbar-nav nav-user">
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle nav-user-link" data-toggle="dropdown">
-                            <img src="/images/user.png" alt="User" class="nav-user-img">
+                            <img src="images/user.png" alt="User" class="nav-user-img">
                             <?php echo ($role == 'Guest') ? "Guest" : htmlspecialchars($username); ?>
                             <span class="caret"></span>
                         </a>
@@ -182,8 +189,10 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
     </div>
 </section>
 
+<?php if ($pageHeading!= "Index") : ?>
 <!-- Dynamic Section with Greeting under Welcome -->
 <section class="nav-section banner" style="background-image: url('<?php echo $backgroundImage; ?>');">
+    <div class="overlay"></div>
     <div class="container">
         <div>
             <h1><?php echo htmlspecialchars($pageHeading); ?></h1>
@@ -192,6 +201,9 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
         </div>
     </div>
 </section>
+<?php endif; ?>
+
+
 
 </body>
 </html>

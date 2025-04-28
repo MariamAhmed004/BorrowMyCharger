@@ -27,13 +27,13 @@ https://templatemo.com/tm-516-known
   }
 
   h1 {
-    color: #252525;
+    color: #000;
     font-size: 3em;
     line-height: normal;
   }
 
   h2 {
-    color: #353535;
+    color: #000;
     font-size: 2em;
     padding-bottom: 10px;
   }
@@ -44,17 +44,19 @@ https://templatemo.com/tm-516-known
 
   h3,
   h3 a {
-    color: #454545;
+    color: #000;
   }
 
   p {
-    color: #757575;
+    color: #000;
     font-size: 14px;
     font-weight: normal;
     line-height: 24px;
   }
 
-
+  div p {
+     color: #000; 
+  }
 
   /*---------------------------------------
      GENERAL               
@@ -253,9 +255,9 @@ https://templatemo.com/tm-516-known
   }
 
   
- @-webkit-@keyframes spinner {
+/* @-webkit-@keyframes spinner {
     to {transform: rotate(360deg);}
-  }
+  }*/
 
   @keyframes spinner {
     to {transform: rotate(360deg);}
@@ -360,7 +362,7 @@ https://templatemo.com/tm-516-known
   }
 
   #home h3 {
-    color: #f9f9f9;
+    color: #000;
     font-size: 16px;
     font-weight: 300;
     margin: 0;
@@ -373,6 +375,7 @@ https://templatemo.com/tm-516-known
     }
   }
 
+
   .home-slider .caption {
     display: flex;
     justify-content: center;
@@ -384,39 +387,95 @@ https://templatemo.com/tm-516-known
     cursor: e-resize;
   }
 
-  .home-slider .item {
+ .home-slider .item {
     background-repeat: no-repeat;
     background-attachment: local;
     background-size: cover;
-    height: 650px;
-  }
+   
+}
+
   
   .caption h3 a { color: #FFF; }
   .caption h3 a:hover { color: #FF3; }
 
   .home-slider .item-first {
-    background-image: url(../images/headerSlide1.jpg);
+    background-image: url(../images/homepage/home-charger-1.jpg);
 	background-position: center;
   }
-
+  
   .home-slider .item-second {
-    background-image: url(../images/headerSlide2.jpg);
+    background-image: url(../images/homepage/home-charger-1.jpg);
   }
 
   .home-slider .item-third {
-    background-image: url(../images/headerSlide3.jpg);
+    background-image: url(../images/homepage/home-charger-2.jpg);
   }
 
-
   .home-slider .item-fourth {
-    background-image: url(../images/headerSlide4.jpg);
+    background-image: url(../images/homepage/home-charger-3.jpg);
+    background-color: rgba(0, 0, 0, 0.3);
   }
 
   .home-slider .item-fifth {
-    background-image: url(../images/headerSlide5.jpg);
+    background-image: url(../images/homepage/home-charger-4.jpg);
+    background-color: rgba(0, 0, 0, 0.3);
   }
 
-  
+.home-slider .item,
+.home-slider .item-first,
+.home-slider .item-second,
+.home-slider .item-third,
+.home-slider .item-fourth,
+.home-slider .item-fifth {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: local;
+    height: 60vh; /* 🔥 not full screen, just 70% of screen height */
+    min-height: 400px; /* 🔥 protect small screens from making it too small */
+}
+
+@media (max-width: 992px) {
+    .home-slider .item {
+        height: 60vh;
+        min-height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-slider .item {
+        height: 50vh;
+        min-height: 300px;
+    }
+}
+
+@media (max-width: 576px) {
+    .home-slider .item {
+        height: 40vh;
+        min-height: 250px;
+    }
+}
+
+.caption {
+    position: relative; /* needed for overlay to position inside */
+    overflow: hidden; /* just in case */
+}
+
+.bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* 🔥 30% dark overlay, adjust to 0.3 or 0.4 */
+    z-index: 1;
+}
+
+.caption .container {
+    position: relative;
+    z-index: 2; /* text stays above the overlay */
+}
+
 
   /*---------------------------------------
       FEATURE              
@@ -653,7 +712,9 @@ https://templatemo.com/tm-516-known
   /*---------------------------------------
       TESTIMONIAL             
   -----------------------------------------*/
-  
+  #testimonial div p{
+      color: #000;
+  }
   #testimonial .item {
     margin: 20px 0;
     padding: 4em 3em;
@@ -676,7 +737,7 @@ https://templatemo.com/tm-516-known
   }
 
   .tst-rating .fa {
-    color: #3f51b5;
+    color: #000;
   }
 
   .tst-image,
@@ -699,7 +760,7 @@ https://templatemo.com/tm-516-known
   }
 
   .tst-author span {
-    color: #808080;
+    color: #000;
     font-size: 14px;
   }
 
@@ -1359,14 +1420,28 @@ https://templatemo.com/tm-516-known
 }
 
 /*banner*/
-   .banner {
+.banner {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
-      background-size: cover;
-      background-position: center;
-      padding: 100px 0;
-      color: white;
-      text-align: center;
-    }
+.banner .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4); /* black color, 40% opacity */
+  z-index: 1;
+}
+
+.banner .container {
+  position: relative;
+  z-index: 2; /* container appears above the overlay */
+}
+
 
     .status-approved {
     color: green;
@@ -1385,3 +1460,391 @@ https://templatemo.com/tm-516-known
  }
 
  
+ 
+ /* Common Styles for Login and Register Pages */
+.auth-body-wrapper {
+    background-color: #e9e9e9;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.auth-main-card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    margin: 0 auto;
+    height: 600px; /* Fixed height for consistency */
+}
+
+.auth-image-column {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+}
+
+.auth-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.auth-image-text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(16, 72, 55, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    z-index: 1;
+}
+
+.auth-image-text-overlay h2, .auth-image-text-overlay p {
+    color: white;
+}
+
+.auth-form-column {
+    padding: 3rem 2rem;
+    background-color: white;
+    height: 100%;
+    overflow-y: auto; /* Make content scrollable if it exceeds the height */
+}
+
+.auth-page-heading {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #635e5f;
+}
+
+.auth-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.auth-label {
+    color: #635e5f;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.auth-input {
+    border: 1px solid #e9e9e9;
+    padding: 0.75rem;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.auth-submit-button {
+    background-color: #104837;
+    border: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 1rem;
+    transition: all 0.3s;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.auth-submit-button:hover {
+    background-color: #2f6867;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 1.3rem;
+    margin-top: 0.25rem;
+}
+
+.auth-link-text {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #746f71;
+}
+
+.auth-link {
+    color: #663942;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.auth-link:hover {
+    color: #104837;
+    text-decoration: none;
+}
+
+@media (max-width: 767.98px) {
+    .auth-main-card {
+        height: auto; /* Allow height to adjust on mobile */
+        max-height: 90vh; /* But limit the maximum height */
+    }
+    
+    .auth-image-column {
+        min-height: 200px;
+        max-height: 250px;
+    }
+}
+
+
+/*Home contact modal success alert*/
+             /* Modal styles */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+        text-align: center;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    
+    /*--------------FAQ home page-------------------*/
+     .faq-section {
+        background-color: #f9f9f9;
+        padding: 60px 0;
+    }
+    
+    .section-title {
+/*        font-size: 2.5rem;*/
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .section-subtitle {
+/*        font-size: 1.1rem;*/
+        color: #666;
+        margin-bottom: 30px;
+    }
+    
+    .faq-accordion {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .faq-item {
+        background: #fff;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .faq-question:hover {
+        background-color: #f5f5f5;
+    }
+    
+
+    .faq-icon {
+        color: #0066cc;
+        font-size: 14px;
+        transition: transform 0.3s ease;
+    }
+    
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        padding: 0 25px;
+    }
+    
+    .faq-answer p {
+        margin: 0;
+        padding-bottom: 20px;
+        color: #666;
+        line-height: 1.8;
+        font-size: 1.5rem;
+    }
+    
+    .faq-item.active .faq-question {
+        background-color: #f5f9ff;
+    }
+    
+    .faq-item.active .faq-icon {
+        transform: rotate(180deg);
+    }
+    
+    .faq-item.active .faq-answer {
+        max-height: 500px; /* Adjust if needed for longer content */
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 2rem;
+        }
+        
+        .faq-question {
+            padding: 15px 20px;
+        }
+        
+        .faq-question h3 {
+            font-size: 1rem;
+        }
+        
+        .faq-answer {
+            padding: 0 20px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .section-title {
+            font-size: 1.8rem;
+        }
+        
+        .section-subtitle {
+            font-size: 1rem;
+        }
+    }
+    
+    
+    /*login page*/
+            /* Login-specific styles */
+        .login-main-card {
+            max-width: 1100px; /* Match register page width */
+            height: 650px; /* Match register page height */
+        }
+        
+        .login-form-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .login-form-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .login-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .login-form-fields {
+            flex-grow: 0;
+        }
+        
+        .login-button-container {
+            margin-top: auto;
+            padding-top: 30px;
+            margin-bottom: 20px;
+        }
+        
+    /* Register-specific styles */
+        .register-main-card {
+            max-width: 1100px;
+            height: 650px; /* Slightly taller than the login card to accommodate more fields */
+        }
+        
+        .register-form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        
+        .register-input-group {
+            padding: 0 10px;
+            margin-bottom: 1.5rem;
+            flex: 1 0 50%;
+        }
+        
+        @media (max-width: 767.98px) {
+            .register-input-group {
+                flex: 1 0 100%;
+            }
+        }
+    
+    .test-carousel {
+    display: flex;
+    overflow: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+}
+
+.testimonial-carousel .item {
+    flex: 0 0 33.3333%;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+    padding: 0 10px;
+    margin-right: 20px;
+}
+
+button.prev, button.next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    display: none;
+}
+
+button.prev {
+    left: 10px;
+}
+
+button.next {
+    right: 10px;
+}
+
+button.prev i, button.next i {
+    font-size: 20px;
+}

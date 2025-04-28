@@ -8,8 +8,8 @@
                         <h2>Contact Info</h2>
                     </div>
                     <address>
-                        <p>Phone: 36XXX626</p>
-                        <p>Email: <a href="mailto:BorrowMyCharger@example.com">BorrowMyCharger@example.com</a></p>
+                        <p>Phone: +973 17777777</p>
+                        <p>Email: <a href="mailto:contact@borrowmycharger.com">contact@borrowmycharger.com</a></p>
                     </address>
                     <div class="copyright-text"> 
                         <p>&copy; All Rights Reserved to Borrow My Charger</p>
@@ -20,13 +20,29 @@
     </div>
 </footer>
 
+<!-- BACK TO TOP BUTTON -->
+<button id="backToTop" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 10px; background-color: #B68942; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    &#8593; <!-- Arrow up character -->
+</button>
 
-     <!-- SCRIPTS -->
-     <script src="js/jquery.js"></script>
-     <script src="js/bootstrap.min.js"></script>
-     <script src="js/owl.carousel.min.js"></script>
-     <script src="js/smoothscroll.js"></script>
-     <script src="js/custom.js"></script>
+
+
+<script>
+    // Show the button when scrolling down
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 100) {
+            $('#backToTop').fadeIn();
+        } else {
+            $('#backToTop').fadeOut();
+        }
+    });
+
+    // Scroll to top on button click
+    $('#backToTop').click(function() {
+        $('html, body').animate({ scrollTop: 0 }, 800);
+        return false;
+    });
+</script>
 
 </body>
 </html>

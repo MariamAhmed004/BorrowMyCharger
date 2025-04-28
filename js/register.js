@@ -37,16 +37,19 @@ document.addEventListener("DOMContentLoaded", function () {
             showError('email', 'Invalid email format.');
             hasErrors = true;
         }
-        // Validate password strength
-        if (!validatePassword(password)) {
-            showError('password', 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special character.');
-            hasErrors = true;
-        }
-        // Validate phone number format
-        if (!/^\d{7,15}$/.test(phone)) {
-            showError('phone', 'Phone number must be 7 to 15 digits.');
-            hasErrors = true;
-        }
+      // Validate password strength
+if (!validatePassword(password)) {
+    showError('password', 'Password must be at least 6 characters long and include at least one uppercase letter and one digit.');
+    hasErrors = true;
+}
+       // Validate phone number format
+if (!/^\d+$/.test(phone)) {
+    showError('phone', 'Phone number can only contain digits.');
+    hasErrors = true;
+} else if (phone.length < 7 || phone.length > 15) {
+    showError('phone', 'Phone number must be between 7 and 15 digits long.');
+    hasErrors = true;
+}
         // Check if country is selected
         if (!country) {
             showError('country', 'Country must be selected.');
@@ -101,11 +104,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return re.test(String(email).toLowerCase()); // Test the email against the regex
     }
 
-    // Function to validate password strength
-    function validatePassword(password) {
-        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; // Regex for strong password
-        return re.test(password); // Test the password against the regex
-    }
+// Function to validate password strength
+function validatePassword(password) {
+    const re = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/; // Regex for easier password
+    return re.test(password); // Test the password against the regex
+}
 
     // Function to check if the username or email exists
     function checkUserExists(username, email) {
@@ -124,3 +127,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+
+   document.addEventListener("DOMContentLoaded", function () {
+            const gccCountries = [
+                { name: "Bahrain", code: "BH" },
+                { name: "Kuwait", code: "KW" },
+                { name: "Oman", code: "OM" },
+                { name: "Qatar", code: "QA" },
+                { name: "Saudi Arabia", code: "SA" },
+                { name: "United Arab Emirates", code: "AE" }
+            ];
+
+            gccCountries.forEach(function(country) {
+                document.getElementById('country').append(new Option(country.name, country.code));
+            });
+        });

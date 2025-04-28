@@ -1,5 +1,5 @@
 <?php
-
+//108.142.248.238
 class Database {
     protected static $_dbInstance = null;
     protected $_dbHandle;
@@ -17,7 +17,6 @@ class Database {
         return self::$_dbInstance;
     }
 
-   
     private function __construct($username, $password, $host, $database) {
         try {
             $this->_dbHandle = new PDO("mysql:host=$host;dbname=$database;charset=utf8", $username, $password);
@@ -36,4 +35,3 @@ class Database {
         $this->_dbHandle = null;
     }
 }
-?>

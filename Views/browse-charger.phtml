@@ -43,23 +43,59 @@
       height: 100%;
     }
 
+    /* Card layout - Fixed width, wrap to new row */
+    #chargePointsContainer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start; /* Align cards to the start of the row */
+    }
+
     .charge-point {
       display: flex;
-      align-items: center;
-      width: calc(33.333% - 20px);
+      flex-direction: column;
+      align-items: flex-start;
       padding: 20px;
       background-color: white;
       border: 1px solid black;
       margin: 10px;
       color: black;
+      width: 300px; /* Fixed width for each card */
+      box-sizing: border-box;
     }
 
     .charge-point img {
       width: 80px;
       height: 80px;
-      margin-right: 20px;
+      margin-bottom: 10px;
     }
 
+    /* Responsive Design for different screen sizes */
+    @media (max-width: 1200px) {
+      .charge-point {
+        width: 300px; /* Keep fixed width for large tablets and above */
+      }
+    }
+
+    @media (max-width: 992px) {
+      .charge-point {
+        width: 300px; /* Keep fixed width for medium screens (tablets) */
+      }
+    }
+
+    @media (max-width: 768px) {
+      .charge-point {
+        width: 300px; /* Keep fixed width for small tablets */
+      }
+    }
+
+    @media (max-width: 576px) {
+      .charge-point {
+        width: 100%; /* Full width on small screens (phones) */
+        margin: 10px 0; /* Adjust margin to prevent horizontal overflow */
+      }
+    }
+
+    /* Filter Layout */
     .filter-row {
       display: flex;
       align-items: center;
@@ -75,16 +111,18 @@
     }
 
     .btn {
-      border-radius: 20px; /* Rounded buttons */
+      border-radius: 20px;
     }
 
     .form-control {
-      width: auto; /* Allow dropdown widths to be auto */
+      width: auto;
     }
   </style>
 </head>
+
 <body>
 <?php require('template/header.phtml') ?>
+
 <!-- Main Content -->
 <div class="container-custom">
   <!-- Left Panel -->
@@ -94,23 +132,26 @@
       <select class="form-control filter-item" id="locationSelect">
         <option value="">Location</option>
         <?php foreach ($view->cities as $city): ?>
-          <option value="<?= htmlspecialchars($city['city_id']) ?>"><?= htmlspecialchars($city['city_name']) ?></option>
+          <option value="<?= htmlspecialchars($city['city_id']) ?>">
+            <?= htmlspecialchars($city['city_name']) ?>
+          </option>
         <?php endforeach; ?>
       </select>
-      <select class="form-control filter-item">
+      <select class="form-control filter-item" id="priceRangeSelect">
         <option value="">Price Range (BHD)</option>
         <option value="0-2">0 BHD - 2 BHD</option>
         <option value="2-5">2 BHD - 5 BHD</option>
         <option value="5-10">5 BHD - 10 BHD</option>
         <option value="10-20">10 BHD - 20 BHD</option>
-        <option value="20+">20 BHD+</option>
       </select>
-      <select class="form-control filter-item">
-        <option>Availability</option>
-        <option>Available</option>
-        <option>Not Available</option>
+      <select class="form-control filter-item" id="availabilitySelect">
+        <option value="">Availability</option>
+             <?php foreach ($view->availabilityStatus as $status): ?>
+        <option value="<?= htmlspecialchars($status['availability_status_id']) ?>">
+            <?= htmlspecialchars($status['availability_status_title']) ?>
+          </option>
+        <?php endforeach; ?>
       </select>
-      <button class="btn btn-primary filter-item">Apply</button>
       <button class="btn btn-secondary filter-item" id="resetBtn">Reset</button>
     </div>
   </div>
@@ -119,32 +160,28 @@
   <div class="map-box mb-4" id="map"></div>
 
   <!-- Charge Points -->
-  <div class="charge-point">
-    <img src="images/chargePoint1.png" alt="Charge Point Image">
-    <div>
-      <h5><strong>Charge Point</strong></h5>
-      <p>123 Main St</p>
-      <p>0.200 BHD per kWh · Available</p>
-      <button class="btn btn-success">View</button>
-    </div>
-  </div>
-  <div class="charge-point">
-    <img src="images/chargePoint1.png" alt="Charge Point Image">
-    <div>
-      <h5><strong>Charge Point</strong></h5>
-      <p>456 Second St</p>
-      <p>0.200 BHD per kWh · Available</p>
-      <button class="btn btn-success">View</button>
-    </div>
-  </div>
-  <div class="charge-point">
-    <img src="images/chargePoint1.png" alt="Charge Point Image">
-    <div>
-      <h5><strong>Charge Point</strong></h5>
-      <p>789 Third St</p>
-      <p>0.200 BHD per kWh · Available</p>
-      <button class="btn btn-success">View</button>
-    </div>
+  <div id="chargePointsContainer">
+    <?php if (!empty($view->chargePoints)): ?>
+      <?php foreach ($view->chargePoints as $chargePoint): ?>
+        <div class="charge-point">
+          <img src="<?= htmlspecialchars($chargePoint['chargePointPictureUrl']) ?>" alt="Charge Point Image">
+          <div>
+            <h5><strong>Charge Point</strong></h5>
+            <p>
+              <?= htmlspecialchars('Block ' . $chargePoint['block'] . ', Road ' . $chargePoint['road'] . ', House ' . $chargePoint['houseNumber'] . ', ' . $chargePoint['streetName'] . ', Postcode ' . $chargePoint['postcode']) ?>
+            </p>
+            <p>
+              <?= htmlspecialchars($chargePoint['cityName'] . ', ' . $chargePoint['countryName']) ?>
+            </p>
+            <p><?= htmlspecialchars(number_format($chargePoint['pricePerKwh'], 3)) ?> BHD per kWh</p>
+            <p>Availability: <?= htmlspecialchars($chargePoint['availabilityStatusTitle']) ?></p>
+            <button class="btn btn-success">View</button>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    <?php else: ?>
+      <p>No charge points available.</p>
+    <?php endif; ?>
   </div>
 </div>
 
@@ -161,10 +198,36 @@
 
   // Reset button functionality
   document.getElementById('resetBtn').onclick = function() {
-    document.getElementById('locationSelect').selectedIndex = 0; // Reset location dropdown
-    document.querySelectorAll('select')[1].selectedIndex = 0; // Reset price dropdown
-    document.querySelectorAll('select')[2].selectedIndex = 0; // Reset availability dropdown
+    document.getElementById('locationSelect').selectedIndex = 0;
+    document.getElementById('priceRangeSelect').selectedIndex = 0;
+    document.getElementById('availabilitySelect').selectedIndex = 0;
+    loadChargePoints();
   };
+
+  // Event listeners for filter changes
+  document.getElementById('locationSelect').addEventListener('change', loadChargePoints);
+  document.getElementById('priceRangeSelect').addEventListener('change', loadChargePoints);
+  document.getElementById('availabilitySelect').addEventListener('change', loadChargePoints);
+
+  function loadChargePoints() {
+    var location = document.getElementById('locationSelect').value;
+    var priceRange = document.getElementById('priceRangeSelect').value;
+    var availability = document.getElementById('availabilitySelect').value;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'browse-charger.php?ajax=true&location=' + location + '&priceRange=' + priceRange + '&availability=' + availability, true);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        document.getElementById('chargePointsContainer').innerHTML = xhr.responseText;
+      } else {
+        console.error('Error fetching charge points:', xhr.statusText);
+      }
+    };
+    xhr.onerror = function() {
+      console.error('Request error...');
+    };
+    xhr.send();
+  }
 </script>
 <?php require('template/footer.phtml') ?>
 </body>
