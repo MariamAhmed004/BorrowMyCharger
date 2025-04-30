@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +16,7 @@
         .modal { 
             display: none; 
             position: fixed; 
-            z-index: 1; 
+            z-index: 1000; 
             left: 0; 
             top: 0; 
             width: 100%; 
@@ -24,7 +25,7 @@
             background-color: rgba(0,0,0,0.5); 
         }
         .modal-content { 
-            position: absolute; 
+            position: fixed; /* Changed from absolute to fixed */
             left: 50%; 
             top: 50%; 
             transform: translate(-50%, -50%); /* Center the modal */
@@ -79,7 +80,7 @@
         
         /* Time picker container */
         .time-picker-container {
-            display: none;
+            display: block; /* Changed from none to block */
             margin-top: 10px;
             padding: 10px;
             background-color: #f9f9f9;
@@ -246,12 +247,42 @@
                 flex-wrap: wrap;
             }
         }
+        
+        /* Error message styling */
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .input-error {
+            border: 1px solid #dc3545;
+        }
+        
+        /* Form validation error message container */
+        #formErrors {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
 <?php require_once('template/header.phtml'); ?>
+
+<?php if (isset($view->message)): ?>
+<div class="alert alert-<?php echo $view->messageType; ?> text-center" role="alert">
+    <?php echo htmlspecialchars($view->message); ?>
+</div>
+<?php endif; ?>
+
 <!-- Section for Add Charge Point -->
-<section id="addChargePointSection" class="add-charge-point">
+<section id="addChargePointSection" class="add-charge-point" <?php echo $view->chargePoint ? 'style="display: none;"' : ''; ?>>
     <div class="text-center">
         <h2 id="chargePointPrompt">You haven't added a charge point yet.</h2>
         <button id="addChargePointBtn" class="btn btn-primary">Add Charge Point</button>
@@ -263,26 +294,27 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h3 class="modal-title">Add Charge Point Details</h3>
+        <div id="formErrors"></div>
         <div class="form-container">
             <form id="chargePointForm">
+                <input type="hidden" id="chargePointId" name="chargePointId" value="">
+                <input type="hidden" id="addressId" name="addressId" value="">
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="home"><i class="fa fa-home"></i> Home</label>
                         <input type="text" id="home" name="home" class="form-control" required>
+                        <span class="error-message" id="homeError">Please enter a valid home number</span>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-clock-o"></i> Availability Type</label>
-                        <select id="availabilityType" name="availabilityType" class="form-control" required>
-                            <option value="">Select</option>
-                            <option value="always">Always Available</option>
-                            <option value="scheduled">Scheduled Hours</option>
-                            <option value="onrequest">On Request</option>
-                        </select>
+                        <label for="block"><i class="fa fa-building"></i> Block</label>
+                        <input type="text" id="block" name="block" class="form-control" required>
+                        <span class="error-message" id="blockError">Please enter a valid block number</span>
                     </div>
                 </div>
                 
-                <!-- Days of Week Availability (shows when Scheduled Hours is selected) -->
-                <div id="daysOfWeekContainer" style="display: none;">
+                <!-- Days of Week Availability (always visible as requested) -->
+                <div id="daysOfWeekContainer">
                     <h4>Days Available</h4>
                     <div class="day-checkbox-container">
                         <label><input type="checkbox" name="availableDays" value="Monday"> Monday</label>
@@ -304,57 +336,98 @@
                     <div class="form-group">
                         <label for="road"><i class="fa fa-road"></i> Road</label>
                         <input type="text" id="road" name="road" class="form-control" required>
+                        <span class="error-message" id="roadError">Please enter a valid road number</span>
                     </div>
-                    <div class="form-group">
-                        <label for="block"><i class="fa fa-building"></i> Block</label>
-                        <input type="text" id="block" name="block" class="form-control" required>
-                    </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
                         <label for="city"><i class="fa fa-map-marker"></i> City</label>
                         <select id="city" name="city" class="form-control" required>
                             <option value="">Select City</option>
-                            <!-- Cities will be populated via API -->
+                            <?php if (isset($view->cities) && is_array($view->cities)): ?>
+                                <?php foreach ($view->cities as $city): ?>
+                                    <option value="<?php echo $city['city_id']; ?>"><?php echo htmlspecialchars($city['city_name']); ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="imageUpload"><i class="fa fa-upload"></i> Upload Picture</label>
-                        <input type="file" id="imageUpload" name="imageUpload" class="form-control" accept=".jpg, .jpeg, .png" required>
-                        <small class="form-text text-muted">Max size: 5MB. Formats: JPG, PNG.</small>
+                        <span class="error-message" id="cityError">Please select a city</span>
                     </div>
                 </div>
-                <div class="last-form-row">
-                    <div class="form-group cost-container">
-                        <label>Charge Cost</label>
-                        <input type="text" id="cost" name="cost" class="form-control" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="imageUpload"><i class="fa fa-upload"></i> Upload Picture</label>
+                        <input type="file" id="imageUpload" name="imageUpload" class="form-control" accept=".jpg, .jpeg, .png">
+                        <small class="form-text text-muted">Max size: 5MB. Formats: JPG, PNG.</small>
+                        <span class="error-message" id="imageError">Please upload a valid image file</span>
                     </div>
-                    <div class="form-group button-container">
+                    <div class="form-group">
+                        <label for="cost">Charge Cost</label>
+                        <input type="text" id="cost" name="cost" class="form-control" required>
+                        <span class="error-message" id="costError">Please enter a valid cost</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group button-container" style="width: 100%; justify-content: center;">
                         <button type="submit" class="add-button">Add</button>
                     </div>
                 </div>
+                <input type="hidden" id="latitude" name="latitude" value="">
+                <input type="hidden" id="longitude" name="longitude" value="">
             </form>
         </div>
     </div>
 </div>
 
 <!-- Display Charge Point Details -->
-<div id="chargePointDetails" class="charge-point-details" style="display: none;">
+<div id="chargePointDetails" class="charge-point-details" <?php echo $view->chargePoint ? '' : 'style="display: none;"'; ?>>
     <h4>My Charge Point Details</h4>
     <div class="details-container">
-        <div id="details"></div>
-        <img id="chargeImage" src="" alt="Charge Point Image" style="display: none;">
+        <div id="details">
+            <?php if (isset($view->chargePoint)): ?>
+                <strong>Home:</strong> <?php echo htmlspecialchars($view->chargePoint['house_number']); ?><br>
+                <strong>Road:</strong> <?php echo htmlspecialchars($view->chargePoint['road']); ?><br>
+                <strong>Block:</strong> <?php echo htmlspecialchars($view->chargePoint['block']); ?><br>
+                <strong>City:</strong> <?php echo htmlspecialchars($view->chargePoint['city_name']); ?><br>
+                <strong>Charge Cost:</strong> <?php echo htmlspecialchars($view->chargePoint['price_per_kwh']); ?> BHD / kWh<br>
+                <strong>Availability:</strong> 
+                <?php if (isset($view->chargePoint['availabilityDays']) && count($view->chargePoint['availabilityDays']) > 0): ?>
+                    Available on: 
+                    <?php 
+                    $daysList = array_column($view->chargePoint['availabilityDays'], 'day_of_week');
+                    echo implode(', ', $daysList);
+                    
+                    foreach ($view->chargePoint['availabilityDays'] as $day): 
+                        if (isset($day['times']) && !empty($day['times'])):
+                    ?>
+                        <br><?php echo htmlspecialchars($day['day_of_week']); ?>: 
+                        <?php echo htmlspecialchars(implode(', ', $day['times'])); ?>
+                    <?php 
+                        endif;
+                    endforeach; 
+                    ?>
+                <?php else: ?>
+                    <?php echo htmlspecialchars($view->chargePoint['availability_status_title']); ?>
+                <?php endif; ?>
+                <br>
+                <?php if (isset($view->chargePoint['latitude']) && isset($view->chargePoint['longitude'])): ?>
+                    <strong>Latitude:</strong> <?php echo htmlspecialchars($view->chargePoint['latitude']); ?><br>
+                    <strong>Longitude:</strong> <?php echo htmlspecialchars($view->chargePoint['longitude']); ?><br>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+        <?php if (isset($view->chargePoint) && isset($view->chargePoint['charge_point_picture_url'])): ?>
+            <img id="chargeImage" src="<?php echo htmlspecialchars($view->chargePoint['charge_point_picture_url']); ?>" alt="Charge Point Image">
+        <?php else: ?>
+            <img id="chargeImage" src="" alt="Charge Point Image" style="display: none;">
+        <?php endif; ?>
     </div>
     <div id="leetcodeMap"></div>
-    <div class="edit-delete-buttons">
-        <button class="edit-button">Edit</button>
-        <button class="delete-button">Delete</button>
-    </div>
+   <div class="edit-delete-buttons">
+    <button class="edit-button" data-charge-point-id="<?= $chargePointId ?>">Edit</button>
+    <button class="delete-button" data-charge-point-id="<?= $chargePointId ?>">Delete</button>
 </div>
 
+</div>
 
 <!-- SCRIPTS -->
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="js/myChargePoint.js"></script>
 

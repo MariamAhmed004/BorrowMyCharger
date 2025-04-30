@@ -120,7 +120,7 @@ class BrowseCharger {
     }
 
     public function getTotalChargers() {
-        $sql = "SELECT COUNT(*) as total FROM pro_chargepoint";
+        $sql = "SELECT COUNT(*) as total FROM Pro_ChargePoint";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
