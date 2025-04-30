@@ -1,215 +1,248 @@
 <?php require('template/header.phtml') ?>
-    <style>
+<style>
+    th, td {
+        text-align: center;
+        padding: 10px;
+    }
 
-        th, td {
-            text-align: center;
-            padding: 10px;
-        }
+    .link {
+        text-decoration: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        display: inline-block;
+        margin: 2px;
+        border-radius: 3px;
+    }
 
-        .link {
-            text-decoration: none; /* Remove underline */
-            padding: 5px 10px; /* Add some padding */
-        }
+    .view-link {
+        color: #0066cc;
+        background-color: #e6f2ff;
+    }
 
-        .view-link {
-            color: blue; /* Blue color for view link */
-        }
+    .delete-link {
+        color: white;
+        background-color: #dc3545;
+    }
 
-        .delete-link {
-            color: red; /* Red color for delete link */
-        }
+    .suspend-link {
+        color: white;
+        background-color: #fd7e14;
+    }
+    
+    .unsuspend-link {
+        color: white;
+        background-color: #20c997;
+    }
+    
+    .approve-link {
+        color: white;
+        background-color: #28a745;
+    }
 
-        .suspend-link {
-            color: orange; /* Orange color for suspend link */
-        }
+    .modal-content {
+        border-radius: 10px;
+    }
 
-        .logged-in {
-            color: blue; /* Blue text for currently logged-in status */
-        }
+    .modal-header {
+        border: none;
+    }
 
-     
-        .modal-content {
-            border-radius: 10px; /* Rounded corners for modal */
-        }
+    .modal-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
 
-        .modal-header {
-            border: none; /* Remove borders */
-        }
+    .profile-info {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 20px;
+    }
 
-        .modal-body {
-            display: flex;
-            flex-direction: column; /* Stack elements vertically */
-            align-items: center; /* Center align items */
-            text-align: center; /* Center-aligned text */
-        }
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 2px solid #007bff;
+        margin-right: 20px;
+    }
 
-        .profile-info {
-            display: flex;
-            align-items: center; /* Align items vertically centered */
-            width: 100%;
-            margin-bottom: 20px;
-        }
+    .info-box {
+        background-color: #e9ecef;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 10px;
+        flex: 1;
+        text-align: center;
+    }
 
-        .profile-picture {
-            width: 100px; /* Fixed size for profile picture */
-            height: 100px;
-            border-radius: 50%; /* Circular picture */
-            border: 2px solid #007bff; /* Border color */
-            margin-right: 20px; /* Space between picture and name */
-        }
+    .red-text {
+        color: red;
+    }
 
-        .info-box {
-            background-color: #e9ecef; /* Light grey background */
-            border-radius: 5px;
-            padding: 15px;
-            margin: 10px; /* Margins around boxes */
-            flex: 1; /* Flex to make them equal width */
-            text-align: center; /* Center text within the box */
-        }
+    .black-text {
+        color: black;
+    }
 
-        .red-text {
-            color: red; /* Red text for important information */
-        }
+    .filter-container {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
 
-        .black-text {
-            color: black; /* Black text for titles */
-        }
-
-        .filter-container {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .filter-container select {
-            width: 30%; /* Adjust width as necessary */
-        }
-    </style>
+    .filter-container select {
+        flex: 1;
+        min-width: 150px;
+        max-width: 250px;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+    }
+    
+    .filter-container button {
+        padding: 8px 15px;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-suspended {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-active {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+</style>
 
 <div class="container mt-5">
     <h1>All Profiles</h1>
 
     <div class="filter-container">
         <select id="nameFilter" onchange="filterTable()">
-            <option value="">Select Name</option>
-            <option value="Jon Doe">Jon Doe</option>
-            <option value="Jane Smith">Jane Smith</option>
-            <option value="Emily Davis">Emily Davis</option>
-            <option value="Michael Brown">Michael Brown</option>
-            <option value="Sarah Wilson">Sarah Wilson</option>
+            <option value="">Filter by Name</option>
+            <?php foreach ($view->uniqueNames as $name): ?>
+                <option value="<?php echo htmlspecialchars($name); ?>"><?php echo htmlspecialchars($name); ?></option>
+            <?php endforeach; ?>
         </select>
 
         <select id="roleFilter" onchange="filterTable()">
-            <option value="">Select Role</option>
-            <option value="Homeowner">Homeowner</option>
-            <option value="Customer">Customer</option>
+            <option value="">Filter by Role</option>
+            <?php foreach ($view->roles as $role): ?>
+                <option value="<?php echo htmlspecialchars($role['role_title']); ?>">
+                    <?php echo htmlspecialchars($role['role_title']); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        
+        <select id="statusFilter" onchange="filterTable()">
+            <option value="">Filter by Status</option>
+            <?php foreach ($view->accountStatuses as $status): ?>
+                <option value="<?php echo htmlspecialchars($status['user_account_status_title']); ?>">
+                    <?php echo htmlspecialchars($status['user_account_status_title']); ?>
+                </option>
+            <?php endforeach; ?>
         </select>
 
-        <select id="activityFilter" onchange="filterTable()">
-            <option value="">Select Last Activity</option>
-            <option value="Currently logged in">Currently logged in</option>
-            <option value="Last Login 1 Hour Ago">Last Login 1 Hour Ago</option>
-            <option value="Last Login 2 Days Ago">Last Login 2 Days Ago</option>
-            <option value="Last Login 3 Hours Ago">Last Login 3 Hours Ago</option>
-            <option value="Last Login 4 Days Ago">Last Login 4 Days Ago</option>
-            <option value="Last Login 5 Hours Ago">Last Login 5 Hours Ago</option>
-        </select>
-
-        <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
     </div>
 
-    <table class="table table-bordered" id="profilesTable">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Last Activity</th>
-                <th>Account Details</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Jon Doe</td>
-                <td>jon.doe@outlook.com</td>
-                <td>Homeowner</td>
-                <td><span class="logged-in">Currently logged in</span></td>
-                <td>
-                    <a href="#" class="link view-link" onclick="showHomeownerDetails('Jon Doe', 'Updated charge point on April 18, 2025', '2 new booking requests')">View</a>
-                </td>
-                <td>
-                    <a href="#" class="link suspend-link" onclick="suspendAccount('Jon Doe')">Suspend</a>
-                    <a href="#" class="link delete-link" onclick="deleteAccount('Jon Doe')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Jane Smith</td>
-                <td>jane.smith@outlook.com</td>
-                <td>Customer</td>
-                <td>Last Login 1 Hour Ago</td>
-                <td>
-                    <a href="#" class="link view-link" onclick="showCustomerDetails('Jane Smith', '19/4/2025 at 10:44 p.m.', '5 Total Bookings')">View</a>
-                </td>
-                <td>
-                    <a href="#" class="link suspend-link" onclick="suspendAccount('Jane Smith')">Suspend</a>
-                    <a href="#" class="link delete-link" onclick="deleteAccount('Jane Smith')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Emily Davis</td>
-                <td>emily.davis@example.com</td>
-                <td>Customer</td>
-                <td>Last Login 3 Hours Ago</td>
-                <td>
-                    <a href="#" class="link view-link" onclick="showCustomerDetails('Emily Davis', '19/4/2025 at 9:30 p.m.', '3 Total Bookings')">View</a>
-                </td>
-                <td>
-                    <a href="#" class="link suspend-link" onclick="suspendAccount('Emily Davis')">Suspend</a>
-                    <a href="#" class="link delete-link" onclick="deleteAccount('Emily Davis')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Michael Brown</td>
-                <td>michael.brown@example.com</td>
-                <td>Homeowner</td>
-                <td>Last Login 4 Days Ago</td>
-                <td>
-                    <a href="#" class="link view-link" onclick="showHomeownerDetails('Michael Brown', 'Updated charge point on April 10, 2025', '3 new booking requests')">View</a>
-                </td>
-                <td>
-                    <a href="#" class="link suspend-link" onclick="suspendAccount('Michael Brown')">Suspend</a>
-                    <a href="#" class="link delete-link" onclick="deleteAccount('Michael Brown')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Sarah Wilson</td>
-                <td>sarah.wilson@example.com</td>
-                <td>Customer</td>
-                <td>Last Login 5 Hours Ago</td>
-                <td>
-                    <a href="#" class="link view-link" onclick="showCustomerDetails('Sarah Wilson', '19/4/2025 at 8:15 p.m.', '2 Total Bookings')">View</a>
-                </td>
-                <td>
-                    <a href="#" class="link suspend-link" onclick="suspendAccount('Sarah Wilson')">Suspend</a>
-                    <a href="#" class="link delete-link" onclick="deleteAccount('Sarah Wilson')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>David Lee</td>
-                <td>david.lee@example.com</td>
-                <td>Homeowner</td>
-                <td>Last Login 2 Days Ago</td>
-                <td>
-                    <a href="#" class="link view-link" onclick="showHomeownerDetails('David Lee', 'Updated charge point on April 15, 2025', '1 new booking request')">View</a>
-                </td>
-                <td>
-                    <a href="#" class="link suspend-link" onclick="suspendAccount('David Lee')">Suspend</a>
-                    <a href="#" class="link delete-link" onclick="deleteAccount('David Lee')">Delete</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div id="tableContainer">
+        <table class="table table-bordered" id="profilesTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Account Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($view->profiles)): ?>
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <div class="alert alert-info my-3">No users found.</div>
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($view->profiles as $profile): ?>
+                        <tr data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>">
+                            <td><?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?></td>
+                            <td><?php echo htmlspecialchars($profile['email']); ?></td>
+                            <td><?php echo htmlspecialchars($profile['username']); ?></td>
+                            <td><?php echo htmlspecialchars($profile['role_title']); ?></td>
+                            <td>
+                                <span class="status-badge status-<?php echo strtolower(htmlspecialchars($profile['user_account_status_title'])); ?>">
+                                    <?php echo htmlspecialchars($profile['user_account_status_title']); ?>
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <?php if (strtolower($profile['user_account_status_title']) === 'suspended'): ?>
+                                    <a href="#" class="link unsuspend-link" 
+                                       data-action="unsuspend" 
+                                       data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                       data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                        Unsuspend
+                                    </a>
+                                <?php else: ?>
+                                    <a href="#" class="link suspend-link" 
+                                       data-action="suspend" 
+                                       data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                       data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                        Suspend
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <?php if (strtolower($profile['role_title']) === 'homeowner' && strtolower($profile['user_account_status_title']) === 'pending'): ?>
+                                    <a href="#" class="link approve-link" 
+                                       data-action="approve" 
+                                       data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                       data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                        Approve
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <a href="#" class="link delete-link" 
+                                   data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                   data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+        
+        <!-- No results message (hidden by default) -->
+        <div id="noResultsMessage" class="alert alert-warning my-4 text-center" style="display: none;">
+            <i class="fa fa-exclamation-circle mr-2"></i>
+            No users found matching your search criteria. Please try different filters.
+        </div>
+    </div>
 </div>
 
 <!-- Modal -->
@@ -238,73 +271,5 @@
         </div>
     </div>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-<script>
-    function showHomeownerDetails(name, chargePoint, bookingRequests) {
-        document.getElementById('modalUserName').textContent = name;
-        document.getElementById('modalChargePoint').textContent = chargePoint; // Display charge point detail
-        document.getElementById('modalBookingRequests').textContent = bookingRequests; // Display booking requests
-        $('#detailsModal').modal('show'); // Show the modal
-    }
-
-    function showCustomerDetails(name, lastBooking, totalBookings) {
-        document.getElementById('modalUserName').textContent = name;
-        document.getElementById('modalChargePointContainer').innerHTML = 
-            `<h5 class="black-text">Last Booking Made</h5><p class="red-text">${lastBooking}</p>`;
-        document.getElementById('modalBookingRequestsContainer').innerHTML = 
-            `<h5 class="black-text">Total Bookings Made</h5><p class="red-text">${totalBookings}</p>`;
-        $('#detailsModal').modal('show'); // Show the modal
-    }
-
-    function deleteAccount(name) {
-        if (confirm(`Are you sure you want to delete the account for ${name}?`)) {
-            alert(`${name}'s account has been deleted.`);
-            // Add your actual delete function here
-        }
-    }
-
-    function suspendAccount(name) {
-        if (confirm(`Are you sure you want to suspend the account for ${name}?`)) {
-            alert(`${name}'s account has been suspended.`);
-            // Add your actual suspend function here
-        }
-    }
-
-    function filterTable() {
-        const nameFilter = document.getElementById("nameFilter").value.toLowerCase();
-        const roleFilter = document.getElementById("roleFilter").value.toLowerCase();
-        const activityFilter = document.getElementById("activityFilter").value.toLowerCase();
-
-        const table = document.getElementById("profilesTable");
-        const rows = table.getElementsByTagName("tr");
-
-        for (let i = 1; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName("td");
-            const name = cells[0].textContent.toLowerCase();
-            const role = cells[2].textContent.toLowerCase();
-            const activity = cells[3].textContent.toLowerCase();
-
-            const nameMatch = nameFilter === "" || name.includes(nameFilter);
-            const roleMatch = roleFilter === "" || role.includes(roleFilter);
-            const activityMatch = activityFilter === "" || activity.includes(activityFilter);
-
-            if (nameMatch && roleMatch && activityMatch) {
-                rows[i].style.display = "";
-            } else {
-                rows[i].style.display = "none";
-            }
-        }
-    }
-
-    function clearFilters() {
-        document.getElementById("nameFilter").selectedIndex = 0;
-        document.getElementById("roleFilter").selectedIndex = 0;
-        document.getElementById("activityFilter").selectedIndex = 0;
-        filterTable(); // Reset the table display
-    }
-</script>
+<script src="js/viewAllProfiles.js"></script>
 <?php require('template/footer.phtml') ?>

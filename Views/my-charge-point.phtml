@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title><?php echo htmlspecialchars($view->pageTitle); ?></title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/owl.carousel.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Modal styles */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        .modal-content { 
+            position: absolute; 
+            left: 50%; 
+            top: 50%; 
+            transform: translate(-50%, -50%); /* Center the modal */
+            background-color: #ffffff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            width: 80%; 
+            max-width: 600px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .close { 
+            color: #333; 
+            position: absolute; 
+            top: 10px; 
+            right: 15px; 
+            font-size: 24px; 
+            font-weight: bold; 
+            background: #f5f5f5; 
+            border-radius: 50%; 
+            width: 25px; 
+            height: 25px; 
+            line-height: 22px; 
+            text-align: center; 
+        }
+        .close:hover, .close:focus { 
+            color: black; 
+            text-decoration: none; 
+            cursor: pointer; 
+        }
+        .modal-title { text-align: center; margin-bottom: 20px; font-weight: bold; }
+        .form-row { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
+        .form-group { width: 48%; min-width: 200px; margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-control { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; background-color: #f5f5f5; box-sizing: border-box; }
+        .add-button { background-color: #f0f0f0; color: #333; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .last-form-row { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: flex-end; }
+        .cost-container { width: 48%; }
+        .button-container { width: 48%; display: flex; justify-content: flex-end; align-items: flex-end; }
+        .form-container { overflow: hidden; padding-bottom: 10px; }
+        
+        /* Day checkboxes */
+        .day-checkbox-container {
+            margin-bottom: 20px;
+        }
+        .day-checkbox-container label {
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: normal;
+        }
+        
+        /* Time picker container */
+        .time-picker-container {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        /* Time selection styles */
+        .time-selection-container {
+            margin-bottom: 15px;
+        }
+        
+        .time-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .time-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .time-button {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .time-button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) { 
+            .form-group, .cost-container { width: 100%; margin-bottom: 15px; } 
+            .form-row, .last-form-row { flex-direction: column; margin-bottom: 0; } 
+            .button-container { width: 100%; justify-content: center; margin-top: 20px; } 
+        }
+        
+        /* Charge point details styles */
+        .charge-point-details { 
+            margin: 20px auto; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background-color: #ffffff; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+            max-width: 90%; 
+            overflow: hidden;
+        }
+
+        /* Details container for flex layout */
+        .details-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        /* Text details styles */
+        #details {
+            width: 60%;
+            padding-right: 15px;
+        }
+        
+        /* Image styles */
+        #chargeImage {
+            width: 35%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .charge-point-details h4 { 
+            margin-bottom: 20px; /* Increased margin for line break effect */
+            padding-bottom: 10px; /* Added padding for more separation */
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            border-bottom: 1px solid #eee; /* Optional: adds a subtle line */
+        }
+        
+        .charge-point-details p { 
+            margin: 5px 0; 
+            text-align: left;
+        }
+        
+        /* Map styles */
+        #leetcodeMap {
+            height: 300px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%; /* Full width */
+        }
+        
+        /* Button styles */
+        .edit-delete-buttons { 
+            display: flex; 
+            justify-content: center; 
+            margin: 10px 0 0 0; 
+            padding: 0;
+        }
+        
+        .edit-button, .delete-button { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 0 5px; 
+            font-weight: 500;
+        }
+        
+        .edit-button { 
+            background-color: #007bff; 
+            color: white; 
+        }
+        
+        .delete-button { 
+            background-color: #dc3545; 
+            color: white; 
+        }
+        
+        /* Other section styles */
+        #addChargePointSection { 
+            text-align: center; 
+            margin: 40px 0; 
+            padding: 20px;
+        }
+        
+        /* Footer adjustments */
+        #footer { 
+            margin-top: 0; 
+            padding-top: 20px;
+        }
+        
+        /* Responsive adjustments for details and image */
+        @media (max-width: 768px) {
+            .details-container {
+                flex-direction: column;
+            }
+            
+            #details, #chargeImage {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+            
+            #chargeImage {
+                max-height: 250px;
+            }
+            
+            .time-grid {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+<?php require_once('template/header.phtml'); ?>
+<!-- Section for Add Charge Point -->
+<section id="addChargePointSection" class="add-charge-point">
+    <div class="text-center">
+        <h2 id="chargePointPrompt">You haven't added a charge point yet.</h2>
+        <button id="addChargePointBtn" class="btn btn-primary">Add Charge Point</button>
+    </div>
+</section>
+
+<!-- Modal for Adding Charge Point -->
+<div id="chargePointModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 class="modal-title">Add Charge Point Details</h3>
+        <div class="form-container">
+            <form id="chargePointForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="home"><i class="fa fa-home"></i> Home</label>
+                        <input type="text" id="home" name="home" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa fa-clock-o"></i> Availability Type</label>
+                        <select id="availabilityType" name="availabilityType" class="form-control" required>
+                            <option value="">Select</option>
+                            <option value="always">Always Available</option>
+                            <option value="scheduled">Scheduled Hours</option>
+                            <option value="onrequest">On Request</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Days of Week Availability (shows when Scheduled Hours is selected) -->
+                <div id="daysOfWeekContainer" style="display: none;">
+                    <h4>Days Available</h4>
+                    <div class="day-checkbox-container">
+                        <label><input type="checkbox" name="availableDays" value="Monday"> Monday</label>
+                        <label><input type="checkbox" name="availableDays" value="Tuesday"> Tuesday</label>
+                        <label><input type="checkbox" name="availableDays" value="Wednesday"> Wednesday</label>
+                        <label><input type="checkbox" name="availableDays" value="Thursday"> Thursday</label>
+                        <label><input type="checkbox" name="availableDays" value="Friday"> Friday</label>
+                        <label><input type="checkbox" name="availableDays" value="Saturday"> Saturday</label>
+                        <label><input type="checkbox" name="availableDays" value="Sunday"> Sunday</label>
+                    </div>
+                    
+                    <!-- Time Picker Containers for each day -->
+                    <div id="timePickersContainer">
+                        <!-- Dynamic time pickers will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="road"><i class="fa fa-road"></i> Road</label>
+                        <input type="text" id="road" name="road" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="block"><i class="fa fa-building"></i> Block</label>
+                        <input type="text" id="block" name="block" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city"><i class="fa fa-map-marker"></i> City</label>
+                        <select id="city" name="city" class="form-control" required>
+                            <option value="">Select City</option>
+                            <!-- Cities will be populated via API -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="imageUpload"><i class="fa fa-upload"></i> Upload Picture</label>
+                        <input type="file" id="imageUpload" name="imageUpload" class="form-control" accept=".jpg, .jpeg, .png" required>
+                        <small class="form-text text-muted">Max size: 5MB. Formats: JPG, PNG.</small>
+                    </div>
+                </div>
+                <div class="last-form-row">
+                    <div class="form-group cost-container">
+                        <label>Charge Cost</label>
+                        <input type="text" id="cost" name="cost" class="form-control" required>
+                    </div>
+                    <div class="form-group button-container">
+                        <button type="submit" class="add-button">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Display Charge Point Details -->
+<div id="chargePointDetails" class="charge-point-details" style="display: none;">
+    <h4>My Charge Point Details</h4>
+    <div class="details-container">
+        <div id="details"></div>
+        <img id="chargeImage" src="" alt="Charge Point Image" style="display: none;">
+    </div>
+    <div id="leetcodeMap"></div>
+    <div class="edit-delete-buttons">
+        <button class="edit-button">Edit</button>
+        <button class="delete-button">Delete</button>
+    </div>
+</div>
+
+
+<!-- SCRIPTS -->
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="js/myChargePoint.js"></script>
+
+</body>
+<?php require_once('template/footer.phtml'); ?>
+</html>

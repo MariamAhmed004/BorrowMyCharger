@@ -1,25 +1,30 @@
 <?php
-
 require_once 'Models/Register.php';
 
-$response = ['usernameExists' => false, 'emailExists' => false];
+header('Content-Type: application/json');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
+$username = trim($_POST['username'] ?? '');
+$email = trim($_POST['email'] ?? '');
 
-    $register = new Register();
+$register = new Register();
 
-    // Check if the username exists
-    if ($register->checkUserExists($username, null)) {
-        $response['usernameExists'] = true;
-    }
+// Initialize response array
+$response = [
+    'usernameExists' => false,
+    'emailExists' => false
+];
 
-    // Check if the email exists
-    if ($register->checkUserExists(null, $email)) {
-        $response['emailExists'] = true;
-    }
+// Check username
+if (!empty($username)) {
+    $usernameExists = $register->checkSpecificField('username', $username);
+    $response['usernameExists'] = $usernameExists;
 }
 
-header('Content-Type: application/json');
+// Check email
+if (!empty($email)) {
+    $emailExists = $register->checkSpecificField('email', $email);
+    $response['emailExists'] = $emailExists;
+}
+
 echo json_encode($response);
+exit;

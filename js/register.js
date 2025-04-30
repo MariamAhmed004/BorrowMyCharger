@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const lastname = document.getElementById('lastname').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
-        const country = document.getElementById('country').value;
         const phone = document.getElementById('phone').value.trim();
         const userType = document.getElementById('user-type').value;
 
@@ -37,22 +36,17 @@ document.addEventListener("DOMContentLoaded", function () {
             showError('email', 'Invalid email format.');
             hasErrors = true;
         }
-      // Validate password strength
-if (!validatePassword(password)) {
-    showError('password', 'Password must be at least 6 characters long and include at least one uppercase letter and one digit.');
-    hasErrors = true;
-}
-       // Validate phone number format
-if (!/^\d+$/.test(phone)) {
-    showError('phone', 'Phone number can only contain digits.');
-    hasErrors = true;
-} else if (phone.length < 7 || phone.length > 15) {
-    showError('phone', 'Phone number must be between 7 and 15 digits long.');
-    hasErrors = true;
-}
-        // Check if country is selected
-        if (!country) {
-            showError('country', 'Country must be selected.');
+        // Validate password strength
+        if (!validatePassword(password)) {
+            showError('password', 'Password must be at least 6 characters long and include at least one uppercase letter and one digit.');
+            hasErrors = true;
+        }
+        // Validate phone number format
+        if (!/^\d+$/.test(phone)) {
+            showError('phone', 'Phone number can only contain digits.');
+            hasErrors = true;
+        } else if (phone.length < 7 || phone.length > 15) {
+            showError('phone', 'Phone number must be between 7 and 15 digits long.');
             hasErrors = true;
         }
         // Check if user type is selected
@@ -67,13 +61,15 @@ if (!/^\d+$/.test(phone)) {
             checkUserExists(username, email).then(response => {
                 if (response.usernameExists) {
                     showError('username', 'The username already exists.'); // Show error for existing username
+                    hasErrors = true;
                 }
                 if (response.emailExists) {
                     showError('email', 'The email already exists.'); // Show error for existing email
+                    hasErrors = true;
                 }
 
                 // If there are no errors, submit the form
-                if (!response.usernameExists && !response.emailExists) {
+                if (!hasErrors) {
                     form.submit(); // Submit the form if no errors found
                 }
             });
@@ -104,11 +100,11 @@ if (!/^\d+$/.test(phone)) {
         return re.test(String(email).toLowerCase()); // Test the email against the regex
     }
 
-// Function to validate password strength
 function validatePassword(password) {
-    const re = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/; // Regex for easier password
-    return re.test(password); // Test the password against the regex
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+    return re.test(password);
 }
+
 
     // Function to check if the username or email exists
     function checkUserExists(username, email) {
@@ -127,19 +123,3 @@ function validatePassword(password) {
         });
     }
 });
-
-
-   document.addEventListener("DOMContentLoaded", function () {
-            const gccCountries = [
-                { name: "Bahrain", code: "BH" },
-                { name: "Kuwait", code: "KW" },
-                { name: "Oman", code: "OM" },
-                { name: "Qatar", code: "QA" },
-                { name: "Saudi Arabia", code: "SA" },
-                { name: "United Arab Emirates", code: "AE" }
-            ];
-
-            gccCountries.forEach(function(country) {
-                document.getElementById('country').append(new Option(country.name, country.code));
-            });
-        });

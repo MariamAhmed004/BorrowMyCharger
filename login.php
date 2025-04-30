@@ -35,20 +35,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             switch ($authResult['role_id']) {
                 case 1:
                     $_SESSION['role'] = 'Admin';
+                    header('Location: dashboard_admin.php'); 
+                    exit;
                     break;
                 case 2:
                     $_SESSION['role'] = 'HomeOwner';
+                    header('Location: home_homeowner.php'); 
+                    exit;
                     break;
                 case 3:
                     $_SESSION['role'] = 'RentalUser';
+                    header('Location: home_rentaluser.php'); 
+            exit;
                     break;
                 default:
                     $_SESSION['role'] = 'Guest';  // Default role if no valid role_id found
-            }
+                    header('Location: index.php'); 
+                    exit;
+                    }
 
-            // Redirect to homepage or user dashboard
-            header('Location: index.php'); // Change this to your dashboard or home page
-            exit;
         } else {
             // Set specific error messages based on authentication result
             if ($authResult === 'email_not_found') {

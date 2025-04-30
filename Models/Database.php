@@ -7,7 +7,7 @@ class Database {
     public static function getInstance() {
         $username = 'u202201907'; // Your database username
         $password = 'u202201907'; // Your database password
-        $host = 'localhost'; // Use the IP address or hostname directly
+        $host = '108.142.248.238'; // Use the IP address or hostname directly
         $dbName = 'db202201907';  // Your database name
 
         if (self::$_dbInstance === null) {

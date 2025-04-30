@@ -1,3 +1,7 @@
+<?php
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Guest';
+?>
+
 <head>
   <style>
     .container-custom {
@@ -32,22 +36,11 @@
       background-color: #0077aa;
     }
 
-    .map-box {
-      width: 100%;
-      height: 400px;
-      background-color: #ccc;
-      margin-bottom: 20px;
-    }
-
-    #map {
-      height: 100%;
-    }
-
-    /* Card layout - Fixed width, wrap to new row */
     #chargePointsContainer {
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-start; /* Align cards to the start of the row */
+      justify-content: flex-start;
+      width: 100%;
     }
 
     .charge-point {
@@ -59,7 +52,7 @@
       border: 1px solid black;
       margin: 10px;
       color: black;
-      width: 300px; /* Fixed width for each card */
+      width: 300px;
       box-sizing: border-box;
     }
 
@@ -69,33 +62,13 @@
       margin-bottom: 10px;
     }
 
-    /* Responsive Design for different screen sizes */
-    @media (max-width: 1200px) {
-      .charge-point {
-        width: 300px; /* Keep fixed width for large tablets and above */
-      }
-    }
-
-    @media (max-width: 992px) {
-      .charge-point {
-        width: 300px; /* Keep fixed width for medium screens (tablets) */
-      }
-    }
-
-    @media (max-width: 768px) {
-      .charge-point {
-        width: 300px; /* Keep fixed width for small tablets */
-      }
-    }
-
     @media (max-width: 576px) {
       .charge-point {
-        width: 100%; /* Full width on small screens (phones) */
-        margin: 10px 0; /* Adjust margin to prevent horizontal overflow */
+        width: 100%;
+        margin: 10px 0;
       }
     }
 
-    /* Filter Layout */
     .filter-row {
       display: flex;
       align-items: center;
@@ -117,23 +90,57 @@
     .form-control {
       width: auto;
     }
+    
+    /* Pagination Styles */
+    .pagination-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .pagination {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .page-link {
+      padding: 8px 16px;
+      margin: 0 5px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      color: #0099cc;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    .page-link.active {
+      background-color: #0099cc;
+      color: white;
+      border-color: #0099cc;
+    }
+    
+    .page-link:hover:not(.active) {
+      background-color: #f1f1f1;
+    }
   </style>
 </head>
 
 <body>
 <?php require('template/header.phtml') ?>
 
-<!-- Main Content -->
 <div class="container-custom">
-  <!-- Left Panel -->
   <div class="left-panel">
     <h5><strong>Filters</strong></h5>
     <div class="filter-row">
       <select class="form-control filter-item" id="locationSelect">
         <option value="">Location</option>
         <?php foreach ($view->cities as $city): ?>
-          <option value="<?= htmlspecialchars($city['city_id']) ?>">
-            <?= htmlspecialchars($city['city_name']) ?>
+          <option value="<?= htmlspecialchars($city['city_id'] ?? '') ?>">
+            <?= htmlspecialchars($city['city_name'] ?? '') ?>
           </option>
         <?php endforeach; ?>
       </select>
@@ -146,9 +153,9 @@
       </select>
       <select class="form-control filter-item" id="availabilitySelect">
         <option value="">Availability</option>
-             <?php foreach ($view->availabilityStatus as $status): ?>
-        <option value="<?= htmlspecialchars($status['availability_status_id']) ?>">
-            <?= htmlspecialchars($status['availability_status_title']) ?>
+        <?php foreach ($view->availabilityStatus as $status): ?>
+          <option value="<?= htmlspecialchars($status['availability_status_id'] ?? '') ?>">
+            <?= htmlspecialchars($status['availability_status_title'] ?? '') ?>
           </option>
         <?php endforeach; ?>
       </select>
@@ -156,78 +163,58 @@
     </div>
   </div>
 
-  <!-- Right Panel -->
-  <div class="map-box mb-4" id="map"></div>
-
-  <!-- Charge Points -->
   <div id="chargePointsContainer">
     <?php if (!empty($view->chargePoints)): ?>
       <?php foreach ($view->chargePoints as $chargePoint): ?>
         <div class="charge-point">
-          <img src="<?= htmlspecialchars($chargePoint['chargePointPictureUrl']) ?>" alt="Charge Point Image">
+          <img src="<?= htmlspecialchars($chargePoint['chargePointPictureUrl'] ?? '') ?>" alt="Charge Point Image">
           <div>
             <h5><strong>Charge Point</strong></h5>
             <p>
-              <?= htmlspecialchars('Block ' . $chargePoint['block'] . ', Road ' . $chargePoint['road'] . ', House ' . $chargePoint['houseNumber'] . ', ' . $chargePoint['streetName'] . ', Postcode ' . $chargePoint['postcode']) ?>
+              <?= htmlspecialchars('Block ' . ($chargePoint['block'] ?? '') . ', Road ' . ($chargePoint['road'] ?? '') . ', House ' . ($chargePoint['houseNumber'] ?? '') . ', ' . ($chargePoint['streetName'] ?? '') . ', Postcode ' . ($chargePoint['postcode'] ?? '')) ?>
             </p>
             <p>
-              <?= htmlspecialchars($chargePoint['cityName'] . ', ' . $chargePoint['countryName']) ?>
+              <?= htmlspecialchars($chargePoint['cityName'] ?? '') ?>
             </p>
-            <p><?= htmlspecialchars(number_format($chargePoint['pricePerKwh'], 3)) ?> BHD per kWh</p>
-            <p>Availability: <?= htmlspecialchars($chargePoint['availabilityStatusTitle']) ?></p>
-            <button class="btn btn-success">View</button>
+            <p><?= htmlspecialchars(number_format((float)($chargePoint['pricePerKwh'] ?? 0), 3)) ?> BHD per kWh</p>
+            <p>Availability: <?= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '') ?></p>
+            <a href="#" class="book-btn" data-role="<?= $role ?>" data-id="<?= htmlspecialchars($chargePoint['chargePointId'] ?? '') ?>">
+              <button class="btn btn-success">Book</button>
+            </a>
           </div>
         </div>
       <?php endforeach; ?>
     <?php else: ?>
       <p>No charge points available.</p>
     <?php endif; ?>
+    
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <?php if ($view->totalPages > 1): ?>
+        <div class="pagination">
+          <?php if ($view->currentPage > 1): ?>
+            <a href="?page=<?= $view->currentPage - 1 ?>" class="page-link" data-page="<?= $view->currentPage - 1 ?>">Previous</a>
+          <?php endif; ?>
+          
+          <?php
+          $startPage = max(1, $view->currentPage - 2);
+          $endPage = min($view->totalPages, $view->currentPage + 2);
+          
+          for ($i = $startPage; $i <= $endPage; $i++):
+            $activeClass = ($i == $view->currentPage) ? 'active' : '';
+          ?>
+            <a href="?page=<?= $i ?>" class="page-link <?= $activeClass ?>" data-page="<?= $i ?>"><?= $i ?></a>
+          <?php endfor; ?>
+          
+          <?php if ($view->currentPage < $view->totalPages): ?>
+            <a href="?page=<?= $view->currentPage + 1 ?>" class="page-link" data-page="<?= $view->currentPage + 1 ?>">Next</a>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
+    </div>
   </div>
 </div>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-  // Map init
-  var map = L.map('map').setView([26.0667, 50.5577], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-  L.marker([26.0667, 50.5577]).addTo(map).bindPopup('Budaiya, Bahrain').openPopup();
-
-  // Reset button functionality
-  document.getElementById('resetBtn').onclick = function() {
-    document.getElementById('locationSelect').selectedIndex = 0;
-    document.getElementById('priceRangeSelect').selectedIndex = 0;
-    document.getElementById('availabilitySelect').selectedIndex = 0;
-    loadChargePoints();
-  };
-
-  // Event listeners for filter changes
-  document.getElementById('locationSelect').addEventListener('change', loadChargePoints);
-  document.getElementById('priceRangeSelect').addEventListener('change', loadChargePoints);
-  document.getElementById('availabilitySelect').addEventListener('change', loadChargePoints);
-
-  function loadChargePoints() {
-    var location = document.getElementById('locationSelect').value;
-    var priceRange = document.getElementById('priceRangeSelect').value;
-    var availability = document.getElementById('availabilitySelect').value;
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'browse-charger.php?ajax=true&location=' + location + '&priceRange=' + priceRange + '&availability=' + availability, true);
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        document.getElementById('chargePointsContainer').innerHTML = xhr.responseText;
-      } else {
-        console.error('Error fetching charge points:', xhr.statusText);
-      }
-    };
-    xhr.onerror = function() {
-      console.error('Request error...');
-    };
-    xhr.send();
-  }
-</script>
+<script src="js/browseCharger.js"></script>
 <?php require('template/footer.phtml') ?>
 </body>

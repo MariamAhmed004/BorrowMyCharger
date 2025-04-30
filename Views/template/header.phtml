@@ -33,7 +33,7 @@ $pageBackgrounds = [
     "booking-history" => "images/HeaderBg5.jpg",
     "borrow-request" => "images/HeaderBg3.jpg",
     "charge-point-management" => "images/HeaderBg5.jpg",
-    "charge-points" => "images/HeaderBg2.jpg",
+    "my-charge-point" => "images/HeaderBg2.jpg",
     "profile" => "/images/HeaderBg5.jpg",
     "dashboard" => "/images/HeaderBg1.jpg",
     "manage-homeowner-registration" => "/images/HeaderBg2.jpg",
@@ -44,10 +44,11 @@ $pageBackgrounds = [
 $pageHeadings = [
     "home" => "$greeting , $username",
     "browse-charger" => "Browse Charger",
+    "book-charger" => "Book Charger",
     "booking-history" => "Booking History",
     "borrow-request" => "Borrow Request",
     "charge-point-management" => "Charge Point Management",
-    "charge-points" => "My Charge Point",
+    "my-charge-point" => "My Charge Point",
     "profile" => "User Profile",
     "dashboard" => "$greeting , $username",
     "manage-homeowner-registration" => "Manage HomeOwners Registration",
@@ -58,10 +59,11 @@ $pageHeadings = [
 $pageDescriptions = [
     "home" => "Nice to see you here.",
     "browse-charger" => "Choose a Charge Point and Book.",
+    "book-charger" => "Book charging point",
     "booking-history" => "Find all of your Bookings.",
     "borrow-request" => "Find all Requests to your Charge Point.",
     "charge-point-management" => "Manage System Charge Points.",
-    "charge-points" => "Your Charge Point Details.",
+    "my-charge-point" => "My Charge Point Details.",
     "profile" => "Find all your user information.",
     "dashboard" => "Nice to see you here.",
     "manage-homeowner-registration" => "Review all HomeOwners Registration.",
@@ -90,13 +92,13 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css">
     <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-<!-- Leaflet JavaScript -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
 </head>
 <body>
 
@@ -105,7 +107,7 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
     <div class="container">
 
         <div class="navbar-header">
-            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <button class="navbar-toggle" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                 <span class="icon icon-bar"></span>
                 <span class="icon icon-bar"></span>
                 <span class="icon icon-bar"></span>
@@ -115,7 +117,6 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
             <a href="index.php" class="navbar-brand nav-logo">
                 <img src="images/logo.png" alt="Borrow My Charger" class="nav-logo-img">
             </a>
- 
         </div>
 
         <!-- MENU LINKS -->
@@ -140,56 +141,53 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
                 <?php
                 if ($role == 'HomeOwner') {
                     echo '<li class="' . (($view->activePage == 'borrow-request') ? 'active' : '') . '"><a href="borrow-request.php">Borrow Request</a></li>';
-                    echo '<li class="' . (($view->activePage == 'charge-points') ? 'active' : '') . '"><a href="charge-points.php">Charge Points</a></li>';
+                    echo '<li class="' . (($view->activePage == 'my-charge-point') ? 'active' : '') . '"><a href="my-charge-point.php">My Charge Point</a></li>';
                 } elseif ($role == 'RentalUser') {
                     echo '<li class="' . (($view->activePage == 'booking-history') ? 'active' : '') . '"><a href="booking-history.php">Booking History</a></li>';
                     echo '<li class="' . (($view->activePage == 'browse-charger') ? 'active' : '') . '"><a href="browse-charger.php">Browse Charger</a></li>';
                 } elseif ($role == 'Admin') {
-                    echo '<li class="dropdown ' . (($view->activePage == 'view-all-profiles' || $view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '">';
-                    echo '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Management <span class="caret"></span></a>';
-                    echo '<ul class="dropdown-menu">';
-                    echo '<li class="' . (($view->activePage == 'view-all-profiles') ? 'active' : '') . '"><a href="view-all-profiles.php">View All Profiles</a></li>';
-                    echo '<li class="' . (($view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '"><a href="manage-homeowner-registration.php">Manage Homeowner Registration</a></li>';
+                    echo '<li class="nav-item dropdown ' . (($view->activePage == 'view-all-profiles' || $view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '">';
+                    echo '<a href="#" class="nav-link dropdown-toggle" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">User Management <span class="caret"></span></a>';
+                    echo '<ul class="dropdown-menu" aria-labelledby="adminDropdown">';
+                    echo '<li class="' . (($view->activePage == 'view-all-profiles') ? 'active' : '') . '"><a href="view-all-profiles.php" class="dropdown-item">View All Profiles</a></li>';
+                    echo '<li class="' . (($view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '"><a href="manage-homeowner-registration.php" class="dropdown-item">Manage Homeowner Registration</a></li>';
                     echo '</ul>';
                     echo '</li>';
                     echo '<li class="' . (($view->activePage == 'charge-point-management') ? 'active' : '') . '"><a href="charge-point-management.php">Charge Point Management</a></li>';
                     echo '<li class="' . (($view->activePage == 'system-reports') ? 'active' : '') . '"><a href="system-reports.php">System Reports</a></li>';
                 } else {
                     echo '<li class="' . (($view->activePage == 'browse-charger') ? 'active' : '') . '"><a href="browse-charger.php">Browse Charger</a></li>';
-                   // echo '<li class="' . (($view->activePage == 'contact') ? 'active' : '') . '"><a href="contact.php">Contact Us</a></li>';
                 }
                 ?>
             </ul>
 
-            <!-- USER DROPDOWN -->
-            <div class="nav-user-wrapper">
-                <ul class="nav navbar-nav nav-user">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle nav-user-link" data-toggle="dropdown">
-                            <img src="images/user.png" alt="User" class="nav-user-img">
-                            <?php echo ($role == 'Guest') ? "Guest" : htmlspecialchars($username); ?>
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu nav-user-menu">
-                            <?php
-                            if ($role == 'Guest') {
-                                echo '<li><a href="login.php" class="nav-user-item">Login</a></li>';
-                                echo '<li><a href="register.php" class="nav-user-item">Sign Up</a></li>';
-                            } else {
-                                echo '<li><a href="profile.php" class="nav-user-item">My Profile</a></li>';
-                                echo '<li><a href="logout.php" class="nav-user-item">Logout</a></li>';
-                            }
-                            ?>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-
+       <!-- USER DROPDOWN -->
+        <div class="nav-user-wrapper">
+            <ul class="nav navbar-nav nav-user">
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="images/user.png" alt="User" class="nav-user-img">
+                        <?php echo ($role == 'Guest') ? "Guest" : htmlspecialchars($username); ?>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <?php
+                        if ($role == 'Guest') {
+                            echo '<li><a href="login.php" class="dropdown-item">Login</a></li>';
+                            echo '<li><a href="register.php" class="dropdown-item">Sign Up</a></li>';
+                        } else {
+                            echo '<li><a href="profile.php" class="dropdown-item">My Profile</a></li>';
+                            echo '<li><a href="logout.php" class="dropdown-item">Logout</a></li>';
+                        }
+                        ?>
+                    </ul>
+                </li>
+            </ul>
+        </div>
         </div>
     </div>
 </section>
 
-<?php if ($pageHeading!= "Index") : ?>
+<?php if ($pageHeading != "Index") : ?>
 <!-- Dynamic Section with Greeting under Welcome -->
 <section class="nav-section banner" style="background-image: url('<?php echo $backgroundImage; ?>');">
     <div class="overlay"></div>
@@ -203,7 +201,6 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
 </section>
 <?php endif; ?>
 
-
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

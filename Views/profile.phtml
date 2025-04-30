@@ -1,44 +1,107 @@
-<?php require_once('template/header.phtml') ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $pageTitle; ?></title>
+    <style>
+        .profile-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group input:disabled {
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .success {
+            color: green;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #005f73;
+        }
+        .validation-error {
+            border: 1px solid red !important;
+        }
+    </style>
+</head>
+<body>
+    <?php require_once('template/header.phtml'); ?>
 
-<div class="container mt-5">
+    <div class="profile-container">
+        <button type="button" id="editButton" class="btn">Edit Profile</button>
+        <form method="POST" action="">
+            <button type="submit" name="delete_account" class="btn" style="background-color: #e63946;">Delete Account</button>
+        </form>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <button class="btn btn-primary btn-sm">Edit Profile</button>
+        <?php if (!empty($errorMessage)): ?>
+            <div class="error"><?php echo $errorMessage; ?></div>
+        <?php endif; ?>
+
+
+        <form id="profileForm" method="POST" action="" novalidate>
+            <div class="form-group">
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" value="<?php echo htmlspecialchars($userData['first_name']); ?>" disabled required>
+                <div class="error" id="first_name_error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" value="<?php echo htmlspecialchars($userData['last_name']); ?>" disabled required>
+                <div class="error" id="last_name_error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="<?php echo htmlspecialchars($userData['email']); ?>" disabled readonly>
+                <small>Email cannot be changed</small>
+            </div>
+
+            <div class="form-group">
+                <label for="phone_number">Phone Number:</label>
+                <input type="text" id="phone_number" name="phone_number" value="<?php echo htmlspecialchars($userData['phone_number']); ?>" disabled required>
+                <div class="error" id="phone_number_error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" value="<?php echo htmlspecialchars($userData['username']); ?>" disabled readonly>
+                <small>Username cannot be changed</small>
+            </div>
+
+            <input type="hidden" name="save_profile" value="1">
+            <button type="submit" id="saveButton" class="btn" style="display: none;">Save</button>
+        </form>
     </div>
 
-    <!-- Profile Image -->
-    <div class="text-center mb-4">
-        <img src="path/to/your/image.jpg" alt="Profile Image" class="rounded-circle" style="width: 150px; height: 150px;">
-    </div>
-
-    <!-- Profile Information (Read-Only) -->
-    <form>
-        <!-- First Name -->
-        <div class="form-group mb-3">
-            <label for="first-name"><strong>First Name:</strong></label>
-            <input type="text" class="form-control" id="first-name" value="John" readonly>
-        </div>
-
-        <!-- Last Name -->
-        <div class="form-group mb-3">
-            <label for="last-name"><strong>Last Name:</strong></label>
-            <input type="text" class="form-control" id="last-name" value="Doe" readonly>
-        </div>
-
-        <!-- Other Fields -->
-        <div class="form-group mb-3">
-            <label for="email"><strong>Email:</strong></label>
-            <input type="email" class="form-control" id="email" value="john.doe@example.com" readonly>
-        </div>
-        <div class="form-group mb-3">
-            <label for="country"><strong>Country:</strong></label>
-            <input type="text" class="form-control" id="country" value="USA" readonly>
-        </div>
-        <div class="form-group mb-3">
-            <label for="phone"><strong>Phone Number:</strong></label>
-            <input type="tel" class="form-control" id="phone" value="123-456-7890" readonly>
-        </div>
-    </form>
-</div>
-
-<?php require_once('template/footer.phtml') ?>
+<script src="js/userProfile.js"></script>
+</body>
+</html>
+<?php require_once('template/footer.phtml'); ?>
