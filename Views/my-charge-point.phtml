@@ -332,6 +332,20 @@
                     </div>
                 </div>
                 
+                <!-- Form row for street name and postcode -->
+<div class="form-row">
+    <div class="form-group">
+        <label for="streetName"><i class="fa fa-road"></i> Street Name</label>
+        <input type="text" id="streetName" name="streetName" class="form-control" required>
+        <span class="error-message" id="streetNameError">Please enter a valid street name</span>
+    </div>
+    <div class="form-group">
+        <label for="postcode"><i class="fa fa-map"></i> Postcode</label>
+        <input type="text" id="postcode" name="postcode" class="form-control" required>
+        <span class="error-message" id="postcodeError">Please enter a valid postcode</span>
+    </div>
+</div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="road"><i class="fa fa-road"></i> Road</label>
@@ -386,6 +400,8 @@
                 <strong>Road:</strong> <?php echo htmlspecialchars($view->chargePoint['road']); ?><br>
                 <strong>Block:</strong> <?php echo htmlspecialchars($view->chargePoint['block']); ?><br>
                 <strong>City:</strong> <?php echo htmlspecialchars($view->chargePoint['city_name']); ?><br>
+<strong>Postcode:</strong> <?php echo isset($view->chargePoint['postcode']) ? htmlspecialchars($view->chargePoint['postcode']) : 'Not provided'; ?><br>
+<strong>Street Name:</strong> <?php echo isset($view->chargePoint['streetName']) ? htmlspecialchars($view->chargePoint['streetName']) : 'Not provided'; ?><br>
                 <strong>Charge Cost:</strong> <?php echo htmlspecialchars($view->chargePoint['price_per_kwh']); ?> BHD / kWh<br>
                 <strong>Availability:</strong> 
                 <?php if (isset($view->chargePoint['availabilityDays']) && count($view->chargePoint['availabilityDays']) > 0): ?>
@@ -419,7 +435,7 @@
             <img id="chargeImage" src="" alt="Charge Point Image" style="display: none;">
         <?php endif; ?>
     </div>
-    <div id="leetcodeMap"></div>
+<div id="leetcodeMap" style="height: 300px; margin: 15px 0; border-radius: 5px; border: 1px solid #ddd; width: 100%;"></div>
    <div class="edit-delete-buttons">
     <button class="edit-button" data-charge-point-id="<?= $chargePointId ?>">Edit</button>
     <button class="delete-button" data-charge-point-id="<?= $chargePointId ?>">Delete</button>

@@ -103,7 +103,7 @@ require_once('Views/my-charge-point.phtml');
 function handleAddChargePoint($model) {
     try {
         // Validate required inputs
-        $requiredFields = ['home', 'road', 'block', 'city', 'cost'];
+        $requiredFields = ['home', 'road', 'block', 'city', 'cost', 'streetName', 'postcode'];
         foreach ($requiredFields as $field) {
             if (!isset($_POST[$field]) || empty($_POST[$field])) {
                 return ['success' => false, 'message' => 'All fields are required'];
@@ -118,6 +118,18 @@ function handleAddChargePoint($model) {
         
         if ($road <= 0 || $block <= 0 || $cost <= 0 || $cityId <= 0) {
             return ['success' => false, 'message' => 'Invalid numeric values'];
+        }
+        
+        // Validate postcode format (alphanumeric with possible spaces or dashes)
+        $postcode = trim($_POST['postcode']);
+        if (!preg_match('/^[a-zA-Z0-9\s-]+$/', $postcode)) {
+            return ['success' => false, 'message' => 'Invalid postcode format'];
+        }
+        
+        // Validate street name (letters, numbers, spaces, commas, and apostrophes)
+        $streetName = trim($_POST['streetName']);
+        if (!preg_match('/^[a-zA-Z0-9\s,\'-]+$/', $streetName)) {
+            return ['success' => false, 'message' => 'Invalid street name format'];
         }
         
         // Check if image was uploaded
@@ -153,6 +165,8 @@ function handleAddChargePoint($model) {
             'road' => $road,
             'block' => $block,
             'city_id' => $cityId,
+            'streetName' => $streetName,
+            'postcode' => $postcode,
             'latitude' => $latitude,
             'longitude' => $longitude,
             'price_per_kwh' => $cost,
@@ -192,7 +206,7 @@ function handleUpdateChargePoint($model) {
         }
         
         // Validate required inputs
-        $requiredFields = ['home', 'road', 'block', 'city', 'cost', 'addressId'];
+        $requiredFields = ['home', 'road', 'block', 'city', 'cost', 'addressId', 'streetName', 'postcode'];
         foreach ($requiredFields as $field) {
             if (!isset($_POST[$field]) || empty($_POST[$field])) {
                 return ['success' => false, 'message' => 'All fields are required'];
@@ -209,6 +223,18 @@ function handleUpdateChargePoint($model) {
         
         if ($road <= 0 || $block <= 0 || $cost <= 0 || $cityId <= 0 || $chargePointId <= 0 || $addressId <= 0) {
             return ['success' => false, 'message' => 'Invalid numeric values'];
+        }
+        
+        // Validate postcode format (alphanumeric with possible spaces or dashes)
+        $postcode = trim($_POST['postcode']);
+        if (!preg_match('/^[a-zA-Z0-9\s-]+$/', $postcode)) {
+            return ['success' => false, 'message' => 'Invalid postcode format'];
+        }
+        
+        // Validate street name (letters, numbers, spaces, commas, and apostrophes)
+        $streetName = trim($_POST['streetName']);
+        if (!preg_match('/^[a-zA-Z0-9\s,\'-]+$/', $streetName)) {
+            return ['success' => false, 'message' => 'Invalid street name format'];
         }
         
         // Process availability data
@@ -235,6 +261,8 @@ function handleUpdateChargePoint($model) {
             'road' => $road,
             'block' => $block,
             'city_id' => $cityId,
+            'streetName' => $streetName,
+            'postcode' => $postcode,
             'latitude' => $latitude,
             'longitude' => $longitude,
             'price_per_kwh' => $cost,

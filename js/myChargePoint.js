@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Element References
     const modal = document.getElementById('chargePointModal');
     const addBtn = document.getElementById('addChargePointBtn');
-    const closeBtn = modal.querySelector('.close');
+    const closeBtn = modal?.querySelector('.close');
     const form = document.getElementById('chargePointForm');
     const formErrors = document.getElementById('formErrors');
     const editBtn = document.querySelector('.edit-button');
@@ -26,40 +26,59 @@ document.addEventListener('DOMContentLoaded', function() {
     let map = null;
     let marker = null;
     let isEditMode = false;
+    let geocoder = null;
     
     // Store selected times for each day to preserve them when toggling days
     let selectedTimesCache = {};
     
-    // Initialize the map if details are shown
-    if (document.getElementById('chargePointDetails').style.display !== 'none') {
-        initMap();
+    // Initialize the map if element exists and details are shown
+    const detailsElement = document.getElementById('chargePointDetails');
+    if (detailsElement && detailsElement.style.display !== 'none') {
+        initMap(document.getElementById('leetcodeMap')); // Updated to use the correct ID
     }
     
-    // Event Listeners
+    // Event Listeners - only add if elements exist
     if (addBtn) {
         addBtn.addEventListener('click', openModal);
     }
     
-    closeBtn.addEventListener('click', closeModal);
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
     
     // Close modal when clicking outside
     window.addEventListener('click', function(event) {
-        if (event.target === modal) {
+        if (modal && event.target === modal) {
             closeModal();
         }
     });
     
     // Add event listeners for city and block field changes
-    document.getElementById('city').addEventListener('change', updateCoordinates);
-    document.getElementById('block').addEventListener('change', updateCoordinates);
+    const cityField = document.getElementById('city');
+    const blockField = document.getElementById('block');
+    const roadField = document.getElementById('road');
+    
+    if (cityField) {
+        cityField.addEventListener('change', updateCoordinates);
+    }
+    
+    if (blockField) {
+        blockField.addEventListener('change', updateCoordinates);
+    }
+    
+    if (roadField) {
+        roadField.addEventListener('change', updateCoordinates);
+    }
     
     // Handle form submission
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        if (validateForm()) {
-            submitForm();
-        }
-    });
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (validateForm()) {
+                submitForm();
+            }
+        });
+    }
     
     // Edit button click handler
     if (editBtn) {
@@ -87,28 +106,247 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Initial setup
-    updateTimePickers(false);
+    // Initial setup if time pickers container exists
+    if (timePickersContainer) {
+        updateTimePickers(false);
+    }
+    
+    /**
+     * Calculate and update the coordinates based on city, block, and road selections
+     * This function uses a predefined mapping of Bahrain locations to coordinates
+     */
+    function updateCoordinates() {
+        // Get the form field values
+        const citySelect = document.getElementById('city');
+        const blockField = document.getElementById('block');
+        const roadField = document.getElementById('road');
+        const latitudeField = document.getElementById('latitude');
+        const longitudeField = document.getElementById('longitude');
+        
+        // If any of the required fields are missing, return
+        if (!citySelect || !blockField || !latitudeField || !longitudeField) {
+            console.error('Required fields for coordinate calculation are missing');
+            return;
+        }
+        
+        // Get values from fields
+        const cityId = citySelect.value;
+        const block = blockField.value.trim();
+        const road = roadField ? roadField.value.trim() : '';
+        
+        // If city or block is empty, don't continue
+        if (!cityId || !block) {
+            console.log('City or block field is empty. Cannot calculate coordinates.');
+            return;
+        }
+        
+        // Get the city name from the selected option
+        const cityName = citySelect.options[citySelect.selectedIndex].text;
+        
+        console.log(`Calculating coordinates for: City=${cityName} (ID=${cityId}), Block=${block}, Road=${road}`);
+        
+        // Use the geocoding service to get coordinates
+        geocodeAddress(cityName, block, road)
+            .then(coordinates => {
+                if (coordinates) {
+                    // Update form fields
+                    latitudeField.value = coordinates.lat;
+                    longitudeField.value = coordinates.lng;
+                    
+                    // Update map if it exists
+                    if (map && marker) {
+                        map.setView([coordinates.lat, coordinates.lng], 15);
+                        marker.setLatLng([coordinates.lat, coordinates.lng]);
+                    } else if (map) {
+                        // If map exists but marker doesn't, create one
+                        marker = L.marker([coordinates.lat, coordinates.lng], {
+                            draggable: true
+                        }).addTo(map);
+                        
+                        // Handle marker drag end event
+                        marker.on('dragend', function(event) {
+                            const position = marker.getLatLng();
+                            latitudeField.value = position.lat;
+                            longitudeField.value = position.lng;
+                        });
+                    }
+                } else {
+                    console.error('Failed to get coordinates for the selected location');
+                }
+            })
+            .catch(error => {
+                console.error('Error calculating coordinates:', error);
+            });
+    }
+    
+    /**
+     * Geocode the address based on city, block, and road
+     * @param {string} city - City name
+     * @param {string} block - Block number
+     * @param {string} road - Road number (optional)
+     * @returns {Promise} Promise that resolves to coordinates object {lat, lng}
+     */
+    function geocodeAddress(city, block, road) {
+        return new Promise((resolve, reject) => {
+            // If we're using a third-party geocoding service like Leaflet's Control.Geocoder
+            if (typeof L !== 'undefined' && L.Control && L.Control.Geocoder) {
+                if (!geocoder) {
+                    geocoder = L.Control.Geocoder.nominatim();
+                }
+                
+                // Format the address string
+                let addressString = `Block ${block}`;
+                if (road) addressString += `, Road ${road}`;
+                addressString += `, ${city}, Bahrain`;
+                
+                geocoder.geocode(addressString, (results) => {
+                    if (results && results.length > 0) {
+                        resolve({
+                            lat: results[0].center.lat,
+                            lng: results[0].center.lng
+                        });
+                    } else {
+                        // If geocoding fails, use Bahrain region coordinates based on city
+                        const fallbackCoords = getFallbackCoordinates(city, block);
+                        resolve(fallbackCoords);
+                    }
+                });
+            } else {
+                // Use fallback coordinates based on city and block
+                const fallbackCoords = getFallbackCoordinates(city, block);
+                resolve(fallbackCoords);
+            }
+        });
+    }
+    
+    /**
+     * Get fallback coordinates for Bahrain cities
+     * @param {string} city - City name
+     * @param {string} block - Block number
+     * @returns {Object} Coordinates object {lat, lng}
+     */
+    function getFallbackCoordinates(city, block) {
+        // Bahrain city coordinates (approximate centers)
+        const cityCoordinates = {
+            'Manama': { lat: 26.2285, lng: 50.5860 },
+            'Riffa': { lat: 26.1305, lng: 50.5550 },
+            'Muharraq': { lat: 26.2572, lng: 50.6119 },
+            'Hamad Town': { lat: 26.1169, lng: 50.4961 },
+            'Isa Town': { lat: 26.1736, lng: 50.5479 },
+            'Sitra': { lat: 26.1553, lng: 50.6198 },
+            'Budaiya': { lat: 26.2172, lng: 50.4488 },
+            'Juffair': { lat: 26.2116, lng: 50.6046 },
+            'Seef': { lat: 26.2456, lng: 50.5628 },
+            'Adliya': { lat: 26.2106, lng: 50.5836 }
+        };
+        
+        // Block adjustments - use these to slightly adjust the coordinates based on block number
+        // This is a simplistic approach - in a real-world scenario, you'd want more accurate mapping
+        const blockAdjustment = parseInt(block, 10) || 0;
+        const latOffset = (blockAdjustment % 10) * 0.001;
+        const lngOffset = (blockAdjustment % 20) * 0.001;
+        
+        // Get base coordinates for the city or default to Manama
+        const baseCoords = cityCoordinates[city] || cityCoordinates['Manama'];
+        
+        // Apply small offsets based on block number to get a more specific location
+        return {
+            lat: baseCoords.lat + latOffset,
+            lng: baseCoords.lng + lngOffset
+        };
+    }
+    
+    /**
+     * Reverse geocode coordinates to address
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     */
+    function reverseGeocode(lat, lng) {
+        // If we're using a third-party geocoding service
+        if (typeof L !== 'undefined' && L.Control && L.Control.Geocoder) {
+            if (!geocoder) {
+                geocoder = L.Control.Geocoder.nominatim();
+            }
+            
+            geocoder.reverse({lat: lat, lng: lng}, map.options.crs.scale(map.getZoom()), results => {
+                if (results && results.length > 0) {
+                    const address = results[0].properties.address;
+                    
+                    // Try to extract block, road, and city information
+                    if (address) {
+                        // Update form fields if they exist
+                        const cityField = document.getElementById('city');
+                        const blockField = document.getElementById('block');
+                        const roadField = document.getElementById('road');
+                        
+                        // Extract and set block
+                        if (blockField && address.suburb) {
+                            // Try to extract block number from suburb or address
+                            const blockMatch = address.suburb.match(/\b\d+\b/) || 
+                                              address.road?.match(/Block\s+(\d+)/i);
+                            if (blockMatch) {
+                                blockField.value = blockMatch[0];
+                            }
+                        }
+                        
+                        // Extract and set road
+                        if (roadField && address.road) {
+                            // Try to extract road number
+                            const roadMatch = address.road.match(/Road\s+(\d+)/i) ||
+                                             address.road.match(/\b\d+\b/);
+                            if (roadMatch) {
+                                roadField.value = roadMatch[1] || roadMatch[0];
+                            }
+                        }
+                        
+                        // Set city if found
+                        if (cityField && address.city) {
+                            // Find matching city option
+                            Array.from(cityField.options).forEach(option => {
+                                if (option.textContent.toLowerCase() === address.city.toLowerCase()) {
+                                    cityField.value = option.value;
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
     
     /**
      * Open the modal dialog
      */
     function openModal() {
+        if (!modal) return;
+        
         resetForm();
         modal.style.display = 'block';
         
         // Update form button text based on mode
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.textContent = isEditMode ? 'Update' : 'Add';
+        const submitBtn = form?.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.textContent = isEditMode ? 'Update' : 'Add';
+        }
         
         // Initialize the cache for selected times
         selectedTimesCache = {};
+        
+        // Initialize map in modal if needed
+        setTimeout(() => {
+            const modalMap = document.getElementById('modalMap');
+            if (modalMap && !map) {
+                initMap(modalMap);
+            }
+        }, 300);
     }
     
     /**
      * Close the modal dialog
      */
     function closeModal() {
+        if (!modal) return;
+        
         modal.style.display = 'none';
         isEditMode = false;
         resetForm();
@@ -120,12 +358,21 @@ document.addEventListener('DOMContentLoaded', function() {
      * Reset the form fields and errors
      */
     function resetForm() {
+        if (!form) return;
+        
         if (!isEditMode) {
             form.reset();
-            document.getElementById('chargePointId').value = '';
-            document.getElementById('addressId').value = '';
-            document.getElementById('latitude').value = '';
-            document.getElementById('longitude').value = '';
+            
+            // Only reset hidden fields if they exist
+            const idField = document.getElementById('chargePointId');
+            const addressIdField = document.getElementById('addressId');
+            const latitudeField = document.getElementById('latitude');
+            const longitudeField = document.getElementById('longitude');
+            
+            if (idField) idField.value = '';
+            if (addressIdField) addressIdField.value = '';
+            if (latitudeField) latitudeField.value = '';
+            if (longitudeField) longitudeField.value = '';
         }
         
         // Hide all error messages
@@ -140,8 +387,10 @@ document.addEventListener('DOMContentLoaded', function() {
             input.classList.remove('input-error');
         });
         
-        formErrors.style.display = 'none';
-        formErrors.textContent = '';
+        if (formErrors) {
+            formErrors.style.display = 'none';
+            formErrors.textContent = '';
+        }
     }
     
     /**
@@ -149,6 +398,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * @return {boolean} True if form is valid
      */
     function validateForm() {
+        if (!form || !formErrors) return false;
+        
         let isValid = true;
         formErrors.style.display = 'none';
         formErrors.textContent = '';
@@ -166,48 +417,54 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate home number
         const home = document.getElementById('home');
-        if (!home.value.trim() || isNaN(parseInt(home.value))) {
-            document.getElementById('homeError').style.display = 'block';
+        if (home && (!home.value.trim() || isNaN(parseInt(home.value)))) {
+            const homeError = document.getElementById('homeError');
+            if (homeError) homeError.style.display = 'block';
             home.classList.add('input-error');
             isValid = false;
         }
         
         // Validate block
         const block = document.getElementById('block');
-        if (!block.value.trim() || isNaN(parseInt(block.value))) {
-            document.getElementById('blockError').style.display = 'block';
+        if (block && (!block.value.trim() || isNaN(parseInt(block.value)))) {
+            const blockError = document.getElementById('blockError');
+            if (blockError) blockError.style.display = 'block';
             block.classList.add('input-error');
             isValid = false;
         }
         
         // Validate road
         const road = document.getElementById('road');
-        if (!road.value.trim() || isNaN(parseInt(road.value))) {
-            document.getElementById('roadError').style.display = 'block';
+        if (road && (!road.value.trim() || isNaN(parseInt(road.value)))) {
+            const roadError = document.getElementById('roadError');
+            if (roadError) roadError.style.display = 'block';
             road.classList.add('input-error');
             isValid = false;
         }
         
         // Validate city
         const city = document.getElementById('city');
-        if (!city.value) {
-            document.getElementById('cityError').style.display = 'block';
+        if (city && !city.value) {
+            const cityError = document.getElementById('cityError');
+            if (cityError) cityError.style.display = 'block';
             city.classList.add('input-error');
             isValid = false;
         }
         
         // Validate cost
         const cost = document.getElementById('cost');
-        if (!cost.value.trim() || isNaN(parseFloat(cost.value)) || parseFloat(cost.value) <= 0) {
-            document.getElementById('costError').style.display = 'block';
+        if (cost && (!cost.value.trim() || isNaN(parseFloat(cost.value)) || parseFloat(cost.value) <= 0)) {
+            const costError = document.getElementById('costError');
+            if (costError) costError.style.display = 'block';
             cost.classList.add('input-error');
             isValid = false;
         }
         
         // Check if image is required (only for new charge points)
         const imageUpload = document.getElementById('imageUpload');
-        if (!isEditMode && (!imageUpload.files || imageUpload.files.length === 0)) {
-            document.getElementById('imageError').style.display = 'block';
+        const imageError = document.getElementById('imageError');
+        if (!isEditMode && imageUpload && (!imageUpload.files || imageUpload.files.length === 0)) {
+            if (imageError) imageError.style.display = 'block';
             imageUpload.classList.add('input-error');
             isValid = false;
         }
@@ -254,6 +511,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * Submit the form data via AJAX
      */
     function submitForm() {
+        if (!form || !formErrors) return;
+        
         // Prepare form data
         const formData = new FormData(form);
         
@@ -313,6 +572,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } catch (e) {
                     formErrors.textContent = 'An error occurred while processing the response';
                     formErrors.style.display = 'block';
+                    console.error('JSON parsing error:', e);
                 }
             } else {
                 formErrors.textContent = 'Server error: ' + xhr.status;
@@ -333,11 +593,14 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function loadChargePointData() {
         // First try to get the chargePointId from the button's data attribute
-        let chargePointId = editBtn.getAttribute('data-charge-point-id');
+        let chargePointId = editBtn?.getAttribute('data-charge-point-id');
         
         // If not found, try to get it from the details container
         if (!chargePointId) {
-            chargePointId = document.getElementById('chargePointDetails').getAttribute('data-charge-point-id');
+            const detailsContainer = document.getElementById('chargePointDetails');
+            if (detailsContainer) {
+                chargePointId = detailsContainer.getAttribute('data-charge-point-id');
+            }
         }
         
         // If still not found, look for hidden input that might contain it
@@ -380,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         // Send the chargePointId parameter to the request
-        xhr.send(`action=getChargePoint&chargePointId=${chargePointId}`);
+        xhr.send(`action=getChargePoint&chargePointId=${encodeURIComponent(chargePointId)}`);
     }
     
     /**
@@ -388,6 +651,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {Object} data The charge point data
      */
     function populateForm(data) {
+        if (!data) return;
+        
         console.log('Populating form with data:', data);
         
         // Clear the time selection cache
@@ -409,6 +674,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const blockField = document.getElementById('block');
         if (blockField) blockField.value = data.block || data.blockNumber || '';
+        
+        // Handle street name field
+        const streetNameField = document.getElementById('streetName');
+        if (streetNameField) streetNameField.value = data.streetName || data.streetame || data.street || '';
+        
+        // Handle postcode field
+        const postcodeField = document.getElementById('postcode');
+        if (postcodeField) postcodeField.value = data.postcode || data.postal_code || data.zipcode || '';
         
         const cityField = document.getElementById('city');
         if (cityField) {
@@ -439,9 +712,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (lat && lng && latField && lngField) {
             latField.value = lat;
             lngField.value = lng;
+            
+            // Update map if it exists
+            if (map && marker) {
+                map.setView([lat, lng], 15);
+                marker.setLatLng([lat, lng]);
+            }
         } else {
             // Generate coordinates based on city and block
-            setTimeout(updateCoordinates, 100); // Small delay to ensure fields are set first
+            setTimeout(updateCoordinates, 300); // Small delay to ensure fields are set first
         }
         
         // Set availability days and times
@@ -496,177 +775,260 @@ document.addEventListener('DOMContentLoaded', function() {
         // Log success message
         console.log('Form populated successfully with charge point data');
     }
+   /**
+ * Delete the charge point
+ */
+function deleteChargePoint() {
+    // Try multiple places to find the chargePointId
+    let chargePointId = null;
     
-    /**
-     * Delete the charge point
-     */
-    function deleteChargePoint() {
-        // Try multiple places to find the chargePointId
-        let chargePointId = null;
-        
-        // First check if delete button has the ID
-        if (deleteBtn.hasAttribute('data-charge-point-id')) {
-            chargePointId = deleteBtn.getAttribute('data-charge-point-id');
-        } 
-        
-        // If not found, try the details container
-        if (!chargePointId) {
-            const detailsElement = document.getElementById('chargePointDetails');
-            if (detailsElement && detailsElement.hasAttribute('data-charge-point-id')) {
-                chargePointId = detailsElement.getAttribute('data-charge-point-id');
-            }
+    // First check if delete button has the ID
+    if (deleteBtn && deleteBtn.hasAttribute('data-charge-point-id')) {
+        chargePointId = deleteBtn.getAttribute('data-charge-point-id');
+    } 
+    
+    // If not found, try the details container
+    if (!chargePointId) {
+        const detailsElement = document.getElementById('chargePointDetails');
+        if (detailsElement && detailsElement.hasAttribute('data-charge-point-id')) {
+            chargePointId = detailsElement.getAttribute('data-charge-point-id');
         }
-        
-        // Try hidden form field as another option
-        if (!chargePointId) {
-            const hiddenField = document.querySelector('input[name="charge_point_id"], #chargePointId');
-            if (hiddenField && hiddenField.value) {
-                chargePointId = hiddenField.value;
-            }
-        }
-        
-        // If we still don't have an ID, look through any data attributes that might contain it
-        if (!chargePointId) {
-            const possibleElements = document.querySelectorAll('[data-id], [data-charge-point-id], [data-chargepoint-id]');
-            for (const element of possibleElements) {
-                if (element.hasAttribute('data-id')) {
-                    chargePointId = element.getAttribute('data-id');
-                    break;
-                } else if (element.hasAttribute('data-charge-point-id')) {
-                    chargePointId = element.getAttribute('data-charge-point-id');
-                    break;
-                } else if (element.hasAttribute('data-chargepoint-id')) {
-                    chargePointId = element.getAttribute('data-chargepoint-id');
-                    break;
-                }
-            }
-        }
-        
-        if (!chargePointId) {
-            alert('No charge point ID found. Please try again or contact support.');
-            console.error('Delete operation failed: No charge point ID was found in the DOM');
-            return;
-        }
-        
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'my-charge-point.php', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-            if (xhr.status >= 200 && xhr.status < 400) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    
-                    if (response.success) {
-                        alert(response.message);
-                        // Redirect to the listing page
-                        window.location.href = response.redirect || 'my-charge-point.php';
-                    } else {
-                        alert(response.message || 'Failed to delete charge point');
-                        console.error('Delete operation failed:', response);
-                    }
-                } catch (e) {
-                    alert('Error processing the response');
-                    console.error('JSON parsing error:', e, xhr.responseText);
-                }
-            } else {
-                alert('Server error: ' + xhr.status);
-                console.error('Server error during delete:', xhr.status, xhr.responseText);
-            }
-        };
-        
-        xhr.onerror = function() {
-            alert('Connection error. Please try again later.');
-            console.error('Network error during delete operation');
-        };
-        
-        console.log('Sending delete request for charge point ID:', chargePointId);
-        xhr.send(`action=delete&chargePointId=${chargePointId}`);
     }
     
-    /**
-     * Update the time pickers based on selected days
-     * @param {boolean} preserveSelections Whether to preserve existing time selections
-     */
-    function updateTimePickers(preserveSelections = false) {
-        // Before updating, save current selections to cache if preserveSelections is true
-        if (preserveSelections) {
-            daysCheckboxes.forEach(checkbox => {
-                const day = checkbox.value;
-                const timeContainer = document.getElementById(`timeContainer_${day}`);
+    // Try hidden form field as another option
+    if (!chargePointId) {
+        const hiddenField = document.querySelector('input[name="charge_point_id"], #chargePointId');
+        if (hiddenField && hiddenField.value) {
+            chargePointId = hiddenField.value;
+        }
+    }
+    
+    // If we still don't have an ID, look through any data attributes that might contain it
+    if (!chargePointId) {
+        const possibleElements = document.querySelectorAll('[data-id], [data-charge-point-id], [data-chargepoint-id]');
+        for (const element of possibleElements) {
+            if (element.hasAttribute('data-id')) {
+                chargePointId = element.getAttribute('data-id');
+                break;
+            } else if (element.hasAttribute('data-charge-point-id')) {
+                chargePointId = element.getAttribute('data-charge-point-id');
+                break;
+            } else if (element.hasAttribute('data-chargepoint-id')) {
+                chargePointId = element.getAttribute('data-chargepoint-id');
+                break;
+            }
+        }
+    }
+    
+    if (!chargePointId) {
+        alert('No charge point ID found. Please try again or contact support.');
+        console.error('Delete operation failed: No charge point ID was found in the DOM');
+        return;
+    }
+    
+    // Log the ID we're going to delete - helps with debugging
+    console.log('Attempting to delete charge point with ID:', chargePointId);
+    
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'my-charge-point.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
+   const requestPayload = `action=delete&chargePointId=${encodeURIComponent(chargePointId)}`;
+    console.log('Delete request payload:', requestPayload);
+    
+    xhr.onload = function() {
+        // Log the full response for debugging
+        console.log('Server response:', xhr.responseText);
+        
+        if (xhr.status >= 200 && xhr.status < 400) {
+            try {
+                const response = JSON.parse(xhr.responseText);
                 
-                if (timeContainer) {
-                    const selectedButtons = timeContainer.querySelectorAll('.time-button.active');
-                    if (selectedButtons.length > 0) {
-                        // Save the selected times for this day
-                        if (!selectedTimesCache[day]) {
-                            selectedTimesCache[day] = [];
-                        }
-                        
-                        selectedButtons.forEach(button => {
-                            const time = button.getAttribute('data-time');
-                            if (!selectedTimesCache[day].includes(time)) {
-                                selectedTimesCache[day].push(time);
-                            }
-                        });
+                if (response.success) {
+                    alert(response.message || 'Charge point successfully deleted.');
+                    
+                    // Redirect to listing page or reload
+                    if (response.redirect) {
+                        window.location.href = response.redirect;
+                    } else {
+                        window.location.reload();
                     }
+                } else {
+                    // Log error details
+                    console.error('Delete failed with error:', response.message);
+                    alert('Failed to delete charge point: ' + (response.message || 'Unknown error'));
                 }
+            } catch (e) {
+                console.error('JSON parsing error:', e, 'Raw response:', xhr.responseText);
+                alert('Error processing the response: ' + e.message);
+            }
+        } else {
+            console.error('HTTP error status:', xhr.status, xhr.statusText);
+            alert('Server error: ' + xhr.status);
+        }
+    };
+    
+    xhr.onerror = function(e) {
+        console.error('XHR error:', e);
+        alert('Connection error. Please try again later.');
+    };
+    
+    // Send the delete request with the chargePointId
+    xhr.send(requestPayload);
+}
+   /**
+ * Initialize and set up the map
+ * @param {HTMLElement} mapElement - Optional map container element
+ */
+function initMap(mapElement) {
+    // Use provided element or try to find one
+    const mapContainer = mapElement || document.getElementById('leetcodeMap'); // Updated to use the correct ID
+
+    if (!mapContainer || typeof L === 'undefined') {
+        console.log('Map container not found or Leaflet not loaded');
+        return;
+    }
+
+    // Get initial coordinates from form fields if available
+    let initialLat = 26.2285;  // Default to Manama, Bahrain
+    let initialLng = 50.5860;
+    let initialZoom = 10;
+
+    const latField = document.getElementById('latitude');
+    const lngField = document.getElementById('longitude');
+
+    if (latField && latField.value && lngField && lngField.value) {
+        initialLat = parseFloat(latField.value);
+        initialLng = parseFloat(lngField.value);
+        initialZoom = 15;
+    }
+
+    // Initialize map if it doesn't exist yet
+    if (!map) {
+        map = L.map(mapContainer).setView([initialLat, initialLng], initialZoom);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add marker if coordinates are available
+        marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+
+        // Handle marker drag end event
+        marker.on('dragend', function() {
+            const position = marker.getLatLng();
+            if (latField) latField.value = position.lat;
+            if (lngField) lngField.value = position.lng;
+            reverseGeocode(position.lat, position.lng);
+        });
+
+        // Add click handler to set marker position
+        map.on('click', function(e) {
+            const position = e.latlng;
+            marker.setLatLng(position);
+            if (latField) latField.value = position.lat;
+            if (lngField) lngField.value = position.lng;
+            reverseGeocode(position.lat, position.lng);
+        });
+
+        // Add geocoder control if available
+        if (L.Control && L.Control.Geocoder) {
+            geocoder = L.Control.Geocoder.nominatim();
+            L.Control.geocoder({
+                geocoder: geocoder,
+                defaultMarkGeocode: false
+            })
+            .on('markgeocode', function(e) {
+                const position = e.geocode.center;
+                marker.setLatLng(position);
+                if (latField) latField.value = position.lat;
+                if (lngField) lngField.value = position.lng;
+                map.setView(position, 15);
+            })
+            .addTo(map);
+        }
+    } else {
+        // If map already exists, just update the view
+        map.setView([initialLat, initialLng], initialZoom);
+        if (marker) {
+            marker.setLatLng([initialLat, initialLng]);
+        } else {
+            marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+            marker.on('dragend', function() {
+                const position = marker.getLatLng();
+                if (latField) latField.value = position.lat;
+                if (lngField) lngField.value = position.lng;
+                reverseGeocode(position.lat, position.lng);
             });
         }
+
+        // Invalidate size (useful when map container was hidden)
+        setTimeout(() => map.invalidateSize(), 300);
+    }
+}
+    /**
+     * Update time pickers based on selected days
+     * @param {boolean} preserveSelections - Whether to preserve existing time selections
+     */
+    function updateTimePickers(preserveSelections) {
+        if (!timePickersContainer) return;
         
-        // Clear existing time pickers
+        // Clear existing time containers
         timePickersContainer.innerHTML = '';
         
-        // Generate time options - half hour increments
-        const timeOptions = [];
-        for (let hour = 0; hour < 24; hour++) {
-            const hourText = hour.toString().padStart(2, '0');
-            timeOptions.push(`${hourText}:00`);
-            timeOptions.push(`${hourText}:30`);
-        }
+        const timeSlots = [
+            '00:00', '01:00', '02:00', '03:00', '04:00', '05:00',
+            '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+            '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+            '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+        ];
         
-        // Create time pickers for each selected day
+        // Generate time pickers for each selected day
         daysCheckboxes.forEach(checkbox => {
             if (checkbox.checked) {
                 const day = checkbox.value;
                 
-                // Create container for this day
+                // Create container for this day's time buttons
                 const dayContainer = document.createElement('div');
+                dayContainer.className = 'time-picker-day-container';
                 dayContainer.id = `timeContainer_${day}`;
-                dayContainer.className = 'time-picker-container';
                 
-                // Add day header
-                const dayHeader = document.createElement('h5');
-                dayHeader.textContent = `${day} Available Times`;
-                dayContainer.appendChild(dayHeader);
+                // Add day label
+                const dayLabel = document.createElement('h5');
+                dayLabel.textContent = day;
+                dayContainer.appendChild(dayLabel);
                 
-                // Add time grid
+                // Create time button grid
                 const timeGrid = document.createElement('div');
-                timeGrid.className = 'time-grid';
+                timeGrid.className = 'time-button-grid';
                 
                 // Add time buttons
-                timeOptions.forEach(time => {
-                    const timeButton = document.createElement('div');
+                timeSlots.forEach(time => {
+                    const timeButton = document.createElement('button');
+                    timeButton.type = 'button';
                     timeButton.className = 'time-button';
                     timeButton.setAttribute('data-time', time);
                     timeButton.textContent = time;
                     
-                    // If preserving selections and this time was previously selected for this day,
-                    // add the active class
-                    if (preserveSelections && 
-                        selectedTimesCache[day] && 
+                    // If preserving selections and we have cached times for this day
+                    if (preserveSelections && selectedTimesCache[day] && 
+                        Array.isArray(selectedTimesCache[day]) && 
                         selectedTimesCache[day].includes(time)) {
                         timeButton.classList.add('active');
                     }
                     
-                    // Add click event to toggle selection
+                    // Add click handler for time selection
                     timeButton.addEventListener('click', function() {
+                        // Toggle active state
                         this.classList.toggle('active');
                         
-                        // Update cache when time is selected/deselected
-                        const timeValue = this.getAttribute('data-time');
+                        // Update cached selection for this day
                         if (!selectedTimesCache[day]) {
                             selectedTimesCache[day] = [];
                         }
+                        
+                        const timeValue = this.getAttribute('data-time');
                         
                         if (this.classList.contains('active')) {
                             // Add to cache if not already there
@@ -685,173 +1047,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     timeGrid.appendChild(timeButton);
                 });
                 
+                // Add time grid to day container
                 dayContainer.appendChild(timeGrid);
+                
+                // Add day container to main container
                 timePickersContainer.appendChild(dayContainer);
             }
         });
-    }
-    
-    /**
-     * Initialize the map
-     */
-    function initMap() {
-        const mapElement = document.getElementById('leetcodeMap');
-        if (!mapElement) return;
-        
-        try {
-            // Get coordinates from HTML attributes or default to Bahrain
-            const latElement = document.querySelector('#chargePointDetails [data-latitude]');
-            const lngElement = document.querySelector('#chargePointDetails [data-longitude]');
-            
-            // Default to Bahrain coordinates
-            let latitude = 26.0667;
-            let longitude = 50.5577;
-            
-            if (latElement && lngElement) {
-                latitude = parseFloat(latElement.getAttribute('data-latitude')) || latitude;
-                longitude = parseFloat(lngElement.getAttribute('data-longitude')) || longitude;
-            }
-            
-            // Initialize map
-            map = L.map('leetcodeMap').setView([latitude, longitude], 15);
-            
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            
-            // Add marker for the charge point
-            marker = L.marker([latitude, longitude]).addTo(map);
-            
-            // If coordinates are stored in hidden fields, use those
-            const latField = document.getElementById('latitude');
-            const lngField = document.getElementById('longitude');
-            
-            if (latField && latField.value && lngField && lngField.value) {
-                const lat = parseFloat(latField.value);
-                const lng = parseFloat(lngField.value);
-                
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    map.setView([lat, lng], 15);
-                    marker.setLatLng([lat, lng]);
-                }
-            }
-            
-            // Allow map clicks to set location in add/edit mode
-            map.on('click', function(e) {
-                if (modal.style.display === 'block') {
-                    const lat = e.latlng.lat;
-                    const lng = e.latlng.lng;
-                    
-                    // Update the form fields
-                    document.getElementById('latitude').value = lat;
-                    document.getElementById('longitude').value = lng;
-                    
-                    // Update marker position
-                    if (marker) {
-                        marker.setLatLng([lat, lng]);
-                    } else {
-                        marker = L.marker([lat, lng]).addTo(map);
-                    }
-                }
-            });
-        } catch (e) {
-            console.error("Map initialization error:", e);
-        }
-    }
-    
-    /**
-     * Update coordinates based on city and block selection
-     * This function is automatically called when city or block fields change
-     */
-    function updateCoordinates() {
-        const citySelect = document.getElementById('city');
-        const blockInput = document.getElementById('block');
-        
-        const cityId = citySelect.value;
-        const block = blockInput.value;
-        
-        // Only proceed if both city and block are selected/entered
-        if (!cityId || !block) {
-            return;
-        }
-        
-        // Define coordinate mappings for cities and blocks in Bahrain
-        // These are example coordinates - you should replace with actual coordinates
-        const cityCoordinates = {
-            // Example format: cityId: { baseLatitude, baseLongitude, blockOffsets: { blockNumber: [latOffset, lngOffset] } }
-            1: { // Manama
-                baseLatitude: 26.2285,
-                baseLongitude: 50.5860,
-                blockOffsets: {
-                    301: [0.005, 0.003],
-                    302: [0.008, 0.005],
-                    303: [0.004, 0.007],
-                    304: [0.002, 0.004],
-                    305: [0.006, 0.002],
-                    // Add more blocks as needed
-                }
-            },
-            2: { // Riffa
-                baseLatitude: 26.1345,
-                baseLongitude: 50.5547,
-                blockOffsets: {
-                    901: [0.005, 0.008],
-                    902: [0.007, 0.004],
-                    903: [0.003, 0.006],
-                    904: [0.009, 0.002],
-                    905: [0.004, 0.005],
-                    // Add more blocks as needed
-                }
-            },
-            3: { // Muharraq
-                baseLatitude: 26.2572,
-                baseLongitude: 50.6145,
-                blockOffsets: {
-                    201: [0.004, 0.002],
-                    202: [0.006, 0.003],
-                    203: [0.002, 0.005],
-                    204: [0.003, 0.007],
-                    205: [0.005, 0.004],
-                    // Add more blocks as needed
-                }
-            },
-            // Add more cities as needed
-        };
-        
-        // Calculate coordinates based on city and block
-        const cityData = cityCoordinates[cityId];
-        if (cityData) {
-            let latitude = cityData.baseLatitude;
-            let longitude = cityData.baseLongitude;
-            
-            // Apply block offset if available
-            if (cityData.blockOffsets && cityData.blockOffsets[block]) {
-                latitude += cityData.blockOffsets[block][0];
-                longitude += cityData.blockOffsets[block][1];
-            } else {
-                // If specific block not found, generate a small random offset
-                // This ensures different coordinates for different blocks in the same city
-                const blockNum = parseInt(block);
-                if (!isNaN(blockNum)) {
-                    // Use block number to generate deterministic offset
-                    const latOffset = (blockNum % 10) * 0.001;
-                    const lngOffset = ((blockNum % 15) + 5) * 0.001;
-                    
-                    latitude += latOffset;
-                    longitude += lngOffset;
-                }
-            }
-            
-            // Update form fields
-            document.getElementById('latitude').value = latitude.toFixed(6);
-            document.getElementById('longitude').value = longitude.toFixed(6);
-            
-            // Update marker on map if map is already initialized
-            if (map && marker) {
-                marker.setLatLng([latitude, longitude]);
-                map.setView([latitude, longitude], 15);
-            }
-        }
     }
 });

@@ -30,7 +30,7 @@ class MyChargePoint {
         }
     }
 
-    /**
+   /**
      * Get the user's charge point details
      * @return array|false Returns charge point data or false if none found
      */
@@ -39,6 +39,7 @@ class MyChargePoint {
             $statement = $this->_dbHandle->prepare(
                 "SELECT cp.charge_point_id, cp.price_per_kwh, cp.charge_point_picture_url, 
                         cpa.charge_point_address_id, cpa.house_number, cpa.road, cpa.block, 
+                        cpa.streetName, cpa.postcode,
                         cpa.latitude, cpa.longitude, c.city_id, c.city_name, 
                         a.availability_status_id, a.availability_status_title
                  FROM Pro_ChargePoint cp
@@ -63,7 +64,6 @@ class MyChargePoint {
             return false;
         }
     }
-
     /**
      * Get availability days and times for a charge point
      * @param int $chargePointId
@@ -111,20 +111,22 @@ class MyChargePoint {
      * @param string $imageFile Path to the uploaded image
      * @return int|false The charge point ID or false on failure
      */
-    public function addChargePoint($data, $imageFile) {
+  public function addChargePoint($data, $imageFile) {
         try {
             $this->_dbHandle->beginTransaction();
             
             // 1. Add charge point address
             $addressStatement = $this->_dbHandle->prepare(
-                "INSERT INTO Pro_ChargePointAddress (house_number, road, block, city_id, latitude, longitude)
-                 VALUES (:house_number, :road, :block, :city_id, :latitude, :longitude)"
+                "INSERT INTO Pro_ChargePointAddress (house_number, road, block, city_id, streetName, postcode, latitude, longitude)
+                 VALUES (:house_number, :road, :block, :city_id, :streetName, :postcode, :latitude, :longitude)"
             );
             
             $addressStatement->bindParam(':house_number', $data['house_number'], PDO::PARAM_INT);
             $addressStatement->bindParam(':road', $data['road'], PDO::PARAM_INT);
             $addressStatement->bindParam(':block', $data['block'], PDO::PARAM_INT);
             $addressStatement->bindParam(':city_id', $data['city_id'], PDO::PARAM_INT);
+            $addressStatement->bindParam(':streetName', $data['streetName'], PDO::PARAM_STR);
+            $addressStatement->bindParam(':postcode', $data['postcode'], PDO::PARAM_STR);
             $addressStatement->bindParam(':latitude', $data['latitude'], PDO::PARAM_STR);
             $addressStatement->bindParam(':longitude', $data['longitude'], PDO::PARAM_STR);
             
@@ -204,6 +206,8 @@ class MyChargePoint {
                      road = :road,
                      block = :block,
                      city_id = :city_id,
+                     streetName = :streetName,
+                     postcode = :postcode,
                      latitude = :latitude,
                      longitude = :longitude
                  WHERE charge_point_address_id = :address_id"
@@ -213,6 +217,8 @@ class MyChargePoint {
             $addressStatement->bindParam(':road', $data['road'], PDO::PARAM_INT);
             $addressStatement->bindParam(':block', $data['block'], PDO::PARAM_INT);
             $addressStatement->bindParam(':city_id', $data['city_id'], PDO::PARAM_INT);
+            $addressStatement->bindParam(':streetName', $data['streetName'], PDO::PARAM_STR);
+            $addressStatement->bindParam(':postcode', $data['postcode'], PDO::PARAM_STR);
             $addressStatement->bindParam(':latitude', $data['latitude'], PDO::PARAM_STR);
             $addressStatement->bindParam(':longitude', $data['longitude'], PDO::PARAM_STR);
             $addressStatement->bindParam(':address_id', $data['charge_point_address_id'], PDO::PARAM_INT);
@@ -299,7 +305,6 @@ class MyChargePoint {
             return false;
         }
     }
-
     /**
      * Delete a charge point
      * @param int $chargePointId
