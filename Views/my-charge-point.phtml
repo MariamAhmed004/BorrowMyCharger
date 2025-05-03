@@ -12,32 +12,35 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Modal styles */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.5); 
-        }
-        .modal-content { 
-            position: fixed; /* Changed from absolute to fixed */
-            left: 50%; 
-            top: 50%; 
-            transform: translate(-50%, -50%); /* Center the modal */
-            background-color: #ffffff; 
-            padding: 20px; 
-            border-radius: 8px; 
-            width: 80%; 
-            max-width: 600px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-            max-height: 90vh;
-            overflow-y: auto;
-        }
+
+
+/* Hide the scrollbar and allow modal content to scroll */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide the page scroll */
+}
+
+/* Modal content */
+.modal-content {
+  background-color: white;
+  max-height: 80vh;
+  width: 90%;
+  overflow-y: auto; /* Enable scrolling within modal */
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+
         .close { 
             color: #333; 
             position: absolute; 
@@ -436,11 +439,13 @@
         <?php endif; ?>
     </div>
 <div id="leetcodeMap" style="height: 300px; margin: 15px 0; border-radius: 5px; border: 1px solid #ddd; width: 100%;"></div>
-   <div class="edit-delete-buttons">
-    <button class="edit-button" data-charge-point-id="<?= $chargePointId ?>">Edit</button>
-    <button class="delete-button" data-charge-point-id="<?= $chargePointId ?>">Delete</button>
-</div>
 
+<div class="edit-delete-buttons">
+    <button class="edit-button" data-charge-point-id="<?= $view->chargePoint['charge_point_id'] ?>">Edit</button>
+    <button class="delete-button" data-charge-point-id="<?= $view->chargePoint['charge_point_id'] ?>">Delete</button>
+    <!-- Add a hidden input with the charge point ID for extra safety -->
+    <input type="hidden" id="chargePointId" name="chargePointId" value="<?= $view->chargePoint['charge_point_id'] ?>">
+</div>
 </div>
 
 <!-- SCRIPTS -->
