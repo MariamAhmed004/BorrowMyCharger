@@ -170,7 +170,7 @@ function handleAddChargePoint($model) {
             'latitude' => $latitude,
             'longitude' => $longitude,
             'price_per_kwh' => $cost,
-            'availability_status_id' => 2, // Scheduled hours
+            'availability_status_id' => 1, //available by default
             'availability_days' => $availabilityDays
         ];
         
