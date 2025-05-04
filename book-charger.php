@@ -8,10 +8,17 @@ $view->pageTitle = 'Book Charger';
 $view->activePage = 'book-charger';
 
 require_once 'Models/browseCharger.php';
+require_once 'Models/BookCharger.php';
+
+
 $browse = new BrowseCharger();
 
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
+$id = $_GET['id'] ?? $_POST['charge_point_id'] ?? null;
+
+
+
+if ($id) {
+    
     // Debug: Check the ID being passed
     error_log("Charger ID: " . $id);
     
@@ -61,15 +68,43 @@ if (isset($_GET['id'])) {
                 return isset($view->availableTimes[$day]) && !empty($view->availableTimes[$day]);
             });
         }
+        
+        //set the id to a view property 
+        $view->chargerPointId = $id;
+        
     } else {
         error_log("Charger not found for ID: " . $id);
         echo "Charger not found.";
         exit; // Stop further processing if charger not found
     }
+    
+    //after adding the charger details poin to the page
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $userId = $_POST['user_id'] ?? null;
+    $chargePointId = $_POST['charge_point_id'] ?? null;
+    $bookingDate = $_POST['selected_date'] ?? null;
+    $bookingTime = $_POST['selected_time'] ?? null;
+
+    if ($userId && $chargePointId && $bookingDate && $bookingTime) {
+        $bookingModel = new BookCharger();
+        $success = $bookingModel->addBooking($userId, $chargePointId, $bookingDate, $bookingTime);
+
+        if ($success) {
+            echo "<script>alert('Booking successfully created!'); window.location.href='user-dashboard.php';</script>";
+        } else {
+            echo "<script>alert('Booking failed. Please try again.');</script>";
+        }
+    } else {
+        echo "<script>alert('All fields are required.');</script>";
+    }
+}
+    
+    
 } else {
     echo "No charger selected.";
     exit; // Stop further processing if no ID provided
 }
+
 
 // Load the view
 require_once 'Views/book-charger.phtml';

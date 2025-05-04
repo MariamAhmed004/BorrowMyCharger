@@ -51,28 +51,28 @@
         <div class="col-md-3">
             <div class="stat-card">
                 <h5>Total Users</h5>
-                <p>170</p>
+                <p><?= htmlspecialchars($view->userCount); ?></p>
             </div>
         </div>
         <!-- Total Homeowners -->
         <div class="col-md-3">
             <div class="stat-card">
                 <h5>Total Homeowners</h5>
-                <p>170</p>
+                <p><?= htmlspecialchars($view->homeOwnerCount); ?></p>
             </div>
         </div>
         <!-- Total Charge Points -->
         <div class="col-md-3">
             <div class="stat-card">
                 <h5>Total Charge Points</h5>
-                <p>170</p>
+                <p><?= htmlspecialchars($view->chargePointCount); ?></p>
             </div>
         </div>
         <!-- Pending Approval -->
         <div class="col-md-3">
             <div class="stat-card">
                 <h5>Pending Approval</h5>
-                <p>170</p>
+                <p><?= htmlspecialchars($view->pendingApproval); ?></p>
             </div>
         </div>
     </div>

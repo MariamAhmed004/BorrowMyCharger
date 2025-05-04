@@ -1,6 +1,8 @@
 <?php require_once('template/header.phtml'); ?>
 
 <div class="container mt-5">
+    <br/>
+    <?php if (!empty($view->bookings)): ?>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -12,30 +14,50 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Example data, replace with dynamic content -->
+            <?php foreach ($view->bookings as $booking): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($booking['streetName'] . ' ' . $booking['house_number']); ?></td>
+                        <td><?= htmlspecialchars($booking['booking_date']); ?></td>
+                        <td><?= htmlspecialchars($booking['start_time']) . ' - ' . htmlspecialchars($booking['end_time']); ?></td>
+                        
+                        <?php 
+                        // Define status classes
+                        $statusClass = '';
+                        switch ($booking['booking_status_id']) {
+                            case 'approved':
+                                $statusClass = 'status-approved';
+                                break;
+                            case 'pending':
+                                $statusClass = 'status-pending';
+                                break;
+                            case 'rejected':
+                                $statusClass = 'status-declined';
+                                break;
+                            default:
+                                $statusClass = '';
+                        }
+                        ?>
+
+                        <td class="<?= $statusClass; ?>"><?= htmlspecialchars(ucfirst($booking['booking_status_id'])); ?></td>
+                        <td><a href="booking-details.php?booking_id=<?= $booking['booking_id']; ?>" class="btn btn-info">View Details</a></td>
+                    </tr>
+                <?php endforeach; ?>
+            
+<!--             Example data, replace with dynamic content 
             <tr>
                 <td>123 Main St</td>
                 <td>12 December 2023</td>
                 <td>10:00 AM - 11:30 AM</td>
                 <td class="status-approved">Approved</td>
                 <td><a href="booking-details.php" class="btn btn-info">View Details</a></td>
-            </tr>
-            <tr>
-                <td>456 Elm St</td>
-                <td>15 December 2023</td>
-                <td>2:00 PM - 3:30 PM</td>
-                <td class="status-pending">Pending</td>
-                <td><a href="booking-details.php" class="btn btn-info">View Details</a></td>
-            </tr>
-            <tr>
-                <td>789 Oak St</td>
-                <td>18 December 2023</td>
-                <td>4:00 PM - 5:30 PM</td>
-                <td class="status-declined">Declined</td>
-                <td><a href="booking-details.php" class="btn btn-info">View Details</a></td>
-            </tr>
+            </tr>-->
+            
         </tbody>
     </table>
+    <?php else: ?>
+        <p>No booking records found.</p>
+    <?php endif; ?>
 </div>
+
 
 <?php require_once('template/footer.phtml'); 

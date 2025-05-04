@@ -28,6 +28,15 @@
       </div>
     </div>
 
+    
+    <form id="bookingForm" action="book-charger.php" method="POST"<?= empty($view->chargerPointId) ? 'style="display: none;"' : '' ?>>
+        
+        <input type="hidden" name="user_id" value="<?= htmlspecialchars($_SESSION['user_id']) ?>">
+<input type="hidden" name="charge_point_id" value="<?= $view->chargerPointId ?>">
+<input type="hidden" name="selected_date" id="selected-date" value="">
+<input type="hidden" name="selected_time" id="selected-time" value="">
+        
+    
     <!-- Availability Section (Centered & Full-Width) -->
     <div class="availability-container">
       <h4 class="text-left">Availability</h4>
@@ -57,11 +66,13 @@
 
         <!-- Submit Button -->
         <div class="submit-button">
-          <button class="btn btn-primary" id="book-button" disabled>Book Now</button>
+          <button type="submit" class="btn btn-primary" id="book-button" disabled>Book Now</button>
         </div>
         
-        <!-- Hidden input to store selected time -->
-        <input type="hidden" id="selected-time" value="" />
+        </form>
+        
+<!--         Hidden input to store selected time 
+        <input type="hidden" id="selected-time" value="" />-->
       <?php else: ?>
         <div class="no-availability-message">
           <p>This charging point currently has no available time slots.</p>
@@ -133,6 +144,23 @@
         // Here you would typically submit the form or make an AJAX request
         alert(`Booking requested for ${selectedDay} at ${selectedTime}`);
         
+        //set the hidden inputs values 
+        document.getElementById('selected-date').value = selected
+        document.getElementById('selected-time').value = selectedTime
+        
+        
+        //update the hidden fields for the date and time 
+        document.getElementById('availability-date')
+                .addEventListener('change', function() {
+                    document.getElementById('selected-date').value = this.value;
+                });
+
+        document.querySelectorAll('.time-option').forEach(timeOption => {
+                timeOption.addEventListener('click', function() {
+            document.getElementById('selected-time').value = this.dataset.time;
+                });
+        });
+            
       
       } else {
         alert('Please select both day and time.');
