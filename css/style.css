@@ -1908,3 +1908,40 @@ button.prev i, button.next i {
       background-color: #007bff;
       color: white;
     }
+
+    /* Text with green background and white text*/
+    .details-approved {
+      background-color: #14842e; /* Green background */
+      color: white; /* White text */
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+    .details-declined {
+      background-color: #9e2531; /* Red background */
+      color: white; /* White text */
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+    .details-pending {
+      background-color: #757474; /* Yellow background */
+      color: white; /* White text */
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+
+    .paragraph-container {
+      padding: 0 20px;
+    }
+
+    .paragraph-container p {
+      font-size: large;
+    }
+
+    .float-image{
+      width: 15%; /* Adjust size as needed */
+      height: 30%; /* Maintain aspect ratio */
+      margin-right: 35rem ;
+      margin-top: 2rem;
+      float: right; /* Float to the right */
+    
+    }

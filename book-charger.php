@@ -91,6 +91,8 @@ if ($id) {
 
         if ($success) {
             echo "<script>alert('Booking successfully created!'); window.location.href='user-dashboard.php';</script>";
+            header("Location:browse-charger.php");
+                exit;
         } else {
             echo "<script>alert('Booking failed. Please try again.');</script>";
         }

@@ -17,19 +17,30 @@ class RentalUserHome {
         $sql = "SELECT COUNT(*) FROM Pro_Booking WHERE booking_status_id = :status_id AND user_id = :user_id";
         $stmt = $this->dbHandle->prepare($sql);
         $stmt->bindValue(':status_id', 1, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchColumn();
+        $count = $stmt->fetchColumn();
+        return $count !== false ? $count : 0; // Return 0 if no rows are found
     }
     
     //get the total user borrowings
     public function getUserBorrowingCount() {
         $sql = "SELECT COUNT(*) FROM Pro_Booking WHERE user_id = :user_id";
         $stmt = $this->dbHandle->prepare($sql);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchColumn();
+        $count = $stmt->fetchColumn();
+        return $count !== false ? $count : 0; // Return 0 if no rows are found
     }
     
+    //get the active reservations 
+    public function getUserActiveReservations() {
+        $sql = "SELECT * FROM Pro_Booking WHERE booking_status_id = :status_id AND user_id = :user_id";
+        $stmt = $this->dbHandle->prepare($sql);
+        $stmt->bindValue(':status_id', 2, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
 }

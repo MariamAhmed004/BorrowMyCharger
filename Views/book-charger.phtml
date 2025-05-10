@@ -46,15 +46,35 @@
           <div class="col-md-12">
             <div class="form-group">
               <label for="availability-date">Select Availability Date:</label>
-              <select class="form-control" id="availability-date" onchange="showTimeOptions()">
-                <option value="">Select Date</option>
-                <?php foreach ($view->availableDays as $day): 
-                  // Only include days that have time slots
-                  if (isset($view->availableTimes[$day]) && !empty($view->availableTimes[$day])): ?>
-                    <option value="<?= htmlspecialchars(trim($day)) ?>"><?= ucfirst(htmlspecialchars(trim($day))) ?></option>
-                  <?php endif; ?>
-                <?php endforeach; ?>
-              </select>
+             
+
+
+              <?php
+$currentDate = new DateTime();
+$weekDates = [];
+
+// Generate dates for the remaining days in the current week
+for ($i = 0; $i < 7; $i++) {
+    $date = clone $currentDate;
+    $date->modify("+$i day");
+    
+    // Store the date in the array with the day of the week as the key
+    $weekDates[$date->format('l')] = $date->format('d-m-Y'); 
+    
+}
+?>
+
+<select class="form-control" id="availability-date" onchange="showTimeOptions()">
+    <option value="">Select Date</option>
+    <!-- Populate the dropdown with available days -->
+    <?php foreach ($view->availableDays as $day): 
+        if (isset($weekDates[$day])): ?>
+            <option value="<?= htmlspecialchars("$day " . $weekDates[$day]) ?>">
+                <?= htmlspecialchars("$day " . $weekDates[$day]) ?>
+            </option>
+        <?php endif;
+    endforeach; ?>
+</select>
             </div>
           </div>
         </div>
@@ -87,11 +107,14 @@
     
     // Function to show time options based on the selected day
     function showTimeOptions() {
-      const selectedDay = document.getElementById('availability-date').value;
+      const SelectedDayandDate = document.getElementById('availability-date').value;
       const timeOptionsContainer = document.getElementById('time-options');
       const bookButton = document.getElementById('book-button');
       const selectedTimeInput = document.getElementById('selected-time');
       
+      //Extract the selected day from the value
+      const selectedDay = SelectedDayandDate.split(' ')[0]; // Get the day part (e.g., "Monday")
+
       // Reset the button to disabled and clear the selected time
       bookButton.disabled = true;
       selectedTimeInput.value = '';
@@ -136,20 +159,20 @@
     }
     
     // Add event listener for the book button
-    document.getElementById('book-button').addEventListener('click', function() {
-      const selectedDay = document.getElementById('availability-date').value;
-      const selectedTime = document.getElementById('selected-time').value;
-      
-      if (selectedDay && selectedTime) {
-        // Here you would typically submit the form or make an AJAX request
-        alert(`Booking requested for ${selectedDay} at ${selectedTime}`);
-        
-        //set the hidden inputs values 
-        document.getElementById('selected-date').value = selected
-        document.getElementById('selected-time').value = selectedTime
-        
-        
-        //update the hidden fields for the date and time 
+     document.getElementById('book-button').addEventListener('click', function() {
+    const selectedDay = document.getElementById('availability-date').value;
+    const selectedTime = document.getElementById('selected-time').value;
+
+    if (selectedDay && selectedTime) {
+        // Dynamically update the hidden input for the selected date
+        const dateParts = selectedDay.split(' '); // Assuming the format is "Day Date"
+        const selectedDate = dateParts[1]; // Extract the date portion
+        document.getElementById('selected-date').value = selectedDate;
+
+        // Ensure the selected time is already set dynamically
+        document.getElementById('selected-time').value = selectedTime;
+
+              //update the hidden fields for the date and time 
         document.getElementById('availability-date')
                 .addEventListener('change', function() {
                     document.getElementById('selected-date').value = this.value;
@@ -160,11 +183,12 @@
             document.getElementById('selected-time').value = this.dataset.time;
                 });
         });
-            
-      
-      } else {
+
+        // Optionally, submit the form or make an AJAX request
+        alert(`Booking requested for ${selectedDate} at ${selectedTime}`);
+    } else {
         alert('Please select both day and time.');
-      }
-    });
+    }
+});
   </script>
 <?php require_once('template/footer.phtml'); ?>

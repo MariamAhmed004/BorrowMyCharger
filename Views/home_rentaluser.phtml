@@ -76,5 +76,11 @@
 </div>
 
     <br><br><br><br>
-<script src="js/homeRentalUser.js"></script>
+
+ 
+<script>
+    // Pass bookings data from PHP to JavaScript
+    window.bookings = <?= json_encode($view->bookings ?? []); ?>;
+</script>
+<script src="js/homeRentalUser.js"></script>   
 <?php require('template/footer.phtml') ?>
