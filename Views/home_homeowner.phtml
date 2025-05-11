@@ -1,5 +1,189 @@
 <?php require('template/header.phtml') ?>
 
-<p>This is the home page for homeowners</p>
+<style>
+    .stats-card {
+        margin-bottom: 20px;
+        border: none;
+        background-color: #e9ecef;
+        padding: 20px;
+        border-radius: 5px;
+        transition: transform 0.3s;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stats-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #299c6e;
+    }
+    
+    .calendar {
+        margin-top: 20px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+    }
+    
+    .weekday-header {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .day {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .day:hover {
+        background-color: #e9ecef;
+    }
+    
+    .day.has-pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .day.has-approved {
+        background-color: #299c6e;
+        color: #fff;
+    }
+    
+    .day.has-rejected {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    
+    .upcoming-bookings {
+        margin-top: 30px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .booking-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #299c6e;
+        background-color: #f8f9fa;
+        border-radius: 0 5px 5px 0;
+    }
+</style>
+
+<div class="container mt-4">
+    <h1>Homeowner Dashboard</h1>
+    <p class="lead">Welcome back! Here's an overview of your charge points and bookings.</p>
+    
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Charge Points</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->chargePointsCount); ?></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Pending Requests</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->pendingRequestsCount); ?></div>
+                <?php if ($view->pendingRequestsCount > 0): ?>
+                    <a href="borrowrequest.php" class="btn btn-sm btn-warning mt-2">View Requests</a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Approved Bookings</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->approvedBookingsCount); ?></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Total Bookings</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->totalBookingsCount); ?></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <!-- Calendar Section -->
+        <div class="col-md-8">
+            <div class="calendar">
+                <h4>Booking Calendar</h4>
+                <div class="calendar-header">
+                    <button id="prevMonth" class="btn btn-secondary">Previous</button>
+                    <h5 id="monthYear"></h5>
+                    <button id="nextMonth" class="btn btn-secondary">Next</button>
+                </div>
+                
+                <div class="weekday-header calendar-grid">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                
+                <div class="calendar-grid" id="calendar"></div>
+                
+                <div class="mt-3">
+                    <span class="badge bg-warning me-2">Pending</span>
+                    <span class="badge bg-success me-2">Approved</span>
+                    <span class="badge bg-danger me-2">Rejected</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upcoming Bookings -->
+        <div class="col-md-4">
+            <div class="upcoming-bookings">
+                <h4>Upcoming Bookings</h4>
+                
+                <?php if (empty($view->upcomingBookings)): ?>
+                    <p class="text-muted">No upcoming bookings.</p>
+                <?php else: ?>
+                    <?php foreach ($view->upcomingBookings as $booking): ?>
+                        <div class="booking-item">
+                            <h6><?= htmlspecialchars($booking['first_name'] . ' ' . $booking['last_name']); ?></h6>
+                            <p class="mb-1">
+                                <strong>Date:</strong> <?= date('d M Y', strtotime($booking['booking_date'])); ?><br>
+                                <strong>Time:</strong> <?= date('H:i', strtotime($booking['booking_time'])); ?><br>
+                                <strong>Location:</strong> <?= htmlspecialchars($booking['streetName'] . ', ' . $booking['postcode']); ?>
+                            </p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/homeHomeOwner.js"></script>
 
 <?php require('template/footer.phtml') ?>

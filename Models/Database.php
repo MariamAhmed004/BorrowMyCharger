@@ -5,10 +5,10 @@ class Database {
     protected $_dbHandle;
 
     public static function getInstance() {
-        $username = 'u202201907'; // Your database username
-        $password = 'u202201907'; // Your database password
-        $host = '108.142.248.238'; // Use the IP address or hostname directly
-        $dbName = 'db202201907';  // Your database name
+        $username = 'u202201907'; 
+        $password = 'u202201907'; 
+        $host = '108.142.248.238'; 
+        $dbName = 'db202201907';  
 
         if (self::$_dbInstance === null) {
             self::$_dbInstance = new self($username, $password, $host, $dbName);

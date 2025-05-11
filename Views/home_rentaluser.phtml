@@ -1,86 +1,93 @@
 <?php require('template/header.phtml') ?>
 
-<style>
+<link rel="stylesheet" href="css/homeRentalUser.css"> <!-- Link to external CSS file -->
+<script src="js/homeRentalUser.js" defer></script> <!-- Link to external JS file -->
 
-        .card {
-            margin-bottom: 20px;
-            border: none;
-            background-color: #e9ecef;
-            padding: 20px;
-            border-radius: 5px;
-        }
-
-        .calendar {
-            margin-top: 20px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-
-        .day {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            background-color: #ffffff;
-            cursor: pointer; /* Change cursor to pointer for clickable days */
-            transition: background-color 0.3s;
-        }
-
-        .day:hover {
-            background-color: #e9ecef; /* Highlight on hover */
-        }
-
-    </style>
-
-<div class="container mt-5">
-    <h1>Welcome Back!</h1>
-
+<div class="container mt-4">
+    <br><br>
+    
+    <!-- Statistics Cards -->
     <div class="row">
-        <!-- Active Reservations -->
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="stats-card">
                 <h5>Active Reservations</h5>
-                <p><?= htmlspecialchars($view->activeReservation); ?></p>
+                <div class="stats-value"><?= htmlspecialchars($view->activeReservation); ?></div>
             </div>
         </div>
-        <!-- Total Borrowings -->
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="stats-card">
                 <h5>Total Borrowings</h5>
-                <p><?= htmlspecialchars($view->borrowingCount); ?></p>
+                <div class="stats-value"><?= htmlspecialchars($view->borrowingCount); ?></div>
+                <a href="booking-history.php" class="btn btn-sm btn-info mt-2">View History</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h5>Available Charging Points</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->availableChargingPoints ?? 0); ?></div>
+                <a href="browse-charger.php" class="btn btn-sm btn-success mt-2">Find Chargers</a>
             </div>
         </div>
     </div>
-
-    <!-- Calendar Section -->
-    <div class="calendar">
-        <h4>My Calendar</h4>
-        <div class="calendar-header">
-            <button id="prevMonth" class="btn btn-secondary">Previous</button>
-            <h5 id="monthYear"></h5>
-            <button id="nextMonth" class="btn btn-secondary">Next</button>
+    
+    <div class="row mt-4">
+        <!-- Calendar Section -->
+        <div class="col-md-8">
+            <div class="calendar">
+                <h4>My Reservation Calendar</h4>
+                <div class="calendar-header">
+                    <button id="prevMonth" class="btn btn-secondary">Previous</button>
+                    <h5 id="monthYear"></h5>
+                    <button id="nextMonth" class="btn btn-secondary">Next</button>
+                </div>
+                
+                <div class="weekday-header calendar-grid">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                
+                <div class="calendar-grid" id="calendar"></div>
+                
+              
+            </div>
         </div>
-        <div class="calendar-grid" id="calendar"></div>
+        
+        <!-- Upcoming Reservations -->
+        <div class="col-md-4">
+            <div class="upcoming-reservations">
+                <h4>Upcoming Reservations</h4>
+                
+                <?php if (empty($view->upcomingReservations)): ?>
+                    <p class="text-muted">No upcoming reservations.</p>
+                <?php else: ?>
+                    <?php foreach ($view->upcomingReservations as $reservation): ?>
+                        <div class="reservation-item">
+                            <h6><?= htmlspecialchars($reservation['location_name'] ?? $reservation['address']); ?></h6>
+                            <p class="mb-1">
+                                <strong>Date:</strong> <?= date('d M Y', strtotime($reservation['reservation_date'])); ?><br>
+                                <strong>Time:</strong> <?= date('H:i', strtotime($reservation['reservation_time'])); ?><br>
+                                <strong>Host:</strong> <?= htmlspecialchars($reservation['host_name']); ?>
+                            </p>
+                            <a href="reservation-details.php?id=<?= $reservation['id']; ?>" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                
+                <div class="mt-3 text-center">
+                    <a href="browse-charger.php" class="btn btn-primary">Find New Charging Points</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-    <br><br><br><br>
-
- 
+<br><br>
 <script>
-    // Pass bookings data from PHP to JavaScript
     window.bookings = <?= json_encode($view->bookings ?? []); ?>;
 </script>
-<script src="js/homeRentalUser.js"></script>   
+
 <?php require('template/footer.phtml') ?>

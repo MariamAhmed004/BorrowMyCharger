@@ -1,17 +1,13 @@
 <?php
-
 require_once 'Models/Database.php';
-
 class BookingHistory {
     private $dbHandle;  
     private $userId;
     
     public function __construct($userId) {
-
         $this->userId = $userId;
         $this->dbHandle = Database::getInstance()->getDbConnection();
     }
-
     //get user active reservations count
     public function getUserBookingHistory() {
         $sql = "SELECT b.*, cpa.streetName, cpa.house_number 
@@ -24,10 +20,8 @@ class BookingHistory {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
     //fetch one booking details
     public function getBookingDetails($bookingId) {
-
         $sql = "SELECT 
                     b.*, 
                     cpa.streetName, 
@@ -35,7 +29,9 @@ class BookingHistory {
                     cpa.road,
                     cpa.block, 
                     c.city_name,
-                    cpa.postcode, 
+                    cpa.postcode,
+                    cpa.latitude,
+                    cpa.longitude, 
                     cp.price_per_kwh, 
                     cp.charge_point_picture_url,
                     ho.first_name AS ownerfirst_name, 
@@ -51,10 +47,5 @@ class BookingHistory {
         $stmt->bindParam(':booking_id', $bookingId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
-
     }
-    
-   
 }
-
-

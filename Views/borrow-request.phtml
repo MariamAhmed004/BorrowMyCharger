@@ -1,6 +1,66 @@
 <?php require('template/header.phtml') ?>
 
-<p>This is the borrow-request page for homeowners</p>
+<div class="container mt-4">
+    <h2>Booking Requests for Your Charge Points</h2>
+    
+    <?php if (isset($view->actionMessage)): ?>
+        <div class="alert <?php echo strpos($view->actionMessage, 'Failed') !== false ? 'alert-danger' : 'alert-success'; ?>" role="alert">
+            <?php echo $view->actionMessage; ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (empty($view->bookingRequests)): ?>
+        <div class="alert alert-info">You have no booking requests at this time.</div>
+    <?php else: ?>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Charge Point</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($view->bookingRequests as $booking): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($booking['booking_id']); ?></td>
+                        <td><?php echo htmlspecialchars($booking['first_name'] . ' ' . $booking['last_name']); ?></td>
+                        <td><?php echo date('d M Y', strtotime($booking['booking_date'])); ?></td>
+                        <td><?php echo date('H:i', strtotime($booking['booking_time'])); ?></td>
+                        <td><?php echo htmlspecialchars($booking['streetName'] . ', ' . $booking['postcode']); ?></td>
+                        <td>£<?php echo number_format($booking['price_per_kwh'], 2); ?>/kWh</td>
+                        <td>
+                            <span class="badge <?php 
+                                echo $booking['booking_status_id'] == 1 ? 'bg-warning' : 
+                                    ($booking['booking_status_id'] == 2 ? 'bg-success' : 'bg-danger'); 
+                            ?>">
+                                <?php echo htmlspecialchars($booking['booking_status_title']); ?>
+                            </span>
+                        </td>
+                            <td><a href="borrow-request-details.php?booking_id=<?= $booking['booking_id']; ?>" class="btn btn-info">View Details</a></td>
+                        <td>
+                            <?php if ($booking['booking_status_id'] == 1): // Pending ?>
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="booking_id" value="<?php echo $booking['booking_id']; ?>">
+                                    <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
+                                </form>
+                            <?php else: ?>
+                                <span class="text-muted">Processed</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+</div>
 
 <?php require('template/footer.phtml') ?>
-

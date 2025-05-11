@@ -19,7 +19,7 @@ $rentalUserHome = new RentalUserHome($userId);
 $view->bookings = $rentalUserHome->getUserActiveReservations();
 $view->activeReservation= $rentalUserHome->getUserActiveReservationCount();
 $view->borrowingCount = $rentalUserHome->getUserBorrowingCount();
-
+$view->availableChargingPoints = $rentalUserHome->getTotalChargePoints();
 $errorMessage = '';
 
 

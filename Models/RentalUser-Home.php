@@ -42,5 +42,13 @@ class RentalUserHome {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
+   // Get total number of charge points 
+public function getTotalChargePoints() {
+    $sql = "SELECT COUNT(*) FROM Pro_ChargePoint";
+    $stmt = $this->dbHandle->prepare($sql);
+   
+    $stmt->execute();
+    return $stmt->fetchColumn(); 
+}
 }

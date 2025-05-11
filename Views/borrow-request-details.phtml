@@ -1,0 +1,310 @@
+<?php require('template/header.phtml') ?>
+
+<div class="container py-5">
+    <!-- Custom CSS for color scheme -->
+    <style>
+        :root {
+            --dark-gray: #61656F;
+            --medium-gray: #748771;
+            --deep-emerald: #044827;
+            --teal: #2F6867;
+            --light-gray: #E8E8E8;
+        }
+        
+        /* Remove background color override */
+        
+        .custom-card {
+            border: none !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+        }
+        
+        .card-header-primary {
+            background-color: var(--deep-emerald) !important;
+            color: white !important;
+        }
+        
+        .card-header-secondary {
+            background-color: var(--teal) !important;
+            color: white !important;
+        }
+        
+        .card-header-tertiary {
+            background-color: var(--medium-gray) !important;
+            color: white !important;
+        }
+        
+        .icon-bg {
+            background-color: var(--light-gray) !important;
+        }
+        
+        .text-primary-custom {
+            color: var(--deep-emerald) !important;
+        }
+        
+        .text-secondary-custom {
+            color: var(--teal) !important;
+        }
+        
+        .btn-primary-custom {
+            background-color: var(--deep-emerald) !important;
+            border-color: var(--deep-emerald) !important;
+            color: white !important;
+        }
+        
+        .btn-outline-custom {
+            background-color: transparent !important;
+            border-color: var(--dark-gray) !important;
+            color: var(--dark-gray) !important;
+        }
+        
+        .btn-outline-custom:hover {
+            background-color: var(--dark-gray) !important;
+            color: white !important;
+        }
+        
+        /* Center content styles */
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+            float: none;
+        }
+    </style>
+    
+    <!-- Page Header -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-12 text-center">
+            <h2 class="display-5 fw-bold text-primary-custom border-bottom pb-3 mb-4">
+                <i class="bi bi-calendar-check"></i> Booking Request Details
+            </h2>
+        </div>
+    </div>
+
+    <!-- Notification Messages -->
+    <?php if (isset($view->actionMessage)): ?>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 content-container">
+                <div class="alert shadow-sm fade show" 
+                     style="background-color: <?= strpos($view->actionMessage, 'Failed') !== false ? '#61656F' : '#748771'; ?>; color: white;" 
+                     role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi <?= strpos($view->actionMessage, 'Failed') !== false ? 'bi-exclamation-triangle' : 'bi-check-circle'; ?> me-2 fs-4"></i>
+                        <div><?= htmlspecialchars($view->actionMessage); ?></div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($view->bookingDetails)): ?>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 content-container">
+                <!-- Booking Information Card -->
+                <div class="card custom-card mb-4 overflow-hidden">
+                    <div class="card-header card-header-primary py-3">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Booking Information</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-hash text-primary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Booking ID</div>
+                                        <div class="fw-bold"><?= htmlspecialchars($view->bookingDetails['booking_id']); ?></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-calendar-event text-primary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Date</div>
+                                        <div class="fw-bold"><?= date('d M Y', strtotime($view->bookingDetails['booking_date'])); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-clock text-primary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Time</div>
+                                        <div class="fw-bold"><?= date('H:i', strtotime($view->bookingDetails['booking_time'])); ?></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-currency-pound text-primary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Price</div>
+                                        <div class="fw-bold">£<?= number_format($view->bookingDetails['price_per_kwh'], 2); ?>/kWh</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-clock-history text-primary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Requested on</div>
+                                        <div class="fw-bold"><?= date('d M Y H:i', strtotime($view->bookingDetails['created_at'] ?? 'now')); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-diagram-3 text-primary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Status</div>
+                                        <div>
+                                            <span class="badge px-3 py-2 rounded-pill fs-6" 
+                                                  style="background-color: <?= 
+                                                    $view->bookingDetails['booking_status_id'] == 1 ? '#748771' : 
+                                                    ($view->bookingDetails['booking_status_id'] == 2 ? '#044827' : '#61656F');
+                                                  ?>; color: white;">
+                                                <?= htmlspecialchars($view->bookingDetails['booking_status_title']); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <?php if (isset($view->bookingDetails['updated_at']) && $view->bookingDetails['booking_status_id'] != 1): ?>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-bg p-2 rounded-3 me-3">
+                                            <i class="bi bi-arrow-repeat text-primary-custom fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small">Last updated</div>
+                                            <div class="fw-bold"><?= date('d M Y H:i', strtotime($view->bookingDetails['updated_at'])); ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($view->bookingDetails['booking_status_id'] == 1): ?>
+                            <div class="mt-4 pt-3 border-top">
+                                <h6 class="text-muted mb-3">Booking Actions</h6>
+                                <form method="post" class="d-flex gap-3">
+                                    <input type="hidden" name="booking_id" value="<?= $view->bookingDetails['booking_id']; ?>">
+                                    <button type="submit" name="action" value="approve" class="btn btn-primary-custom btn-lg w-50 fw-bold">
+                                        <i class="bi bi-check-circle me-2"></i>Approve
+                                    </button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-outline-custom btn-lg w-50 fw-bold">
+                                        <i class="bi bi-x-circle me-2"></i>Reject
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Customer Information Card -->
+                <div class="card custom-card overflow-hidden mb-4">
+                    <div class="card-header card-header-secondary py-3">
+                        <h5 class="mb-0"><i class="bi bi-person-fill me-2"></i>Customer Information</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-person text-secondary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Name</div>
+                                        <div class="fw-bold"><?= htmlspecialchars($view->bookingDetails['first_name'] . ' ' . $view->bookingDetails['last_name']); ?></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-person-badge text-secondary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Username</div>
+                                        <div class="fw-bold"><?= htmlspecialchars($view->bookingDetails['username']); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-telephone text-secondary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Phone</div>
+                                        <div class="fw-bold"><?= htmlspecialchars($view->bookingDetails['customer_phone']); ?></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-bg p-2 rounded-3 me-3">
+                                        <i class="bi bi-envelope text-secondary-custom fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Email</div>
+                                        <div class="fw-bold"><?= htmlspecialchars($view->bookingDetails['customer_email']); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <?php if (isset($view->bookingDetails['notes']) && !empty($view->bookingDetails['notes'])): ?>
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header card-header-tertiary py-3">
+                            <h5 class="mb-0"><i class="bi bi-chat-quote-fill me-2"></i>Customer Notes</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="icon-bg p-3 rounded-3">
+                                <i class="bi bi-quote fs-3 text-secondary-custom"></i>
+                                <p class="mb-0 fst-italic"><?= nl2br(htmlspecialchars($view->bookingDetails['notes'])); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Right Column removed, content moved to the main column -->
+        </div>
+    <?php else: ?>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 content-container">
+                <div class="alert shadow-sm p-4 rounded-3" style="background-color: #61656F; color: white;">
+                    <div class="d-flex">
+                        <i class="bi bi-exclamation-triangle-fill fs-1 me-3"></i>
+                        <div>
+                            <h4 class="alert-heading">Booking Not Found</h4>
+                            <p class="mb-0">The booking request you're looking for doesn't exist or you don't have permission to view it.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<?php require('template/footer.phtml') ?>
