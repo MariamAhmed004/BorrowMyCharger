@@ -1,296 +1,379 @@
 <?php
-session_start();
-require_once('Models/myChargePoint.php');
+require_once('Models/chargePoint1.php');
+// Start the session only if it is not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $view = new stdClass();
-$view->pageTitle = 'My Charger';
+$view->pageTitle = 'My Charge Points';
 $view->activePage = 'my-charge-point';
 $view->message = null;
 $view->messageType = null;
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+$chargePointModel = new MyChargePointModel();
+$userId = $_SESSION['user_id'];
 
-$myChargePointModel = new MyChargePoint();
-
+// Handle different actions via AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
     $response = ['success' => false, 'message' => 'Invalid request'];
-    
     $action = $_POST['action'] ?? '';
-    
-    switch ($action) {
-        case 'add':
-            $response = handleAddChargePoint($myChargePointModel);
-            break;
-        case 'update':
-            $response = handleUpdateChargePoint($myChargePointModel);
-            break;
-        case 'delete':
-            $response = handleDeleteChargePoint($myChargePointModel);
-            break;
-        case 'getCities':
-            $cities = $myChargePointModel->getCities();
-            $response = ['success' => true, 'cities' => $cities];
-            break;
-        case 'getChargePoint':
-            $chargePoint = $myChargePointModel->getUserChargePoint();
-            $response = [
-                'success' => ($chargePoint !== false),
-                'chargePoint' => $chargePoint
-            ];
-            break;
-        default:
-            $response = ['success' => false, 'message' => 'Invalid action'];
+
+    try {
+        switch ($action) {
+            case 'add':
+                $response = handleAddChargePoint($chargePointModel, $userId);
+                break;
+            case 'update':
+                $response = handleUpdateChargePoint($chargePointModel, $userId);
+                break;
+            case 'delete':
+                $response = handleDeleteChargePoint($chargePointModel, $userId);
+                break;
+            default:
+                $response = ['success' => false, 'message' => 'Invalid action'];
+        }
+    } catch (Exception $e) {
+        $response = [
+            'success' => false, 
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ];
     }
-    
+
     echo json_encode($response);
     exit();
 }
 
-$view->cities = $myChargePointModel->getCities();
-$view->chargePoint = $myChargePointModel->getUserChargePoint();
+// Fetch cities and user's charge points for the view
+$view->cities = $chargePointModel->getAllCities();
+$view->chargePoints = $chargePointModel->getUserChargePoint($userId);
+$view->availabilityStatuses = $chargePointModel->getAvailabilityStatuses();
+
+// Render the view
 require_once('Views/my-charge-point.phtml');
 
-function handleAddChargePoint($model) {
-    try {
-        $requiredFields = ['home', 'road', 'block', 'city', 'cost', 'streetName', 'postcode', 'latitude', 'longitude'];
-        foreach ($requiredFields as $field) {
-            if (!isset($_POST[$field]) || empty($_POST[$field])) {
-                return ['success' => false, 'message' => 'All fields are required'];
+/**
+ * Process available days and times data from the form
+ * @return array Processed availability data in format suitable for database operations
+ */
+function processAvailableDaysTimes() {
+    $availabilityData = [];
+    
+    // Check if selected_days array exists in the POST data
+    if(isset($_POST['selected_days']) && is_array($_POST['selected_days'])) {
+        // For each selected day
+        foreach($_POST['selected_days'] as $day) {
+            // Check if there are times selected for this day
+            if(isset($_POST['day_times'][$day]) && is_array($_POST['day_times'][$day])) {
+                // Add this day and its times to the result array
+                $availabilityData[$day] = $_POST['day_times'][$day];
             }
         }
+    }
+    
+    return $availabilityData;
+}
 
-        $road = intval($_POST['road']);
-        $block = intval($_POST['block']);
-        $cost = floatval($_POST['cost']);
-        $cityId = intval($_POST['city']);
-        
-        // Validate latitude and longitude
-        $latitude = floatval($_POST['latitude']);
-        $longitude = floatval($_POST['longitude']);
-        if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
-            return ['success' => false, 'message' => 'Invalid latitude or longitude values'];
+/**
+ * Handle add charge point action
+ */
+function handleAddChargePoint($model, $userId) {
+    $errors = [];
+    $requiredFields = [
+        'streetName' => 'Street Name',
+        'city_id' => 'City',
+        'postcode' => 'Postcode',
+        'house_number' => 'House Number',
+        'road' => 'Road',
+        'block' => 'Block',
+        'price_per_kwh' => 'Price per kWh',
+        'latitude' => 'Latitude',
+        'longitude' => 'Longitude'
+    ];
+    
+    // Validate required fields
+    foreach ($requiredFields as $field => $label) {
+        if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+            $errors[$field] = "$label is required";
         }
+    }
 
-        if ($road <= 0 || $block <= 0 || $cost <= 0 || $cityId <= 0) {
-            return ['success' => false, 'message' => 'Invalid numeric values'];
-        }
-        
-        $postcode = trim($_POST['postcode']);
-        if (!preg_match('/^[a-zA-Z0-9\s-]+$/', $postcode)) {
-            return ['success' => false, 'message' => 'Invalid postcode format'];
-        }
-        
-        $streetName = trim($_POST['streetName']);
-        if (!preg_match('/^[a-zA-Z0-9\s,\'-]+$/', $streetName)) {
-            return ['success' => false, 'message' => 'Invalid street name format'];
-        }
-        
-        if (!isset($_FILES['imageUpload']) || $_FILES['imageUpload']['error'] !== UPLOAD_ERR_OK) {
-            return ['success' => false, 'message' => 'Image upload is required'];
-        }
-
-        $availabilityDays = [];
-        if (isset($_POST['days']) && is_array($_POST['days'])) {
-            foreach ($_POST['days'] as $day) {
-                $times = isset($_POST['times'][$day]) && is_array($_POST['times'][$day]) 
-                    ? $_POST['times'][$day] 
-                    : [];
-                
-                $availabilityDays[$day] = $times;
+    // Validate days and times
+    if (!isset($_POST['selected_days']) || !is_array($_POST['selected_days']) || empty($_POST['selected_days'])) {
+        $errors['availableDays'] = "At least one day must be selected";
+    } else {
+        // Check if each day has at least one time slot selected
+        foreach ($_POST['selected_days'] as $day) {
+            if (!isset($_POST['day_times'][$day]) || !is_array($_POST['day_times'][$day]) || empty($_POST['day_times'][$day])) {
+                $errors['availableDays'] = "Each selected day must have at least one time slot";
+                break;
             }
         }
+    }
 
-        $imagePath = $model->uploadImage($_FILES['imageUpload']);
-        if ($imagePath === false) {
-            return ['success' => false, 'message' => 'Image upload failed'];
-        }
+    // Image upload validation
+    if (!isset($_FILES['charge_point_picture']) || $_FILES['charge_point_picture']['error'] !== UPLOAD_ERR_OK) {
+        $errors['charge_point_picture'] = 'Charge point picture is required';
+    }
 
-        $data = [
-            'house_number' => intval($_POST['home']),
-            'road' => $road,
-            'block' => $block,
-            'city_id' => $cityId,
-            'streetName' => $streetName,
-            'postcode' => $postcode,
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-            'price_per_kwh' => $cost,
-            'availability_status_id' => 1,
-            'availability_days' => $availabilityDays
+    // Return errors if any
+    if (!empty($errors)) {
+        return [
+            'success' => false, 
+            'errors' => $errors
         ];
+    }
 
-        $chargePointId = $model->addChargePoint($data, $imagePath);
-        
-        if ($chargePointId !== false) {
+    // Validate and sanitize inputs
+    $data = [
+        'streetName' => trim($_POST['streetName']),
+        'postcode' => trim($_POST['postcode']),
+        'latitude' => floatval($_POST['latitude']),
+        'longitude' => floatval($_POST['longitude']),
+        'city_id' => intval($_POST['city_id']),
+        'house_number' => intval($_POST['house_number']),
+        'road' => intval($_POST['road']),
+        'block' => intval($_POST['block']),
+        'price_per_kwh' => floatval($_POST['price_per_kwh'])
+    ];
+
+    // Process available days and times
+    $availabilityData = processAvailableDaysTimes();
+
+    // Additional validation
+    foreach ($data as $key => $value) {
+        if ($key !== 'streetName' && $key !== 'postcode' && $key !== 'price_per_kwh') {
+            if ($value <= 0) {
+                $errors[$key] = "Invalid $key value";
+            }
+        }
+    }
+
+    if (!empty($errors)) {
+        return [
+            'success' => false, 
+            'errors' => $errors
+        ];
+    }
+
+    // Image upload logic
+    $uploadDir = 'uploads/charge-points/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    $fileName = uniqid() . '_' . basename($_FILES['charge_point_picture']['name']);
+    $uploadPath = $uploadDir . $fileName;
+
+    if (!move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $uploadPath)) {
+        return [
+            'success' => false, 
+            'message' => 'Failed to upload image'
+        ];
+    }
+
+    // Add charge point picture URL to data
+    $data['charge_point_picture_url'] = $uploadPath;
+
+    try {
+        // Add charge point
+        $chargePointId = $model->addChargePoint($userId, $data);
+
+        if ($chargePointId) {
+            // Save available days and times
+            foreach ($availabilityData as $day => $times) {
+                $model->saveChargePointAvailability($chargePointId, $day, $times);
+            }
+            
             return [
                 'success' => true, 
                 'message' => 'Charge point added successfully',
                 'chargePointId' => $chargePointId
             ];
         } else {
-            return ['success' => false, 'message' => 'Failed to add charge point'];
+            // Remove uploaded image if charge point creation fails
+            if (file_exists($uploadPath)) {
+                unlink($uploadPath);
+            }
+            return [
+                'success' => false, 
+                'message' => 'Failed to add charge point'
+            ];
         }
-
     } catch (Exception $e) {
-        error_log("Error in handleAddChargePoint: " . $e->getMessage());
-        return ['success' => false, 'message' => 'An error occurred'];
+        // Remove uploaded image on error
+        if (file_exists($uploadPath)) {
+            unlink($uploadPath);
+        }
+        throw $e;
     }
 }
 
-function handleUpdateChargePoint($model) {
-    try {
-        if (!isset($_POST['chargePointId']) || empty($_POST['chargePointId'])) {
-            return ['success' => false, 'message' => 'Charge point ID is required'];
+/**
+ * Handle update charge point action
+ */
+function handleUpdateChargePoint($model, $userId) {
+    $errors = [];
+    $requiredFields = [
+        'charge_point_id' => 'Charge Point ID',
+        'streetName' => 'Street Name',
+        'city_id' => 'City',
+        'postcode' => 'Postcode',
+        'house_number' => 'House Number',
+        'road' => 'Road',
+        'block' => 'Block',
+        'price_per_kwh' => 'Price per kWh',
+        'latitude' => 'Latitude',
+        'longitude' => 'Longitude'
+    ];
+    
+    // Validate required fields
+    foreach ($requiredFields as $field => $label) {
+        if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+            $errors[$field] = "$label is required";
         }
+    }
 
-        $requiredFields = ['home', 'road', 'block', 'city', 'cost', 'addressId', 'streetName', 'postcode', 'latitude', 'longitude'];
-        foreach ($requiredFields as $field) {
-            if (!isset($_POST[$field]) || empty($_POST[$field])) {
-                return ['success' => false, 'message' => 'All fields are required'];
+    // Validate days and times
+    if (!isset($_POST['selected_days']) || !is_array($_POST['selected_days']) || empty($_POST['selected_days'])) {
+        $errors['availableDays'] = "At least one day must be selected";
+    } else {
+        // Check if each day has at least one time slot selected
+        foreach ($_POST['selected_days'] as $day) {
+            if (!isset($_POST['day_times'][$day]) || !is_array($_POST['day_times'][$day]) || empty($_POST['day_times'][$day])) {
+                $errors['availableDays'] = "Each selected day must have at least one time slot";
+                break;
             }
         }
+    }
 
-        $road = intval($_POST['road']);
-        $block = intval($_POST['block']);
-        $cost = floatval($_POST['cost']);
-        $cityId = intval($_POST['city']);
-        $chargePointId = intval($_POST['chargePointId']);
-        $addressId = intval($_POST['addressId']);
-        
-        // Validate latitude and longitude
-        $latitude = floatval($_POST['latitude']);
-        $longitude = floatval($_POST['longitude']);
-        if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
-            return ['success' => false, 'message' => 'Invalid latitude or longitude values'];
-        }
-
-        if ($road <= 0 || $block <= 0 || $cost <= 0 || $cityId <= 0 || $chargePointId <= 0 || $addressId <= 0) {
-            return ['success' => false, 'message' => 'Invalid numeric values'];
-        }
-        
-        $postcode = trim($_POST['postcode']);
-        if (!preg_match('/^[a-zA-Z0-9\s-]+$/', $postcode)) {
-            return ['success' => false, 'message' => 'Invalid postcode format'];
-        }
-        
-        $streetName = trim($_POST['streetName']);
-        if (!preg_match('/^[a-zA-Z0-9\s,\'-]+$/', $streetName)) {
-            return ['success' => false, 'message' => 'Invalid street name format'];
-        }
-
-        $availabilityDays = [];
-        if (isset($_POST['days']) && is_array($_POST['days'])) {
-            foreach ($_POST['days'] as $day) {
-                $times = isset($_POST['times'][$day]) && is_array($_POST['times'][$day]) 
-                    ? $_POST['times'][$day] 
-                    : [];
-                
-                $availabilityDays[$day] = $times;
-            }
-        }
-
-        $data = [
-            'charge_point_id' => $chargePointId,
-            'charge_point_address_id' => $addressId,
-            'house_number' => intval($_POST['home']),
-            'road' => $road,
-            'block' => $block,
-            'city_id' => $cityId,
-            'streetName' => $streetName,
-            'postcode' => $postcode,
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-            'price_per_kwh' => $cost,
-            'availability_status_id' => 2,
-            'availability_days' => $availabilityDays
+    // Return errors if any
+    if (!empty($errors)) {
+        return [
+            'success' => false, 
+            'errors' => $errors
         ];
+    }
 
-        $imagePath = null;
-        if (isset($_FILES['imageUpload']) && $_FILES['imageUpload']['error'] === UPLOAD_ERR_OK) {
-            $imagePath = $model->uploadImage($_FILES['imageUpload']);
-            if ($imagePath === false) {
-                return ['success' => false, 'message' => 'Image upload failed'];
+    $chargePointId = intval($_POST['charge_point_id']);
+
+    // Validate and sanitize inputs
+    $data = [
+        'charge_point_id' => $chargePointId,
+        'streetName' => trim($_POST['streetName']),
+        'postcode' => trim($_POST['postcode']),
+        'latitude' => floatval($_POST['latitude']),
+        'longitude' => floatval($_POST['longitude']),
+        'city_id' => intval($_POST['city_id']),
+        'house_number' => intval($_POST['house_number']),
+        'road' => intval($_POST['road']),
+        'block' => intval($_POST['block']),
+        'price_per_kwh' => floatval($_POST['price_per_kwh'])
+    ];
+
+    // Process available days and times
+    $availabilityData = processAvailableDaysTimes();
+
+    // Additional validation
+    foreach ($data as $key => $value) {
+        if ($key !== 'charge_point_id' && $key !== 'streetName' && $key !== 'postcode' && $key !== 'price_per_kwh') {
+            if ($value <= 0) {
+                $errors[$key] = "Invalid $key value";
             }
         }
+    }
 
-        $success = $model->updateChargePoint($data, $imagePath);
+    if (!empty($errors)) {
+        return [
+            'success' => false, 
+            'errors' => $errors
+        ];
+    }
+
+    // Handle image upload (optional)
+    $uploadPath = $_POST['existing_picture_url'] ?? '';
+    if (isset($_FILES['charge_point_picture']) && $_FILES['charge_point_picture']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = 'uploads/charge-points/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $fileName = uniqid() . '_' . basename($_FILES['charge_point_picture']['name']);
+        $uploadPath = $uploadDir . $fileName;
         
+        if (!move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $uploadPath)) {
+            return [
+                'success' => false, 
+                'message' => 'Failed to upload image'
+            ];
+        }
+    }
+
+    // Add charge point picture URL to data
+    if (!empty($uploadPath)) {
+        $data['charge_point_picture_url'] = $uploadPath;
+    }
+
+    try {
+        // Update charge point
+        $success = $model->updateChargePoint($chargePointId, $data);
+
         if ($success) {
+            // First, delete all existing availability for this charge point
+            $model->deleteChargePointAvailability($chargePointId);
+            
+            // Then save the new availability
+            foreach ($availabilityData as $day => $times) {
+                $model->saveChargePointAvailability($chargePointId, $day, $times);
+            }
+            
             return [
                 'success' => true, 
                 'message' => 'Charge point updated successfully'
             ];
         } else {
-            return ['success' => false, 'message' => 'Failed to update charge point'];
+            return [
+                'success' => false, 
+                'message' => 'Failed to update charge point'
+            ];
         }
-
     } catch (Exception $e) {
-        error_log("Error in handleUpdateChargePoint: " . $e->getMessage());
-        return ['success' => false, 'message' => 'An error occurred'];
+        // If this is a new image that failed, delete it
+        if ($uploadPath !== $_POST['existing_picture_url'] && file_exists($uploadPath)) {
+            unlink($uploadPath);
+        }
+        throw $e;
     }
 }
 
-function handleDeleteChargePoint($model) {
+/**
+ * Handle delete charge point action
+ */
+function handleDeleteChargePoint($model, $userId) {
+    if (!isset($_POST['charge_point_id'])) {
+        return [
+            'success' => false,
+            'message' => 'Charge point ID is required'
+        ];
+    }
+    $chargePointId = intval($_POST['charge_point_id']);
+
     try {
-        // Detailed logging for debugging
-        error_log("=== DELETE CHARGE POINT REQUEST ===");
-        error_log("Raw POST data: " . print_r($_POST, true));
-        error_log("User ID from session: " . $_SESSION['user_id']);
+        // First delete availability data
+        $model->deleteChargePointAvailability($chargePointId);
         
-        // Check if chargePointId exists in request
-        if (!isset($_POST['chargePointId']) || empty($_POST['chargePointId'])) {
-            error_log("Missing chargePointId in request");
-            return ['success' => false, 'message' => 'Charge point ID is required'];
-        }
-
-        $chargePointId = $_POST['chargePointId'];
-        error_log("Processing deletion for charge point ID: " . $chargePointId);
-        
-        // Get all user charge points for debugging
-        $userChargePoint = $model->getUserChargePoint();
-        error_log("User charge point data: " . print_r($userChargePoint, true));
-        
-        // If user has no charge points
-        if (!$userChargePoint) {
-            error_log("User doesn't have any charge points");
-            return ['success' => false, 'message' => 'You don\'t have any charge points to delete'];
-        }
-        
-        // Compare IDs (convert both to strings for safe comparison)
-        $userChargePointId = (string)($userChargePoint['charge_point_id'] ?? '');
-        $requestedId = (string)$chargePointId;
-        
-        error_log("Comparing user's charge point ID: '$userChargePointId' with requested ID: '$requestedId'");
-        error_log("Types - user's ID: " . gettype($userChargePointId) . ", requested ID: " . gettype($requestedId));
-        
-        if ($userChargePointId !== $requestedId) {
-            error_log("Authorization failed - IDs don't match: '{$userChargePointId}' !== '{$requestedId}'");
-            return ['success' => false, 'message' => 'You are not authorized to delete this charge point'];
-        }
-        
-        error_log("Authorization check passed - proceeding with deletion");
-
-        // Attempt to delete the charge point
+        // Then delete the charge point
         $success = $model->deleteChargePoint($chargePointId);
-        error_log("Delete operation result: " . ($success ? 'success' : 'failure'));
 
-        if ($success) {
-            return [
-                'success' => true, 
-                'message' => 'Charge point deleted successfully'
-            ];
-        } else {
-            error_log('Database operation failed for charge point deletion');
-            return ['success' => false, 'message' => 'Database operation failed. Please try again later.'];
-        }
-        
+        return [
+            'success' => $success, 
+            'message' => $success 
+                ? 'Charge point deleted successfully' 
+                : 'Failed to delete charge point'
+        ];
     } catch (Exception $e) {
-        error_log("Exception in handleDeleteChargePoint: " . $e->getMessage());
-        error_log("Stack trace: " . $e->getTraceAsString());
-        return ['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()];
+        return [
+            'success' => false,
+            'message' => $e->getMessage()
+        ];
     }
 }

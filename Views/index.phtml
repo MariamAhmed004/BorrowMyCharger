@@ -1,50 +1,45 @@
+<link rel="stylesheet" href="css/home.css">
 <?php require('template/header.phtml') ?>
-   <!-- HOME SLIDER -->
-     <section id="home">
-          <div class="row">
-               <div class="owl-carousel owl-theme home-slider">
-                    <div class="item item-first">
-                       <div class="caption">
-    <div class="bg-overlay"></div> 
-    <div class="container">
-        <div class="col-md-6 col-sm-12">
-            <h1>Share Your EV Charger</h1>
-            <h3>Earn money by renting out your home charging point when you're not using it.</h3>
-            <a href="register.php" class="section-btn btn btn-default">Register Now</a>
+     <main>
+  <section id="carousel">
+    <div class="carousel">
+        <div id="wrapper">
+            <div id="carouselItem1" class="carouselContent">
+                <span>
+                    <h1>Welcome to Borrow My Charger</h1>
+                   
+                </span>
+            </div>
+            <div id="carouselItem2" class="carouselContent">
+                <span>
+                    <h2>Homeowners</h2>
+                    <p>Monetize Your EV Charger When You're Not Using It</p>
+                </span>
+            </div>
+            <div id="carouselItem3" class="carouselContent">
+                <span>
+                    <h2>EV Drivers</h2>
+                    <p>Find Nearby Charging Points With Real-Time Availability</p>
+                </span>
+            </div>
+            <div id="carouselItem4" class="carouselContent">
+                <span>
+                    <h2>Join Today</h2>
+                    <p>Empower EV Travel, One Charge at a Time</p>
+                </span>
+            </div>
         </div>
     </div>
-</div>
+    <div id="navLinks">
+        <ul>
+            <li class="itemLinks active" data-pos="0"></li>
+            <li class="itemLinks" data-pos="1"></li>
+            <li class="itemLinks" data-pos="2"></li>
+            <li class="itemLinks" data-pos="3"></li>
+        </ul>
+    </div>
+</section>
 
-                    </div>
-
-                    <div class="item item-second">
-                         <div class="caption">
-                              <div class="container">
-                                   <div class="col-md-6 col-sm-12">
-                                        <h1>Need a Charge? Find a nearby charger.</h1>
-                                        <h3>Book affordable charging points in your neighborhood with just a few clicks.</h3>
-                                        <a href="search.php" class="section-btn btn btn-default">Find Chargers</a>
-                                   </div>
-                              </div>
-                         </div>
-                    </div>
-
-                    <div class="item item-third">
-                         <div class="caption">
-                              <div class="container">
-                                   <div class="col-md-6 col-sm-12">
-                                        <h1>Community Powered Charging</h1>
-                                        <h3>Join thousands of EV owners sharing charging resources and making electric vehicle ownership easier for everyone.</h3>
-                                        <a href="about.php" class="section-btn btn btn-default">Learn More</a>
-                                   </div>
-                              </div>
-                         </div>
-                    </div>
-               </div>
-          </div>
-     </section>
-
-     <main>
           <section>
                <div class="container">
                     <div class="row">
@@ -61,6 +56,30 @@
                </div>
           </section>
 
+         
+ <section id="map-preview" style="background-color: #E8E9EF; padding: 60px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center mb-4">
+                <h2>Find Charging Points Near You</h2>
+                <p class="lead">Our interactive map makes it easy to locate available chargers in your area</p>
+                <select id="availability-filter" class="form-control" style="width: 200px; margin: 20px auto;">
+                    <option value="all">All</option>
+                    <option value="available">Available</option>
+                    <option value="unavailable">UnAvailable</option>
+                </select>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+    <input type="number" id="min-price" class="form-control" placeholder="Min Price" style="width: 100px;">
+    <input type="number" id="max-price" class="form-control" placeholder="Max Price" style="width: 100px;">
+</div>
+
+            </div>
+            <div class="col-md-12">
+                <div id="charger-map" style="height: 400px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"></div>
+            </div>
+        </div>
+    </div>
+</section>
           <section>
                <div class="container">
                     <div class="row">
@@ -278,22 +297,6 @@
     </div>
 </section>
 
-         <!-- MAP PREVIEW -->
-<section id="map-preview" style="background-color: #E8E9EF; padding: 60px 0;">
-     <div class="container">
-          <div class="row">
-               <div class="col-md-12 text-center mb-4">
-                    <h2>Find Charging Points Near You</h2>
-                    <p class="lead">Our interactive map makes it easy to locate available chargers in your area</p>
-               </div>
-               <div class="col-md-12">
-                    <div id="charger-map" style="height: 400px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"></div>
-                  
-               </div>
-          </div>
-     </div>
-</section>
-
      </main>
    
    <!-- FAQ Section -->
@@ -407,7 +410,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6 col-sm-12">
-                <form id="contact-form" role="form" method="post">
+                <form id="contact-form" action="index.php" role="form" method="post">
                     <div class="section-title">
                         <h2 style="color: white;">Contact us <small style="color: #E8E9EF;">Have more questions? We're here to help!</small></h2>
                     </div>
@@ -465,5 +468,10 @@
 <script src="js/contactForm.js"></script>
 <script src="js/map.js"></script>
 <script src="js/faq.js"></script>
-<script src="js/test.js"></script>
+<script src="js/home.js"></script>
+<script>
+    const chargePoints = <?php echo json_encode($chargePoints); ?>;
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjJVMZgeuOeEypf2xCiIs7vIOxXH4pakw&callback=initMap" async defer></script>
 <?php require('template/footer.phtml') ?>

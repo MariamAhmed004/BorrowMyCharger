@@ -1,0 +1,232 @@
+<?php
+require_once 'Models/chargePoint1.php';
+
+class ChargePointController {
+    private $_chargePointModel;
+
+    public function __construct() {
+        $this->_chargePointModel = new ChargePoint();
+    }
+
+    public function indexAction() {
+        // Check if user is logged in
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php');
+            exit();
+        }
+
+        // Get user's charge points
+        $chargePoints = $this->_chargePointModel->getUserChargePoints($_SESSION['user_id']);
+        
+        // Get cities for dropdown
+        $cities = $this->_chargePointModel->getCities();
+
+        // Require the view with extracted variables
+        require 'Views/my-charge-point.phtml';
+    }
+
+    public function getCityDetailsAction() {
+        header('Content-Type: application/json');
+        
+        // Check if user is logged in
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['error' => 'Unauthorized']);
+            exit();
+        }
+
+        // Validate charge point ID
+        if (!isset($_GET['charge_point_id'])) {
+            echo json_encode(['error' => 'Invalid charge point ID']);
+            exit();
+        }
+
+        // Fetch user's charge points to ensure ownership
+        $chargePoints = $this->_chargePointModel->getUserChargePoints($_SESSION['user_id']);
+        
+        // Check if the charge point belongs to the user
+        $requestedChargePoint = null;
+        foreach ($chargePoints as $point) {
+            if ($point['charge_point_id'] == $_GET['charge_point_id']) {
+                $requestedChargePoint = $point;
+                break;
+            }
+        }
+
+        if (!$requestedChargePoint) {
+            echo json_encode(['error' => 'Charge point not found']);
+            exit();
+        }
+
+        // Return full details of the charge point
+        echo json_encode($requestedChargePoint);
+        exit();
+    }
+
+    public function addChargePointAction() {
+        header('Content-Type: application/json');
+        
+        // Validate input
+        $errors = $this->validateChargePointInput($_POST);
+        if (!empty($errors)) {
+            echo json_encode(['success' => false, 'errors' => $errors]);
+            exit();
+        }
+
+        // Handle file upload for charge point picture
+        $pictureUrl = $this->uploadChargePointPicture();
+        if ($pictureUrl === false) {
+            echo json_encode(['success' => false, 'errors' => ['picture' => 'Failed to upload picture']]);
+            exit();
+        }
+
+        // Prepare data
+        $data = [
+            'postcode' => $_POST['postcode'],
+            'latitude' => $_POST['latitude'],
+            'longitude' => $_POST['longitude'],
+            'streetName' => $_POST['streetName'],
+            'city_id' => $_POST['city_id'],
+            'house_number' => $_POST['house_number'],
+            'road' => $_POST['road'],
+            'block' => $_POST['block'],
+            'price_per_kwh' => $_POST['price_per_kwh'],
+            'charge_point_picture_url' => $pictureUrl
+        ];
+
+        // Add charge point
+        session_start();
+        $result = $this->_chargePointModel->addChargePoint($_SESSION['user_id'], $data);
+
+        if ($result) {
+            echo json_encode(['success' => true, 'charge_point_id' => $result]);
+        } else {
+            echo json_encode(['success' => false, 'errors' => ['general' => 'Failed to add charge point']]);
+        }
+        exit();
+    }
+
+    public function updateChargePointAction() {
+        header('Content-Type: application/json');
+        
+        // Validate input
+        $errors = $this->validateChargePointInput($_POST);
+        if (!empty($errors)) {
+            echo json_encode(['success' => false, 'errors' => $errors]);
+            exit();
+        }
+
+        // Handle file upload for charge point picture
+        $pictureUrl = $this->uploadChargePointPicture();
+        if ($pictureUrl === false) {
+            echo json_encode(['success' => false, 'errors' => ['picture' => 'Failed to upload picture']]);
+            exit();
+        }
+
+        // Prepare data
+        $data = [
+            'postcode' => $_POST['postcode'],
+            'latitude' => $_POST['latitude'],
+            'longitude' => $_POST['longitude'],
+            'streetName' => $_POST['streetName'],
+            'city_id' => $_POST['city_id'],
+            'house_number' => $_POST['house_number'],
+            'road' => $_POST['road'],
+            'block' => $_POST['block'],
+            'price_per_kwh' => $_POST['price_per_kwh'],
+            'charge_point_picture_url' => $pictureUrl
+        ];
+
+        // Update charge point
+        $result = $this->_chargePointModel->updateChargePoint($_POST['charge_point_id'], $data);
+
+        if ($result) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'errors' => ['general' => 'Failed to update charge point']]);
+        }
+        exit();
+    }
+
+    public function deleteChargePointAction() {
+        header('Content-Type: application/json');
+        
+        if (!isset($_POST['charge_point_id'])) {
+            echo json_encode(['success' => false, 'errors' => ['general' => 'Invalid charge point']]);
+            exit();
+        }
+
+        $result = $this->_chargePointModel->deleteChargePoint($_POST['charge_point_id']);
+
+        if ($result) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'errors' => ['general' => 'Failed to delete charge point']]);
+        }
+        exit();
+    }
+
+    private function validateChargePointInput($data) {
+        $errors = [];
+
+        // Validate required fields
+        $requiredFields = [
+            'postcode', 'latitude', 'longitude', 'streetName', 'city_id', 
+            'house_number', 'road', 'block', 'price_per_kwh'
+        ];
+        foreach ($requiredFields as $field) {
+            if (empty($data[$field])) {
+                $errors[$field] = ucfirst($field) . ' is required';
+            }
+        }
+
+        // Validate numeric fields
+        $numericFields = ['latitude', 'longitude', 'house_number', 'road', 'block', 'price_per_kwh'];
+        foreach ($numericFields as $field) {
+            if (!empty($data[$field]) && !is_numeric($data[$field])) {
+                $errors[$field] = ucfirst($field) . ' must be a number';
+            }
+        }
+
+        // Validate price
+        if (!empty($data['price_per_kwh']) && ($data['price_per_kwh'] <= 0 || $data['price_per_kwh'] > 1000)) {
+            $errors['price_per_kwh'] = 'Price must be between 0 and 1000';
+        }
+
+        return $errors;
+    }
+
+    private function uploadChargePointPicture() {
+        // Check if file was uploaded
+        if (!isset($_FILES['charge_point_picture']) || $_FILES['charge_point_picture']['error'] !== UPLOAD_ERR_OK) {
+            // If no new file, return the existing URL if it exists
+            return isset($_POST['existing_picture_url']) ? $_POST['existing_picture_url'] : '';
+        }
+
+        $file = $_FILES['charge_point_picture'];
+        
+        // Validate file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file['type'], $allowedTypes)) {
+            return false;
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = 'uploads/charge_points/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate unique filename
+        $fileName = uniqid() . '_' . time() . '_' . basename($file['name']);
+        $uploadPath = $uploadDir . $fileName;
+
+        // Move uploaded file
+        if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+            return $uploadPath;
+        }
+
+        return false;
+    }
+}

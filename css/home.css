@@ -1,0 +1,118 @@
+#carousel {
+        margin: 1rem 0;
+    }
+
+ .carousel {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        height: 450px;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+#wrapper {
+        display: flex;
+        width: 400%;
+        height: 100%;
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .carouselContent {
+        width: 25%;
+        flex-shrink: 0;
+        height: 450px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        font-weight: bold;
+        text-align: center;
+        position: relative;
+        background-size: cover;
+        background-position: center;
+    }
+
+    /* Add background images for each carousel item */
+    #carouselItem1 {
+        background-image: url('/images/homepage/home-charger-1.jpg');
+    }
+
+    #carouselItem2 {
+        background-image: url('/images/homepage/home-charger-2.jpg');
+    }
+
+    #carouselItem3 {
+        background-image: url('/images/homepage/home-charger-3.jpg');
+    }
+
+    #carouselItem4 {
+        background-image: url('/images/homepage/home-charger-5.jpg');
+    }
+
+    .carouselContent::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1;
+    }
+
+    .carouselContent span {
+        position: relative;
+        z-index: 2;
+        max-width: 80%;
+        line-height: 1.4;
+        padding: 15px;
+    }
+    
+    .carouselContent h2  {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 2.6rem;
+        color: white;
+    }
+    .carouselContent h1{
+        color: white;
+    }
+    
+    .carouselContent p {
+        margin-top: 0;
+        font-size: 2rem;
+        color: #f0f0f0;
+    }
+   
+    #navLinks {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    #navLinks ul {
+        padding: 0;
+        list-style: none;
+        display: inline-flex;
+        gap: 10px;
+        margin: 0;
+    }
+
+    #navLinks ul li {
+        width: 14px;
+        height: 14px;
+        background: #ccc;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    #navLinks ul li.active {
+        background: #007bff;
+    }
+
+    #navLinks ul li:hover {
+        background: #0056b3;
+    }

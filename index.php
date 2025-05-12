@@ -1,111 +1,71 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 // Start session
 session_start();
 // Include Composer's autoloader
 require 'vendor/autoload.php'; 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once('Models/chargePoint1.php');
 
-$view = new stdClass();
-$view->pageTitle = '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $message = $_POST['message'];
 
-// Process form submission via AJAX
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $response = ['success' => false, 'message' => ''];
-    
-    // Collect form data
-    $name = htmlspecialchars($_POST['name']);
-    $email = htmlspecialchars($_POST['email']);
-    $messageContent = htmlspecialchars($_POST['message']);
-    
-    // Create a new PHPMailer instance for confirmation to user
+    // Validate input
+    if (empty($name) || empty($email) || empty($message)) {
+        echo json_encode(['success' => false, 'message' => 'All fields are required.']);
+        exit;
+    }
+
+    // Create a new PHPMailer instance
     $mail = new PHPMailer(true);
-    
+
     try {
         // Server settings
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = 'smtp.gmail.com'; // Gmail SMTP server
         $mail->SMTPAuth = true;
-        $mail->Username = 'borrowmycharger@gmail.com'; 
-        $mail->Password = 'wfev cxol dfcw qbjd'; // Use your Gmail App Password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
-        $mail->Port = 587;
-        
-        // Recipients - only send to the user
-        $mail->setFrom('borrowmycharger@gmail.com', 'BorrowMyCharger');
-        $mail->addAddress($email, $name);
-        
+        $mail->Username = 'borrowmycharger@gmail.com'; // Your Gmail address
+        $mail->Password = 'igpd eanh psic xlgt'; // Your Gmail password or App Password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587; // Use 587 for TLS
+
+        // Recipients
+        $mail->setFrom('borrowmycharger@gmail.com', 'BorrowMyCharger'); // Your email and name
+        $mail->addAddress($email, $name); // User email
+
         // Content
         $mail->isHTML(true);
-        $mail->Subject = "Confirmation: Your message has been received";
-        $mail->Body = "
-            <html>
-            <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
-                <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 5px;'>
-                    <h2 style='color: #B68942;'>Thank You for Contacting Us!</h2>
-                    <p>Hello $name,</p>
-                    <p>We have received your message and will get back to you shortly.</p>
-                    <p>Here's a copy of what you sent us:</p>
-                    <div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;'>
-                        <p><strong>Message:</strong><br>$messageContent</p>
-                    </div>
-                    <p>Best regards,<br>The Borrow My Charger Team</p>
-                </div>
-            </body>
-            </html>
-        ";
-        
-        // Send the email to user
+        $mail->Subject = 'Thank you for contacting us';
+        $mail->Body = "Hello $name,<br><br>Thank you for reaching out!<br>Your message:<br>$message<br><br>Best regards,<br>Your Company";
+
+        // Send the email
         $mail->send();
-        
-        // Create a separate email for admin notification
-        $adminMail = new PHPMailer(true);
-        
-        // Server settings (same as above)
-        $adminMail->isSMTP();
-        $adminMail->Host = 'smtp.gmail.com';
-        $adminMail->SMTPAuth = true;
-        $adminMail->Username = 'borrowmycharger@gmail.com'; 
-        $adminMail->Password = 'wfev cxol dfcw qbjd';
-        $adminMail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
-        $adminMail->Port = 587;
-        
-        // Set up admin notification email
-        $adminMail->setFrom('borrowmycharger@gmail.com', 'Contact Form Notification');
-        $adminMail->addAddress('borrowmycharger@gmail.com', 'BorrowMyCharger Admin');
-        
-        // Content for admin
-        $adminMail->isHTML(true);
-        $adminMail->Subject = "New Contact Form Submission from $name";
-        $adminMail->Body = "
-            <html>
-            <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
-                <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 5px;'>
-                    <h2 style='color: #B68942;'>New Contact Form Submission</h2>
-                    <p><strong>From:</strong> $name</p>
-                    <p><strong>Email:</strong> $email</p>
-                    <p><strong>Message:</strong></p>
-                    <div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;'>
-                        $messageContent
-                    </div>
-                    <p><small>This is an automated notification from your website's contact form.</small></p>
-                </div>
-            </body>
-            </html>
-        ";
-        
-        // Send admin notification
-        $adminMail->send();
-        
-        $response['success'] = true;
-        $response['message'] = 'Thank you! Your message has been sent successfully. We will be in touch soon.';
+        echo json_encode(['success' => true, 'message' => 'Your message has been sent!']);
     } catch (Exception $e) {
-        $response['message'] = "Sorry, there was an error sending your message. Please try again later.";
+        echo json_encode(['success' => false, 'message' => "Message could not be sent. Mailer Error: {$mail->ErrorInfo}"]);
     }
-    
-    // Return JSON response
+
+    exit;
+}
+$chargePointModel = new MyChargePointModel();
+
+if (isset($_GET['filter'])) {
+    $filter = $_GET['filter'];
+    $minPrice = isset($_GET['min_price']) && is_numeric($_GET['min_price']) ? (float)$_GET['min_price'] : null;
+    $maxPrice = isset($_GET['max_price']) && is_numeric($_GET['max_price']) ? (float)$_GET['max_price'] : null;
+
+    if ($filter === "available") {
+        $chargePoints = $chargePointModel->getAvailableChargePoints($minPrice, $maxPrice);
+    } elseif ($filter === "unavailable") {
+        $chargePoints = $chargePointModel->getUnAvailableChargePoints($minPrice, $maxPrice);
+    } else {
+        $chargePoints = $chargePointModel->getChargePointDetails($minPrice, $maxPrice);
+    }
+
     header('Content-Type: application/json');
-    echo json_encode($response);
+    echo json_encode($chargePoints);
     exit;
 }
 

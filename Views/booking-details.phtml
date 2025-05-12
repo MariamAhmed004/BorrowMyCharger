@@ -1,93 +1,92 @@
-<?php require('template/header.phtml'); ?>
-<!-- Add Leaflet CSS and JS in the head section -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details</title>
+    <link rel="stylesheet" href="css/bookingDetails.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjJVMZgeuOeEypf2xCiIs7vIOxXH4pakw"></script>
+</head>
+<body>
+    <?php require('template/header.phtml'); ?>
 
-<div class="container mt-5">
-    <br/>
-    <?php if (!empty($view->bookingDetails)): ?>
-        <h1>Booking Details</h1>
-        <div class="paragraph-container">
-            <h4>Booking ID: <?= htmlspecialchars($view->bookingDetails['booking_id']); ?></h4>
-            <?php 
-            $statusText = '';
-            $statusClass = '';
-            switch ($view->bookingDetails['booking_status_id']) {
-                case 1:
-                    $statusText = 'Pending Approval';
-                    $statusClass = 'details-pending';
-                    break;
-                case 2:
-                    $statusText = 'Approved';
-                    $statusClass = 'details-approved';
-                    break;
-                case 3:
-                    $statusText = 'Rejected';
-                    $statusClass = 'details-declined';
-                    break;
-                default:
-                    $statusText = 'Unknown';
-                    $statusClass = '';
-            }
-            ?>
-            <p>Booking Status: <span class="<?= $statusClass; ?>"><?= htmlspecialchars($statusText); ?></span></p>
-            <p>Booking Date: <?= htmlspecialchars(explode(' ', $view->bookingDetails['booking_date'])[0]); ?></p>
-            <p>Booking Time: <?= htmlspecialchars($view->bookingDetails['booking_time']); ?></p>
-        </div>
+    <div class="container mt-5">
+        <br/>
+        <?php if (!empty($view->bookingDetails)): ?>
+            <h1>Booking Details</h1>
+            <div class="paragraph-container">
+                <h4>Booking ID: <?= htmlspecialchars($view->bookingDetails['booking_id']); ?></h4>
+                <?php 
+                $statusText = '';
+                $statusClass = '';
+                switch ($view->bookingDetails['booking_status_id']) {
+                    case 1:
+                        $statusText = 'Pending Approval';
+                        $statusClass = 'details-pending';
+                        break;
+                    case 2:
+                        $statusText = 'Approved';
+                        $statusClass = 'details-approved';
+                        break;
+                    case 3:
+                        $statusText = 'Rejected';
+                        $statusClass = 'details-declined';
+                        break;
+                    default:
+                        $statusText = 'Unknown';
+                        $statusClass = '';
+                }
+                ?>
+                <p>Booking Status: <span class="<?= $statusClass; ?>"><?= htmlspecialchars($statusText); ?></span></p>
+                <p>Booking Date: <?= htmlspecialchars(explode(' ', $view->bookingDetails['booking_date'])[0]); ?></p>
+                <p>Booking Time: <?= htmlspecialchars($view->bookingDetails['booking_time']); ?></p>
+            </div>
 
-        <!-- Add Map Container -->
-        <h1>Charge Point Location</h1>
-        <div id="map">
-            <div id="map-loading">Loading map...</div>
-        </div>
+            <!-- Add Map Container -->
+            <h1>Charge Point Location</h1>
+            <div id="map" style="height: 400px;"></div>
 
-        <!-- Charge Point Details Section -->
-        <h1>Charge Point Details</h1>
-        <div class="paragraph-container">
-            <div class="charge-point-details">
-                <div class="details-column">
-                    <p>Charge Point ID: <?= htmlspecialchars($view->bookingDetails['charge_point_id']); ?></p>
-                    <p>Street Name: <?= htmlspecialchars($view->bookingDetails['streetName']); ?></p>
-                    <p>House Number: <?= htmlspecialchars($view->bookingDetails['house_number']); ?></p>
-                    <p>Road: <?= htmlspecialchars($view->bookingDetails['road']); ?></p>
-                    <p>Block: <?= htmlspecialchars($view->bookingDetails['block']); ?></p>
-                    <p>City: <?= htmlspecialchars($view->bookingDetails['city_name']); ?></p>
-                    <p>Post Code: <?= htmlspecialchars($view->bookingDetails['postcode']); ?></p>
-                    <p>Price per kWh: <?= htmlspecialchars($view->bookingDetails['price_per_kwh']); ?></p>
-                </div>
-                <div class="image-column">
-                    <img src="<?= htmlspecialchars($view->bookingDetails['charge_point_picture_url']); ?>" alt="Charge Point Image" class="img-fluid">
+            <!-- Charge Point Details Section -->
+            <h1>Charge Point Details</h1>
+            <div class="paragraph-container">
+                <div class="charge-point-details">
+                    <div class="details-column">
+                        <p>Charge Point ID: <?= htmlspecialchars($view->bookingDetails['charge_point_id']); ?></p>
+                        <p>Street Name: <?= htmlspecialchars($view->bookingDetails['streetName']); ?></p>
+                        <p>House Number: <?= htmlspecialchars($view->bookingDetails['house_number']); ?></p>
+                        <p>Road: <?= htmlspecialchars($view->bookingDetails['road']); ?></p>
+                        <p>Block: <?= htmlspecialchars($view->bookingDetails['block']); ?></p>
+                        <p>City: <?= htmlspecialchars($view->bookingDetails['city_name']); ?></p>
+                        <p>Post Code: <?= htmlspecialchars($view->bookingDetails['postcode']); ?></p>
+                        <p>Price per kWh: <?= htmlspecialchars($view->bookingDetails['price_per_kwh']); ?></p>
+                    </div>
+                    <div class="image-column">
+                        <img src="<?= htmlspecialchars($view->bookingDetails['charge_point_picture_url']); ?>" alt="Charge Point Image" class="img-fluid">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <h1>Charge Point Owner Details</h1>
-        <div class="paragraph-container">
-            <p>Homeowner Name: <?= htmlspecialchars($view->bookingDetails['ownerfirst_name'] . ' ' . $view->bookingDetails['ownerlast_name']); ?></p>
-            <p>Homeowner Phone: <?= htmlspecialchars($view->bookingDetails['homeowner_phone']); ?></p>
-        </div>
+            <h1>Charge Point Owner Details</h1>
+            <div class="paragraph-container">
+                <p>Homeowner Name: <?= htmlspecialchars($view->bookingDetails['ownerfirst_name'] . ' ' . $view->bookingDetails['ownerlast_name']); ?></p>
+                <p>Homeowner Phone: <?= htmlspecialchars($view->bookingDetails['homeowner_phone']); ?></p>
+            </div>
 
-        <!-- Store booking ID for JavaScript -->
-        <input type="hidden" id="booking-id" value="<?= htmlspecialchars($view->bookingDetails['booking_id']); ?>">
+            <!-- Store booking ID for JavaScript -->
+            <input type="hidden" id="booking-id" value="<?= htmlspecialchars($view->bookingDetails['booking_id']); ?>">
 
-  
-    <?php else: ?>
-        <p>No booking records found.</p>
-    <?php endif; ?>
-</div>
+        <?php else: ?>
+            <p>No booking records found.</p>
+        <?php endif; ?>
+    </div>
 
-<br/>
-<div class="container">
-    <a href="booking-history.php" class="btn btn-primary">Back to Booking History</a>
-    <br><br>
-</div>
-<?php require('template/footer.phtml'); ?>
-  
-<!-- External CSS -->
-<link rel="stylesheet" href="css/bookingDetails.css">
-<!-- External JavaScript -->
-<script src="js/bookingDetails.js"></script>
+    <br/>
+    <div class="container">
+        <a href="booking-history.php" class="btn btn-primary">Back to Booking History</a>
+        <br><br>
+    </div>
+    <?php require('template/footer.phtml'); ?>
+
+    <script src="js/bookingDetails.js"></script>
+</body>
+</html>

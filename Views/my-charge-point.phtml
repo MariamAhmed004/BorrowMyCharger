@@ -2,76 +2,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title><?php echo htmlspecialchars($view->pageTitle); ?></title>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/owl.carousel.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-
-
-/* Hide the scrollbar and allow modal content to scroll */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden; /* Hide the page scroll */
-}
-
-/* Modal content */
-.modal-content {
-  background-color: white;
-  max-height: 80vh;
-  width: 90%;
-  overflow-y: auto; /* Enable scrolling within modal */
-  padding: 1rem;
-  border-radius: 8px;
-}
-
-
-        .close { 
-            color: #333; 
-            position: absolute; 
-            top: 10px; 
-            right: 15px; 
-            font-size: 24px; 
-            font-weight: bold; 
-            background: #f5f5f5; 
-            border-radius: 50%; 
-            width: 25px; 
-            height: 25px; 
-            line-height: 22px; 
-            text-align: center; 
-        }
-        .close:hover, .close:focus { 
-            color: black; 
-            text-decoration: none; 
-            cursor: pointer; 
-        }
-        .modal-title { text-align: center; margin-bottom: 20px; font-weight: bold; }
-        .form-row { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
-        .form-group { width: 48%; min-width: 200px; margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
-        .form-control { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; background-color: #f5f5f5; box-sizing: border-box; }
-        .add-button { background-color: #f0f0f0; color: #333; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        .last-form-row { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: flex-end; }
-        .cost-container { width: 48%; }
-        .button-container { width: 48%; display: flex; justify-content: flex-end; align-items: flex-end; }
-        .form-container { overflow: hidden; padding-bottom: 10px; }
-        
-        /* Day checkboxes */
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Charge Point</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+            /* Day checkboxes */
         .day-checkbox-container {
             margin-bottom: 20px;
         }
@@ -122,201 +60,137 @@
             color: white;
             border-color: #007bff;
         }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) { 
-            .form-group, .cost-container { width: 100%; margin-bottom: 15px; } 
-            .form-row, .last-form-row { flex-direction: column; margin-bottom: 0; } 
-            .button-container { width: 100%; justify-content: center; margin-top: 20px; } 
-        }
-        
-        /* Charge point details styles */
-        .charge-point-details { 
-            margin: 20px auto; 
-            padding: 20px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            background-color: #ffffff; 
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
-            max-width: 90%; 
-            overflow: hidden;
-        }
-
-        /* Details container for flex layout */
-        .details-container {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-start;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        
-        /* Text details styles */
-        #details {
-            width: 60%;
-            padding-right: 15px;
-        }
-        
-        /* Image styles */
-        #chargeImage {
-            width: 35%;
-            max-height: 200px;
-            object-fit: cover;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-
-        .charge-point-details h4 { 
-            margin-bottom: 20px; /* Increased margin for line break effect */
-            padding-bottom: 10px; /* Added padding for more separation */
-            font-weight: bold;
-            text-align: center;
-            width: 100%;
-            border-bottom: 1px solid #eee; /* Optional: adds a subtle line */
-        }
-        
-        .charge-point-details p { 
-            margin: 5px 0; 
-            text-align: left;
-        }
-        
-        /* Map styles */
-        #leetcodeMap {
-            height: 300px;
-            margin: 15px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            width: 100%; /* Full width */
-        }
-        
-        /* Button styles */
-        .edit-delete-buttons { 
-            display: flex; 
-            justify-content: center; 
-            margin: 10px 0 0 0; 
-            padding: 0;
-        }
-        
-        .edit-button, .delete-button { 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            margin: 0 5px; 
-            font-weight: 500;
-        }
-        
-        .edit-button { 
-            background-color: #007bff; 
-            color: white; 
-        }
-        
-        .delete-button { 
-            background-color: #dc3545; 
-            color: white; 
-        }
-        
-        /* Other section styles */
-        #addChargePointSection { 
-            text-align: center; 
-            margin: 40px 0; 
-            padding: 20px;
-        }
-        
-        /* Footer adjustments */
-        #footer { 
-            margin-top: 0; 
-            padding-top: 20px;
-        }
-        
-        /* Responsive adjustments for details and image */
-        @media (max-width: 768px) {
-            .details-container {
-                flex-direction: column;
-            }
-            
-            #details, #chargeImage {
-                width: 100%;
-                margin-bottom: 15px;
-            }
-            
-            #chargeImage {
-                max-height: 250px;
-            }
-            
-            .time-grid {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-        }
-        
-        /* Error message styling */
-        .error-message {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .input-error {
-            border: 1px solid #dc3545;
-        }
-        
-        /* Form validation error message container */
-        #formErrors {
-            color: #dc3545;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 15px;
-            display: none;
-        }
-    </style>
-</head>
+</style>
 <body>
-<?php require_once('template/header.phtml'); ?>
-
-<?php if (isset($view->message)): ?>
-<div class="alert alert-<?php echo $view->messageType; ?> text-center" role="alert">
-    <?php echo htmlspecialchars($view->message); ?>
-</div>
-<?php endif; ?>
-
-<!-- Section for Add Charge Point -->
-<section id="addChargePointSection" class="add-charge-point" <?php echo $view->chargePoint ? 'style="display: none;"' : ''; ?>>
-    <div class="text-center">
-        <h2 id="chargePointPrompt">You haven't added a charge point yet.</h2>
-        <button id="addChargePointBtn" class="btn btn-primary">Add Charge Point</button>
-    </div>
-</section>
-
-<!-- Modal for Adding Charge Point -->
-<div id="chargePointModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h3 class="modal-title">Add Charge Point Details</h3>
-        <div id="formErrors"></div>
-        <div class="form-container">
-            <form id="chargePointForm">
-                <input type="hidden" id="chargePointId" name="chargePointId" value="">
-                <input type="hidden" id="addressId" name="addressId" value="">
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="home"><i class="fa fa-home"></i> Home</label>
-                        <input type="text" id="home" name="home" class="form-control" required>
-                        <span class="error-message" id="homeError">Please enter a valid home number</span>
+    
+    <div class="container mt-5">
+        <h1 class="mb-4">My Charge Point</h1>
+        
+        <div id="chargePointsContainer">
+            <?php if (empty($view->chargePoints)): ?>
+                <div class="alert alert-info text-center">
+                    <p class="mb-3">You haven't added a charge point yet.</p>
+                    <button id="addChargePointBtn" class="btn btn-primary">
+                        Add Charge Point
+                    </button>
+                </div>
+            <?php else: ?>
+                <div class="row mb-4">
+                    <?php 
+                    // We only display the first charge point since users can only have one
+                    $point = $view->chargePoints[0]; 
+                    ?>
+                    <div class="col-md-6">
+                        <div class="card charge-point-card" 
+                             data-charge-point-id="<?= $point['charge_point_id'] ?>"
+                             data-details='<?= json_encode($point) ?>'>
+                            <img src="<?= htmlspecialchars($point['charge_point_picture_url']) ?>" 
+                                 class="card-img-top" 
+                                 alt="Charge Point">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <?= htmlspecialchars($point['streetName']) ?>, 
+                                    <?= htmlspecialchars($point['city_name']) ?>
+                                </h5>
+                                <p class="card-text">
+                                    <strong>Address:</strong> Block <?= htmlspecialchars($point['block']) ?>, 
+                                    Road <?= htmlspecialchars($point['road']) ?>, 
+                                    House <?= htmlspecialchars($point['house_number']) ?><br>
+                                    <strong>Postcode:</strong> <?= htmlspecialchars($point['postcode']) ?><br>
+                                    <strong>Price per kWh:</strong> <?= htmlspecialchars($point['price_per_kwh']) ?> BHD<br>
+                                    <strong>Status:</strong> <?= htmlspecialchars($point['availability_status_title']) ?>
+                                </p>
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-warning edit-charge-point">Edit</button>
+                                    <button class="btn btn-danger delete-charge-point">Delete</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="block"><i class="fa fa-building"></i> Block</label>
-                        <input type="text" id="block" name="block" class="form-control" required>
-                        <span class="error-message" id="blockError">Please enter a valid block number</span>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Location</h5>
+                                <div id="mainMapContainer" class="border rounded" style="height: 400px;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Days of Week Availability (always visible as requested) -->
+            <?php endif; ?>
+        </div>
+
+        <!-- Charge Point Modal -->
+        <div class="modal fade" id="chargePointModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Add Charge Point</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="chargePointForm" enctype="multipart/form-data">
+                            <input type="hidden" id="chargePointId" name="charge_point_id">
+                            <input type="hidden" id="existing_picture_url" name="existing_picture_url">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Street Name</label>
+                                    <input type="text" name="streetName" id="streetName" 
+                                           class="form-control" required>
+                                    <div class="invalid-feedback" id="streetName-error"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">City</label>
+                                    <select name="city_id" id="city_id" class="form-select" required>
+                                        <option value="">Select City</option>
+                                        <?php foreach ($view->cities as $city): ?>
+                                            <option value="<?= $city['city_id'] ?>">
+                                                <?= htmlspecialchars($city['city_name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="invalid-feedback" id="city_id-error"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Postcode</label>
+                                    <input type="text" name="postcode" id="postcode" 
+                                           class="form-control" required>
+                                    <div class="invalid-feedback" id="postcode-error"></div>
+                                </div>
+                                
+                                
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">House Number</label>
+                                    <input type="number" name="house_number" id="house_number" 
+                                           class="form-control" required min="1">
+                                    <div class="invalid-feedback" id="house_number-error"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Road</label>
+                                    <input type="number" name="road" id="road" 
+                                           class="form-control" required min="1">
+                                    <div class="invalid-feedback" id="road-error"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Block</label>
+                                    <input type="number" name="block" id="block" 
+                                           class="form-control" required min="1">
+                                    <div class="invalid-feedback" id="block-error"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Price per kWh (BHD)</label>
+                                    <input type="number" step="0.01" name="price_per_kwh" id="price_per_kwh" 
+                                           class="form-control" required min="0.01">
+                                    <div class="invalid-feedback" id="price_per_kwh-error"></div>
+                                </div>
+                                
+                                                <!-- Days of Week Availability (always visible as requested) -->
                 <div id="daysOfWeekContainer">
                     <h4>Days Available</h4>
                     <div class="day-checkbox-container">
@@ -333,125 +207,40 @@
                     <div id="timePickersContainer">
                         <!-- Dynamic time pickers will be inserted here -->
                     </div>
-                </div>
-                
-                <!-- Form row for street name and postcode -->
-<div class="form-row">
-    <div class="form-group">
-        <label for="streetName"><i class="fa fa-road"></i> Street Name</label>
-        <input type="text" id="streetName" name="streetName" class="form-control" required>
-        <span class="error-message" id="streetNameError">Please enter a valid street name</span>
-    </div>
-    <div class="form-group">
-        <label for="postcode"><i class="fa fa-map"></i> Postcode</label>
-        <input type="text" id="postcode" name="postcode" class="form-control" required>
-        <span class="error-message" id="postcodeError">Please enter a valid postcode</span>
-    </div>
-</div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="road"><i class="fa fa-road"></i> Road</label>
-                        <input type="text" id="road" name="road" class="form-control" required>
-                        <span class="error-message" id="roadError">Please enter a valid road number</span>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Charge Point Picture</label>
+                                    <input type="file" name="charge_point_picture" id="charge_point_picture" 
+                                           accept="image/jpeg,image/png,image/gif" 
+                                           class="form-control">
+                                    <div class="invalid-feedback" id="charge_point_picture-error"></div>
+                                    <div id="image-preview-container" class="mt-2"></div>
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Location</label>
+                                    <div id="mapContainer" class="border rounded" style="height: 400px;"></div>
+                                    <input type="hidden" name="latitude" id="latitude" required>
+                                    <input type="hidden" name="longitude" id="longitude" required>
+                                    <small class="text-muted">Click on the map or drag the marker to set your charge point location</small>
+                                    <div class="invalid-feedback" id="location-error"></div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="city"><i class="fa fa-map-marker"></i> City</label>
-                        <select id="city" name="city" class="form-control" required>
-                            <option value="">Select City</option>
-                            <?php if (isset($view->cities) && is_array($view->cities)): ?>
-                                <?php foreach ($view->cities as $city): ?>
-                                    <option value="<?php echo $city['city_id']; ?>"><?php echo htmlspecialchars($city['city_name']); ?></option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </select>
-                        <span class="error-message" id="cityError">Please select a city</span>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="saveChargePointBtn" class="btn btn-primary">Save Charge Point</button>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="imageUpload"><i class="fa fa-upload"></i> Upload Picture</label>
-                        <input type="file" id="imageUpload" name="imageUpload" class="form-control" accept=".jpg, .jpeg, .png">
-                        <small class="form-text text-muted">Max size: 5MB. Formats: JPG, PNG.</small>
-                        <span class="error-message" id="imageError">Please upload a valid image file</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="cost">Charge Cost</label>
-                        <input type="text" id="cost" name="cost" class="form-control" required>
-                        <span class="error-message" id="costError">Please enter a valid cost</span>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group button-container" style="width: 100%; justify-content: center;">
-                        <button type="submit" class="add-button">Add</button>
-                    </div>
-                </div>
-                <input type="hidden" id="latitude" name="latitude" value="">
-                <input type="hidden" id="longitude" name="longitude" value="">
-            </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Display Charge Point Details -->
-<div id="chargePointDetails" class="charge-point-details" <?php echo $view->chargePoint ? '' : 'style="display: none;"'; ?>>
-    <h4>My Charge Point Details</h4>
-    <div class="details-container">
-        <div id="details">
-            <?php if (isset($view->chargePoint)): ?>
-                <strong>Home:</strong> <?php echo htmlspecialchars($view->chargePoint['house_number']); ?><br>
-                <strong>Road:</strong> <?php echo htmlspecialchars($view->chargePoint['road']); ?><br>
-                <strong>Block:</strong> <?php echo htmlspecialchars($view->chargePoint['block']); ?><br>
-                <strong>City:</strong> <?php echo htmlspecialchars($view->chargePoint['city_name']); ?><br>
-<strong>Postcode:</strong> <?php echo isset($view->chargePoint['postcode']) ? htmlspecialchars($view->chargePoint['postcode']) : 'Not provided'; ?><br>
-<strong>Street Name:</strong> <?php echo isset($view->chargePoint['streetName']) ? htmlspecialchars($view->chargePoint['streetName']) : 'Not provided'; ?><br>
-                <strong>Charge Cost:</strong> <?php echo htmlspecialchars($view->chargePoint['price_per_kwh']); ?> BHD / kWh<br>
-                <strong>Availability:</strong> 
-                <?php if (isset($view->chargePoint['availabilityDays']) && count($view->chargePoint['availabilityDays']) > 0): ?>
-                    Available on: 
-                    <?php 
-                    $daysList = array_column($view->chargePoint['availabilityDays'], 'day_of_week');
-                    echo implode(', ', $daysList);
-                    
-                    foreach ($view->chargePoint['availabilityDays'] as $day): 
-                        if (isset($day['times']) && !empty($day['times'])):
-                    ?>
-                        <br><?php echo htmlspecialchars($day['day_of_week']); ?>: 
-                        <?php echo htmlspecialchars(implode(', ', $day['times'])); ?>
-                    <?php 
-                        endif;
-                    endforeach; 
-                    ?>
-                <?php else: ?>
-                    <?php echo htmlspecialchars($view->chargePoint['availability_status_title']); ?>
-                <?php endif; ?>
-                <br>
-                <?php if (isset($view->chargePoint['latitude']) && isset($view->chargePoint['longitude'])): ?>
-                    <strong>Latitude:</strong> <?php echo htmlspecialchars($view->chargePoint['latitude']); ?><br>
-                    <strong>Longitude:</strong> <?php echo htmlspecialchars($view->chargePoint['longitude']); ?><br>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
-        <?php if (isset($view->chargePoint) && isset($view->chargePoint['charge_point_picture_url'])): ?>
-            <img id="chargeImage" src="<?php echo htmlspecialchars($view->chargePoint['charge_point_picture_url']); ?>" alt="Charge Point Image">
-        <?php else: ?>
-            <img id="chargeImage" src="" alt="Charge Point Image" style="display: none;">
-        <?php endif; ?>
-    </div>
-<div id="leetcodeMap" style="height: 300px; margin: 15px 0; border-radius: 5px; border: 1px solid #ddd; width: 100%;"></div>
-
-<div class="edit-delete-buttons">
-    <button class="edit-button" data-charge-point-id="<?= $view->chargePoint['charge_point_id'] ?>">Edit</button>
-    <button class="delete-button" data-charge-point-id="<?= $view->chargePoint['charge_point_id'] ?>">Delete</button>
-    <!-- Add a hidden input with the charge point ID for extra safety -->
-    <input type="hidden" id="chargePointId" name="chargePointId" value="<?= $view->chargePoint['charge_point_id'] ?>">
-</div>
-</div>
-
-<!-- SCRIPTS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="js/myChargePoint.js"></script>
-
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjJVMZgeuOeEypf2xCiIs7vIOxXH4pakw&libraries=places"></script>
+    <script src="js/chargePoint1.js"></script>
+   
 </body>
-<?php require_once('template/footer.phtml'); ?>
 </html>

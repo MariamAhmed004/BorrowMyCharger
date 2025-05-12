@@ -1,78 +1,77 @@
-   document.addEventListener('DOMContentLoaded', function() {
-          // Initialize the map with a default center (will be replaced by user location if available)
-          var map = L.map('charger-map').setView([53.4808, -2.2426], 12); // Default to Manchester coordinates
+let markers = []; // Array to hold all markers
+let map; // Declare map variable
 
-          // Add OpenStreetMap tile layer
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-               attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          }).addTo(map);
+function initMap() {
+    const bahrainCenter = { lat: 26.0667, lng: 50.5577 };
 
-          // Add sample charger markers
-          var chargers = [
-               {lat: 53.4808, lng: -2.2426, name: "Sarah M.'s Charger", type: "7kW", price: "£5/hr"},
-               {lat: 53.4750, lng: -2.2550, name: "James P.'s Charger", type: "11kW", price: "£7/hr"},
-               {lat: 53.4900, lng: -2.2300, name: "Emma T.'s Charger", type: "22kW", price: "£9/hr"},
-               {lat: 53.4650, lng: -2.2200, name: "David's Charger", type: "7kW", price: "£5/hr"},
-               {lat: 53.4920, lng: -2.2480, name: "Jennifer's Charger", type: "11kW", price: "£6/hr"}
-          ];
+    map = new google.maps.Map(document.getElementById("charger-map"), {
+        zoom: 12,
+        center: bahrainCenter,
+    });
 
-          // Custom marker icon for chargers
-          var chargerIcon = L.icon({
-               iconUrl: 'images/marker-icon.png', 
-               iconSize: [25, 41],
-               iconAnchor: [12, 41],
-               popupAnchor: [1, -34]
-          });
+    loadMarkers("all"); // Load all markers by default
 
-          // Add charger markers to the map
-          chargers.forEach(function(charger) {
-               var marker = L.marker([charger.lat, charger.lng], {icon: chargerIcon}).addTo(map);
-               marker.bindPopup("<b>" + charger.name + "</b><br>Type: " + charger.type + "<br>Price: " + charger.price + "<br><a href='charger-details.php?id=1'>View Details</a>");
-          });
+    document.getElementById("availability-filter").addEventListener("change", function() {
+        const filterValue = this.value.toLowerCase(); // Convert to lowercase
+        loadMarkers(filterValue);
+    });
 
-          // Try to get user's location
-          if (navigator.geolocation) {
-               navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                         // Success: got user's location
-                         var userLat = position.coords.latitude;
-                         var userLng = position.coords.longitude;
-                         
-                         // Center map on user's location
-                         map.setView([userLat, userLng], 13);
-                         
-                         // Add a marker at user's location
-                         var userIcon = L.icon({
-                              iconUrl: 'images/marker-icon.png', // Custom icon for user location
-                              iconSize: [25, 41],
-                              iconAnchor: [12, 41],
-                              popupAnchor: [1, -34]
-                         });
-                         
-                         var userMarker = L.marker([userLat, userLng], {icon: userIcon}).addTo(map);
-                         userMarker.bindPopup("<b>Your Location</b>").openPopup();
-                         
-                         // Create a circle showing approximate location radius
-                         var circle = L.circle([userLat, userLng], {
-                              radius: 1000, // 1km radius
-                              color: '#3388ff',
-                              fillColor: '#3388ff',
-                              fillOpacity: 0.1
-                         }).addTo(map);
-                    },
-                    function(error) {
-                         // Error or permission denied
-                         console.log("Error getting location: " + error.message);
-                         // Keep the default map center
-                    },
-                    {
-                         enableHighAccuracy: true,
-                         timeout: 5000,
-                         maximumAge: 0
-                    }
-               );
-          } else {
-               console.log("Geolocation is not supported by this browser.");
-               // Keep the default map center
-          }
-     });
+    // Add event listeners for price inputs
+    document.getElementById("min-price").addEventListener("input", function() {
+        loadMarkers(document.getElementById("availability-filter").value.toLowerCase());
+    });
+
+    document.getElementById("max-price").addEventListener("input", function() {
+        loadMarkers(document.getElementById("availability-filter").value.toLowerCase());
+    });
+}
+
+function loadMarkers(filter) {
+    const minPrice = parseFloat(document.getElementById("min-price").value) || 0; // Default to 0 if empty
+    const maxPrice = parseFloat(document.getElementById("max-price").value) || Infinity; // Default to Infinity if empty
+
+    // Clear existing markers
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `index.php?filter=${filter}&min_price=${minPrice}&max_price=${maxPrice}`, true);
+    xhr.onload = function() {
+        if (this.status === 200) {
+            const chargePoints = JSON.parse(this.responseText);
+            chargePoints.forEach(point => {
+                const price = parseFloat(point.price_per_kwh);
+                
+                // Check if the charge point's price is within the specified range
+                if (price >= minPrice && price <= maxPrice) {
+                    const position = { lat: parseFloat(point.latitude), lng: parseFloat(point.longitude) };
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        title: `Charge Point ID: ${point.charge_point_id}`
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <strong>Charge Point ID:</strong> ${point.charge_point_id}<br>
+                            <strong>Price per kWh:</strong> BD${point.price_per_kwh}<br>
+                            <strong>Status:</strong> ${point.availability_status_title}<br>
+                            <strong>Street:</strong> ${point.streetName}<br>
+                            <strong>House Number:</strong> ${point.house_number}<br>
+                            <strong>Block:</strong> ${point.block}<br>
+                            <strong>Road:</strong> ${point.road}<br>
+                            <img src="${point.charge_point_picture_url}" alt="Charge Point Image" style="width:100px;height:auto;">
+                        `
+                    });
+
+                    marker.addListener("click", () => {
+                        infoWindow.open(map, marker);
+                    });
+
+                    markers.push(marker);
+                }
+            });
+        }
+    };
+    xhr.send();
+}
