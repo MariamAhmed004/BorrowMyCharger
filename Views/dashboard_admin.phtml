@@ -1,147 +1,615 @@
 <?php require('template/header.phtml') ?>
-    <style>
+<style>
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2ecc71;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
+        --light-gray: #f8f9fa;
+        --dark-gray: #343a40;
+    }
+    
+    .dashboard-container {
+        padding: 20px;
+    }
+    
+    .pie-chart-container {
+    max-width: 250px; 
+    margin: auto; 
+}
+    .stat-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card .icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .stat-card .count {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stat-card .title {
+        color: #6c757d;
+        font-size: 1rem;
+    }
+    
+    .chart-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: var(--dark-gray);
+    }
+    
+    .stat-trend {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    .trend-up {
+        color: var(--secondary-color);
+    }
+    
+    .trend-down {
+        color: var(--danger-color);
+    }
+    
+    .card-primary { border-left: 4px solid var(--primary-color); }
+    .card-success { border-left: 4px solid var(--secondary-color); }
+    .card-warning { border-left: 4px solid var(--warning-color); }
+    .card-danger { border-left: 4px solid var(--danger-color); }
+    
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .data-table th {
+        background-color: var(--light-gray);
+        padding: 12px 15px;
+        text-align: left;
+    }
+    
+    .data-table td {
+        padding: 10px 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .pie-chart-container h4 {
+    font-size: 1.2rem; 
+}
 
-
-        .stat-card {
-            margin: 10px;
-            padding: 20px;
-            border-radius: 5px;
-            background-color: #e9ecef;
-            text-align: center;
+@media (max-width: 576px) {
+    .pie-chart-container h4 {
+        font-size: 1rem; /* Smaller font size for mobile */
+    }
+}
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .info-box {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-left: 4px solid var(--primary-color);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .pie-charts-row {
+        margin-bottom: 20px;
+    }
+    
+    .pie-chart-container {
+        height: 320px;
+        position: relative;
+    }
+    
+    @media (max-width: 768px) {
+        .chart-container {
+            margin-bottom: 30px;
         }
-
-        .calendar {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        
+        .pie-chart-container {
+            height: 250px;
             margin-bottom: 20px;
         }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-
-        .day {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            background-color: #ffffff;
-            cursor: pointer; /* Change cursor to pointer for clickable days */
-            transition: background-color 0.3s;
-        }
-
-        .day:hover {
-            background-color: #e9ecef; /* Highlight on hover */
-        }
-
-  
-    </style>
-
-<div class="container mt-5">
-    <div class="row">
-        <!-- Total Users -->
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Total Users</h5>
-                <p><?= htmlspecialchars($view->userCount); ?></p>
-            </div>
-        </div>
-        <!-- Total Homeowners -->
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Total Homeowners</h5>
-                <p><?= htmlspecialchars($view->homeOwnerCount); ?></p>
-            </div>
-        </div>
-        <!-- Total Charge Points -->
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Total Charge Points</h5>
-                <p><?= htmlspecialchars($view->chargePointCount); ?></p>
-            </div>
-        </div>
-        <!-- Pending Approval -->
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Pending Approval</h5>
-                <p><?= htmlspecialchars($view->pendingApproval); ?></p>
+    }
+</style>
+<div class="dashboard-container">
+     <!-- Summary Info Box -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="info-box">
+                <h4>Dashboard Summary</h4>
+                <p>
+                    This dashboard provides a comprehensive overview of the EV Charge Point Management System.
+                    There are currently <?= htmlspecialchars($view->userCount) ?> users, including <?= htmlspecialchars($view->homeOwnerCount) ?> home owners.
+                    The system has <?= htmlspecialchars($view->chargePointCount) ?> charge points registered with various availability statuses.
+                    <?php if ($view->pendingApproval > 0): ?>
+                    <strong>Action Required:</strong> <?= htmlspecialchars($view->pendingApproval) ?> users are pending approval.
+                    <?php endif; ?>
+                </p>
             </div>
         </div>
     </div>
-
-    <!-- Calendar Section -->
-    <div class="calendar">
-        <h4>My Calendar</h4>
-        <div class="calendar-header">
-            <button id="prevMonth" class="btn btn-secondary">Previous</button>
-            <h5 id="monthYear"></h5>
-            <button id="nextMonth" class="btn btn-secondary">Next</button>
+    <!-- Key Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card card-primary">
+                <div class="icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="count"><?= htmlspecialchars($view->userCount); ?></div>
+                <div class="title">Total Users</div>
+            </div>
         </div>
-        <div class="calendar-grid" id="calendar"></div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card card-success">
+                <div class="icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="count"><?= htmlspecialchars($view->homeOwnerCount); ?></div>
+                <div class="title">Home Owners</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card card-warning">
+                <div class="icon">
+                    <i class="fas fa-charging-station"></i>
+                </div>
+                <div class="count"><?= htmlspecialchars($view->chargePointCount); ?></div>
+                <div class="title">Charge Points</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card card-danger">
+                <div class="icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="count"><?= htmlspecialchars($view->pendingApproval); ?></div>
+                <div class="title">Pending Approvals</div>
+            </div>
+        </div>
+    </div>
+    
+ <!-- Pie Charts in single row -->
+<div class="row mb-4 pie-charts-row">
+    <div class="col-12">
+        <div class="chart-container">
+            <h2 class="chart-title text-center">System Status Overview</h2>
+            <div class="row">
+                <div class="col-6 col-md-3">
+                    <div class="pie-chart-container text-center">
+                        <h4 class="mb-3">Distribution by Role</h4>
+                        <canvas id="userRolesChart" width="200" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="pie-chart-container text-center">
+                        <h4 class="mb-3">Charge Point Status</h4>
+                        <canvas id="chargePointStatusChart" width="200" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="pie-chart-container text-center">
+                        <h4 class="mb-3">User Account Status</h4>
+                        <canvas id="userStatusChart" width="200" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="pie-chart-container text-center">
+                        <h4 class="mb-3">Booking Status</h4>
+                        <canvas id="bookingStatusChart" width="200" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-    <br><br><br><br>
-
-
+   <div class="row mb-4 justify-content-center">
+    <div class="col-md-10">
+        <!-- Booking Trends -->
+        <div class="chart-container">
+            <h2 class="chart-title text-center">Booking Trends (Last 7 Days)</h2>
+            <canvas id="bookingTrendsChart" class="w-75 mx-auto"></canvas>
+        </div>
+        
+        <!-- Price Statistics -->
+        <div class="chart-container">
+            <h2 class="chart-title text-center">Charge Point Pricing Statistics</h2>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card-body text-center">
+                        <h5>Min Price</h5>
+                        <p class="h3"><?= isset($view->priceStats['min_price']) ? number_format($view->priceStats['min_price'], 2) : '0.00' ?></p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-body text-center">
+                        <h5>Max Price</h5>
+                        <p class="h3"><?= isset($view->priceStats['max_price']) ? number_format($view->priceStats['max_price'], 2) : '0.00' ?></p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-body text-center">
+                        <h5>Avg Price</h5>
+                        <p class="h3"><?= isset($view->priceStats['avg_price']) ? number_format($view->priceStats['avg_price'], 2) : '0.00' ?></p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-body text-center">
+                        <h5>Std Deviation</h5>
+                        <p class="h3"><?= isset($view->priceStats['std_price']) ? number_format($view->priceStats['std_price'], 2) : '0.00' ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Popular Booking Times -->
+        <div class="chart-container">
+            <h2 class="chart-title text-center">Popular Booking Times</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-center mb-3">Popular Days</h4>
+                    <canvas id="popularDaysChart" class="w-75 mx-auto"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <h4 class="text-center mb-3">Popular Hours</h4>
+                    <canvas id="popularHoursChart" class="w-75 mx-auto"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    <!-- Top Charge Points Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container">
+                <h2 class="chart-title">Top Charge Points by Bookings</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Charge Point ID</th>
+                                <th>Booking Count</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            if (isset($view->topChargePoints) && is_array($view->topChargePoints)): 
+                                foreach ($view->topChargePoints as $cpId => $bookingCount): 
+                            ?>
+                            <tr>
+                                <td><?= htmlspecialchars($cpId) ?></td>
+                                <td><?= htmlspecialchars($bookingCount) ?></td>
+                                <td>
+                                    <div class="progress">
+                                        <?php 
+                                        $max = max($view->topChargePoints);
+                                        $percent = ($max > 0) ? ($bookingCount / $max) * 100 : 0;
+                                        ?>
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: <?= htmlspecialchars($percent) ?>%" 
+                                             aria-valuenow="<?= htmlspecialchars($percent) ?>" 
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php 
+                                endforeach; 
+                            else: 
+                            ?>
+                            <tr>
+                                <td colspan="3" class="text-center">No data available</td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const monthYear = document.getElementById('monthYear');
-    const calendar = document.getElementById('calendar');
-    const prevMonth = document.getElementById('prevMonth');
-    const nextMonth = document.getElementById('nextMonth');
-
-    let currentDate = new Date();
-
-    function renderCalendar() {
-        calendar.innerHTML = '';
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-
-        // Set month and year title
-        monthYear.textContent = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-        // Get the first day of the month
-        const firstDay = new Date(year, month, 1);
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        // Get the index of the first day of the month
-        const firstDayIndex = firstDay.getDay();
-
-        // Fill the calendar with empty cells before the first day
-        for (let i = 0; i < firstDayIndex; i++) {
-            const emptyCell = document.createElement('div');
-            emptyCell.classList.add('day');
-            calendar.appendChild(emptyCell);
+    // Utility function to generate random but consistent colors
+    function generateColors(count) {
+        const colors = [
+            '#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6',
+            '#1abc9c', '#34495e', '#e67e22', '#c0392b', '#16a085'
+        ];
+        
+        let result = [];
+        for (let i = 0; i < count; i++) {
+            result.push(colors[i % colors.length]);
         }
-
-        // Fill the calendar with the days of the month
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayCell = document.createElement('div');
-            dayCell.classList.add('day');
-            dayCell.textContent = day;
-            dayCell.onclick = () => alert(`Selected date: ${day} ${currentDate.toLocaleString('default', { month: 'long' })} ${year}`);
-            calendar.appendChild(dayCell);
-        }
+        return result;
     }
 
-    prevMonth.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar();
+    // Helper to safely parse JSON data from PHP
+    function parseData(dataString, defaultValue = {}) {
+        try {
+            return JSON.parse(dataString);
+        } catch (e) {
+            console.error('Error parsing data:', e);
+            return defaultValue;
+        }
+    }
+    
+    // Chart for User Roles
+    function createUserRolesChart() {
+        const data = <?= json_encode($view->userRoleCounts ?? []) ?>;
+        const labels = Object.keys(data);
+        const values = Object.values(data).map(Number);
+        
+        const ctx = document.getElementById('userRolesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: generateColors(labels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'User Distribution'
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart for Charge Point Status
+    function createChargePointStatusChart() {
+        const data = <?= json_encode($view->chargePointStatusCounts ?? []) ?>;
+        const labels = Object.keys(data);
+        const values = Object.values(data).map(Number);
+        
+        const ctx = document.getElementById('chargePointStatusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#2ecc71', '#e74c3c', '#f39c12'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart for User Account Status
+    function createUserStatusChart() {
+        const data = <?= json_encode($view->userStatusCounts ?? []) ?>;
+        const labels = Object.keys(data);
+        const values = Object.values(data).map(Number);
+        
+        const ctx = document.getElementById('userStatusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#2ecc71', '#e74c3c', '#f39c12'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart for Booking Status
+    function createBookingStatusChart() {
+        const data = <?= json_encode($view->bookingStatusCounts ?? []) ?>;
+        const labels = Object.keys(data);
+        const values = Object.values(data).map(Number);
+        
+        const ctx = document.getElementById('bookingStatusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#f39c12', '#2ecc71', '#e74c3c'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart for Booking Trends
+    function createBookingTrendsChart() {
+        const data = <?= json_encode($view->bookingsLastSevenDays ?? []) ?>;
+        const labels = Object.keys(data);
+        const values = Object.values(data).map(Number);
+        
+        // Format dates for display
+        const formattedLabels = labels.map(date => {
+            const d = new Date(date);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        
+        const ctx = document.getElementById('bookingTrendsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: formattedLabels,
+                datasets: [{
+                    label: 'Bookings',
+                    data: values,
+                    fill: false,
+                    borderColor: '#3498db',
+                    tension: 0.1,
+                    pointBackgroundColor: '#3498db'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart for Popular Days
+    function createPopularDaysChart() {
+        const data = <?= json_encode($view->popularBookingDays ?? []) ?>;
+        const labels = Object.keys(data);
+        const values = Object.values(data).map(Number);
+        
+        const ctx = document.getElementById('popularDaysChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Bookings',
+                    data: values,
+                    backgroundColor: generateColors(labels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Chart for Popular Hours
+    function createPopularHoursChart() {
+        const data = <?= json_encode($view->popularBookingTimes ?? []) ?>;
+        const labels = Object.keys(data).map(hour => {
+            // Format hour (24h to 12h with AM/PM)
+            const h = parseInt(hour);
+            if (h === 0) return '12 AM';
+            if (h === 12) return '12 PM';
+            return h < 12 ? `${h} AM` : `${h-12} PM`;
+        });
+        const values = Object.values(data).map(Number);
+        
+        const ctx = document.getElementById('popularHoursChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Bookings',
+                    data: values,
+                    backgroundColor: generateColors(labels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Initialize all charts when the page is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        createUserRolesChart();
+        createChargePointStatusChart();
+        createUserStatusChart();
+        createBookingStatusChart();
+        createBookingTrendsChart();
+        createPopularDaysChart();
+        createPopularHoursChart();
     });
-
-    nextMonth.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-    });
-
-    // Initial render
-    renderCalendar();
 </script>
+
 <?php require('template/footer.phtml') ?>

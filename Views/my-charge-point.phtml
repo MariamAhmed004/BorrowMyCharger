@@ -1,212 +1,283 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Charge Point</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<?php require('template/header.phtml') ?>
 <style>
-            /* Day checkboxes */
-        .day-checkbox-container {
-            margin-bottom: 20px;
-        }
-        .day-checkbox-container label {
-            display: inline-block;
-            margin-right: 10px;
-            font-weight: normal;
-        }
-        
-        /* Time picker container */
-        .time-picker-container {
-            display: block; /* Changed from none to block */
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        /* Time selection styles */
-        .time-selection-container {
-            margin-bottom: 15px;
-        }
-        
-        .time-label {
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        
-        .time-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .time-button {
-            padding: 5px 10px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .time-button.active {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-</style>
-<body>
+    /* Day checkboxes */
+    .day-checkbox-container {
+        margin-bottom: 20px;
+    }
+    .day-checkbox-container label {
+        display: inline-block;
+        margin-right: 10px;
+        font-weight: normal;
+    }
     
-    <div class="container mt-5">
-        <h1 class="mb-4">My Charge Point</h1>
-        
-        <div id="chargePointsContainer">
-            <?php if (empty($view->chargePoints)): ?>
-                <div class="alert alert-info text-center">
-                    <p class="mb-3">You haven't added a charge point yet.</p>
-                    <button id="addChargePointBtn" class="btn btn-primary">
-                        Add Charge Point
-                    </button>
-                </div>
-            <?php else: ?>
-                <div class="row mb-4">
-                    <?php 
-                    // We only display the first charge point since users can only have one
-                    $point = $view->chargePoints[0]; 
-                    ?>
-                    <div class="col-md-6">
-                        <div class="card charge-point-card" 
-                             data-charge-point-id="<?= $point['charge_point_id'] ?>"
-                             data-details='<?= json_encode($point) ?>'>
-                            <img src="<?= htmlspecialchars($point['charge_point_picture_url']) ?>" 
-                                 class="card-img-top" 
-                                 alt="Charge Point">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <?= htmlspecialchars($point['streetName']) ?>, 
-                                    <?= htmlspecialchars($point['city_name']) ?>
-                                </h5>
-                                <p class="card-text">
-                                    <strong>Address:</strong> Block <?= htmlspecialchars($point['block']) ?>, 
-                                    Road <?= htmlspecialchars($point['road']) ?>, 
-                                    House <?= htmlspecialchars($point['house_number']) ?><br>
-                                    <strong>Postcode:</strong> <?= htmlspecialchars($point['postcode']) ?><br>
-                                    <strong>Price per kWh:</strong> <?= htmlspecialchars($point['price_per_kwh']) ?> BHD<br>
-                                    <strong>Status:</strong> <?= htmlspecialchars($point['availability_status_title']) ?>
-                                </p>
-                                <div class="d-flex justify-content-between">
-                                    <button class="btn btn-warning edit-charge-point">Edit</button>
-                                    <button class="btn btn-danger delete-charge-point">Delete</button>
-                                </div>
+    /* Time picker container */
+    .time-picker-container {
+        display: block; /* Changed from none to block */
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    
+    /* Time selection styles */
+    .time-selection-container {
+        margin-bottom: 15px;
+    }
+    
+    .time-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    .time-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .time-button {
+        padding: 5px 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .time-button.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .modal {
+        z-index: 1055;
+    }
+
+    .modal-backdrop {
+        z-index: 1040;
+    }
+
+    /* Adjusted image size */
+    .charge-point-img {
+        width: 100%;
+        height: 220px; /* Fixed height */
+        object-fit: cover; /* This prevents stretching */
+        object-position: center; /* Centers the image */
+    }
+    
+    /* Improved card styles */
+    .charge-point-card {
+        height: 100%;
+        max-width: 380px; /* Control the max width for better image proportions */
+        margin: 0 auto; /* Center the card if narrower than container */
+        box-shadow: 0 4px 8px rgba(0,0,0,.1);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    
+    .charge-point-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Map card styling */
+    .map-card {
+        height: 100%;
+        box-shadow: 0 4px 8px rgba(0,0,0,.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    /* Improved availability list styling */
+    .availability-list li {
+        padding: 5px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .availability-list li:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="container mt-5">
+    <div id="chargePointsContainer">
+        <?php if (empty($view->chargePoints)): ?>
+            <div class="alert alert-info text-center">
+                <p class="mb-3">You haven't added a charge point yet.</p>
+                <button id="addChargePointBtn" class="btn btn-primary">
+                    Add Charge Point
+                </button>
+            </div>
+        <?php else: ?>
+            <div class="row g-0"> <!-- Removed mb-4 and changed to g-0 to eliminate gap -->
+                <?php 
+                // We only display the first charge point since users can only have one
+                $point = $view->chargePoints[0]; 
+                ?>
+                <div class="col-md-5 pe-md-2"> <!-- Reduced width from 6 to 5 columns -->
+                    <div class="card charge-point-card mb-3 mb-md-0" 
+                         data-charge-point-id="<?= $point['charge_point_id'] ?>"
+                         data-details='<?= json_encode($point) ?>'>
+                        <img src="<?= htmlspecialchars($point['charge_point_picture_url']) ?>" 
+                             class="card-img-top charge-point-img" 
+                             alt="Charge Point">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">
+                                <?= htmlspecialchars($point['streetName']) ?>, 
+                                <?= htmlspecialchars($point['city_name']) ?>
+                            </h5>
+                            <p class="card-text">
+                                <strong>Address:</strong> Block <?= htmlspecialchars($point['block']) ?>, 
+                                Road <?= htmlspecialchars($point['road']) ?>, 
+                                House <?= htmlspecialchars($point['house_number']) ?><br>
+                                <strong>Postcode:</strong> <?= htmlspecialchars($point['postcode']) ?><br>
+                                <strong>Price per kWh:</strong> <?= htmlspecialchars($point['price_per_kwh']) ?> BHD<br>
+                                <strong>Status:</strong> <span class="badge bg-success"><?= htmlspecialchars($point['availability_status_title']) ?></span><br>
+                            <strong>Availability:</strong>
+                            <ul class="availability-list ps-3 mt-2">
+                                <?php if (!empty($point['availability_days'])): ?>
+                                    <?php 
+                                    // Create an associative array to group times by day
+                                    $dayTimes = [];
+                                    foreach ($point['availability_days'] as $availability) {
+                                        $dayOfWeek = $availability['day_of_week'];
+                                        
+                                        // Initialize array for this day if it doesn't exist
+                                        if (!isset($dayTimes[$dayOfWeek])) {
+                                            $dayTimes[$dayOfWeek] = [];
+                                        }
+                                        
+                                        // Add the time to this day's array
+                                        if (isset($availability['available_time'])) {
+                                            $dayTimes[$dayOfWeek][] = $availability['available_time'];
+                                        } else if (isset($availability['times'][0]['available_time'])) {
+                                            $dayTimes[$dayOfWeek][] = $availability['times'][0]['available_time'];
+                                        }
+                                    }
+                                    
+                                    // Now display each day with all its times
+                                    foreach ($dayTimes as $dayOfWeek => $times) {
+                                        echo '<li>' . htmlspecialchars($dayOfWeek) . ': ' . 
+                                             htmlspecialchars(implode(', ', $times)) . '</li>';
+                                    }
+                                    ?>
+                                <?php else: ?>
+                                    <li>No availability information available.</li>
+                                <?php endif; ?>
+                            </ul>
+                            </p>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button class="btn btn-warning edit-charge-point">
+                                    <i class="bi bi-pencil-square me-2"></i>Edit
+                                </button>
+                                <button class="btn btn-danger delete-charge-point">
+                                    <i class="bi bi-trash me-2"></i>Delete
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Location</h5>
-                                <div id="mainMapContainer" class="border rounded" style="height: 400px;"></div>
-                            </div>
+                </div>
+                <div class="col-md-7 ps-md-2"> <!-- Increased width from 6 to 7 columns -->
+                    <div class="card map-card">
+                        <div class="card-body p-0"> <!-- Removed padding to make map fill card -->
+                            <h5 class="card-title p-3 mb-0 bg-light">Location</h5>
+                            <div id="mainMapContainer" class="border-top" style="height: 400px;"></div>
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
+    </div>
 
-        <!-- Charge Point Modal -->
-        <div class="modal fade" id="chargePointModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Add Charge Point</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="chargePointForm" enctype="multipart/form-data">
-                            <input type="hidden" id="chargePointId" name="charge_point_id">
-                            <input type="hidden" id="existing_picture_url" name="existing_picture_url">
+    <!-- Charge Point Modal -->
+    <div class="modal fade" id="chargePointModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Charge Point</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="chargePointForm" enctype="multipart/form-data">
+                        <input type="hidden" id="chargePointId" name="charge_point_id">
+                        <input type="hidden" id="existing_picture_url" name="existing_picture_url">
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Street Name</label>
-                                    <input type="text" name="streetName" id="streetName" 
-                                           class="form-control" required>
-                                    <div class="invalid-feedback" id="streetName-error"></div>
-                                </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Street Name</label>
+                                <input type="text" name="streetName" id="streetName" 
+                                       class="form-control" required>
+                                <div class="invalid-feedback" id="streetName-error"></div>
+                            </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">City</label>
-                                    <select name="city_id" id="city_id" class="form-select" required>
-                                        <option value="">Select City</option>
-                                        <?php foreach ($view->cities as $city): ?>
-                                            <option value="<?= $city['city_id'] ?>">
-                                                <?= htmlspecialchars($city['city_name']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="invalid-feedback" id="city_id-error"></div>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">City</label>
+                                <select name="city_id" id="city_id" class="form-select" required>
+                                    <option value="">Select City</option>
+                                    <?php foreach ($view->cities as $city): ?>
+                                        <option value="<?= $city['city_id'] ?>">
+                                            <?= htmlspecialchars($city['city_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="invalid-feedback" id="city_id-error"></div>
+                            </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Postcode</label>
-                                    <input type="text" name="postcode" id="postcode" 
-                                           class="form-control" required>
-                                    <div class="invalid-feedback" id="postcode-error"></div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Postcode</label>
+                                <input type="text" name="postcode" id="postcode" 
+                                       class="form-control" required>
+                                <div class="invalid-feedback" id="postcode-error"></div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">House Number</label>
+                                <input type="number" name="house_number" id="house_number" 
+                                       class="form-control" required min="1">
+                                <div class="invalid-feedback" id="house_number-error"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Road</label>
+                                <input type="number" name="road" id="road" 
+                                       class="form-control" required min="1">
+                                <div class="invalid-feedback" id="road-error"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Block</label>
+                                <input type="number" name="block" id="block" 
+                                       class="form-control" required min="1">
+                                <div class="invalid-feedback" id="block-error"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price per kWh (BHD)</label>
+                                <input type="number" step="0.01" name="price_per_kwh" id="price_per_kwh" 
+                                       class="form-control" required min="0.01">
+                                <div class="invalid-feedback" id="price_per_kwh-error"></div>
+                            </div>
+                            
+                            <!-- Days of Week Availability (always visible as requested) -->
+                            <div id="daysOfWeekContainer">
+                                <h4>Days Available</h4>
+                                <div class="day-checkbox-container">
+                                    <label><input type="checkbox" name="availableDays" value="Monday"> Monday</label>
+                                    <label><input type="checkbox" name="availableDays" value="Tuesday"> Tuesday</label>
+                                    <label><input type="checkbox" name="availableDays" value="Wednesday"> Wednesday</label>
+                                    <label><input type="checkbox" name="availableDays" value="Thursday"> Thursday</label>
+                                    <label><input type="checkbox" name="availableDays" value="Friday"> Friday</label>
+                                    <label><input type="checkbox" name="availableDays" value="Saturday"> Saturday</label>
+                                    <label><input type="checkbox" name="availableDays" value="Sunday"> Sunday</label>
                                 </div>
                                 
-                                
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">House Number</label>
-                                    <input type="number" name="house_number" id="house_number" 
-                                           class="form-control" required min="1">
-                                    <div class="invalid-feedback" id="house_number-error"></div>
+                                <!-- Time Picker Containers for each day -->
+                                <div id="timePickersContainer">
+                                    <!-- Dynamic time pickers will be inserted here -->
                                 </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Road</label>
-                                    <input type="number" name="road" id="road" 
-                                           class="form-control" required min="1">
-                                    <div class="invalid-feedback" id="road-error"></div>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Block</label>
-                                    <input type="number" name="block" id="block" 
-                                           class="form-control" required min="1">
-                                    <div class="invalid-feedback" id="block-error"></div>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Price per kWh (BHD)</label>
-                                    <input type="number" step="0.01" name="price_per_kwh" id="price_per_kwh" 
-                                           class="form-control" required min="0.01">
-                                    <div class="invalid-feedback" id="price_per_kwh-error"></div>
-                                </div>
-                                
-                                                <!-- Days of Week Availability (always visible as requested) -->
-                <div id="daysOfWeekContainer">
-                    <h4>Days Available</h4>
-                    <div class="day-checkbox-container">
-                        <label><input type="checkbox" name="availableDays" value="Monday"> Monday</label>
-                        <label><input type="checkbox" name="availableDays" value="Tuesday"> Tuesday</label>
-                        <label><input type="checkbox" name="availableDays" value="Wednesday"> Wednesday</label>
-                        <label><input type="checkbox" name="availableDays" value="Thursday"> Thursday</label>
-                        <label><input type="checkbox" name="availableDays" value="Friday"> Friday</label>
-                        <label><input type="checkbox" name="availableDays" value="Saturday"> Saturday</label>
-                        <label><input type="checkbox" name="availableDays" value="Sunday"> Sunday</label>
-                    </div>
-                    
-                    <!-- Time Picker Containers for each day -->
-                    <div id="timePickersContainer">
-                        <!-- Dynamic time pickers will be inserted here -->
-                    </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Charge Point Picture</label>
@@ -236,11 +307,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjJVMZgeuOeEypf2xCiIs7vIOxXH4pakw&libraries=places"></script>
-    <script src="js/chargePoint1.js"></script>
-   
-</body>
-</html>
+</div>
+<br><br>
+<?php require('template/footer.phtml') ?>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzC0BK1BmIr0UHSMxkG7wFV7Kw4ZqfXqg&libraries=places"></script>
+<script src="js/chargePoint1.js"></script>

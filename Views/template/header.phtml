@@ -36,10 +36,9 @@ $pageBackgrounds = [
     "booknigDetails" => "images/HeaderBg5.jpg",
     "my-charge-point" => "images/HeaderBg2.jpg",
     "profile" => "/images/HeaderBg5.jpg",
-    "dashboard" => "/images/HeaderBg1.jpg",
-    "manage-homeowner-registration" => "/images/HeaderBg2.jpg",
-    "system-reports" => "/images/HeaderBg1.jpg",
-    "view-all-profiles" => "/images/HeaderBg2.jpg"
+    "dashboard" => "images/HeaderBg1.jpg",
+    "system-reports" => "images/HeaderBg1.jpg",
+    "view-all-profiles" => "images/HeaderBg2.jpg"
 ];
 
 $pageHeadings = [
@@ -53,31 +52,13 @@ $pageHeadings = [
     "my-charge-point" => "My Charge Point",
     "profile" => "User Profile",
     "dashboard" => "$greeting , $username",
-    "manage-homeowner-registration" => "Manage HomeOwners Registration",
     "system-reports" => "System Reports",
     "view-all-profiles" => "View All Profiles"
-];
-
-$pageDescriptions = [
-    "home" => "Nice to see you here.",
-    "browse-charger" => "Choose a Charge Point and Book.",
-    "book-charger" => "Book charging point",
-    "booking-history" => "Find all of your Bookings.",
-    "booknigDetails" => "Find more details of your booking",
-    "borrow-request" => "Find all Requests to your Charge Point.",
-    "charge-point-management" => "Manage System Charge Points.",
-    "my-charge-point" => "My Charge Point Details.",
-    "profile" => "Find all your user information.",
-    "dashboard" => "Nice to see you here.",
-    "manage-homeowner-registration" => "Review all HomeOwners Registration.",
-    "system-reports" => "Generate, Export system related reports.",
-    "view-all-profiles" => "View and Manage all users in the system."
 ];
 
 // Use defaults if active page isn't mapped
 $backgroundImage = isset($pageBackgrounds[$view->activePage]) ? $pageBackgrounds[$view->activePage] : "images/banners/home-banner.jpg";
 $pageHeading = isset($pageHeadings[$view->activePage]) ? $pageHeadings[$view->activePage] : "Index";
-$pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptions[$view->activePage] : "Providing the best service for charging needs.";
 
 ?>
 
@@ -86,99 +67,97 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
 <head>
     <title><?php echo htmlspecialchars($view->pageTitle); ?></title>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/owl.carousel.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .nav-link.active {
+            color: #fff; /* Change text color */
+            background-color: #007bff; /* Change background color */
+            border-radius: 5px; /* Optional: add border-radius */
+        }
+    </style>
 </head>
 <body>
 
 <!-- MENU -->
-<section class="navbar custom-navbar navbar-fixed-top" role="navigation">
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <div class="container">
+        <a class="navbar-brand" href="<?php 
+            if ($role == 'Guest' || $role == 'RentalUser') {
+                echo 'index.php';
+            } else {
+                echo $role == 'HomeOwner' ? 'home_homeowner.php' : 'dashboard_admin.php';
+            }
+        ?>">
+            <img src="images/logo.png" alt="Borrow My Charger" class="nav-logo-img">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <?php if ($role == 'Guest' || $role == 'RentalUser'): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo (($view->activePage == 'home' || $view->activePage == '') ? 'active' : ''); ?>" href="index.php">Home</a>
+                </li>
+                <?php endif; ?>
 
-        <div class="navbar-header">
-            <button class="navbar-toggle" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
-                <span class="icon icon-bar"></span>
-                <span class="icon icon-bar"></span>
-                <span class="icon icon-bar"></span>
-            </button>
-
-            <!-- Logo -->
-            <a href="index.php" class="navbar-brand nav-logo">
-                <img src="images/logo.png" alt="Borrow My Charger" class="nav-logo-img">
-            </a>
-        </div>
-
-        <!-- MENU LINKS -->
-        <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav navbar-nav-first">
-                <li class="<?php echo ($view->activePage == 'home' || $view->activePage == 'dashboard') ? 'active' : ''; ?>">
-                    <a href="<?php  
+                <?php if ($role != 'Guest'): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo (($view->activePage == 'dashboard') ? 'active' : ''); ?>" href="<?php  
                         if ($role == 'HomeOwner') { 
                             echo 'home_homeowner.php'; 
                         } elseif ($role == 'RentalUser') { 
                             echo 'home_rentaluser.php'; 
                         } elseif ($role == 'Admin') { 
                             echo 'dashboard_admin.php'; 
-                        } else { 
-                            echo 'index.php'; 
                         }
-                    ?>">
-                    <?php echo ($role == 'Admin') ? 'Dashboard' : 'Home'; ?>
-                    </a>
+                    ?>">Dashboard</a>
                 </li>
+                <?php endif; ?>
 
                 <?php
                 if ($role == 'HomeOwner') {
-                    echo '<li class="' . (($view->activePage == 'borrow-request') ? 'active' : '') . '"><a href="borrow-request.php">Borrow Request</a></li>';
-                    echo '<li class="' . (($view->activePage == 'my-charge-point') ? 'active' : '') . '"><a href="my-charge-point.php">My Charge Point</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'borrow-request') ? 'active' : '') . '" href="borrow-request.php">Borrow Request</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'my-charge-point') ? 'active' : '') . '" href="my-charge-point.php">My Charge Point</a></li>';
                 } elseif ($role == 'RentalUser') {
-                    echo '<li class="' . (($view->activePage == 'booking-history') ? 'active' : '') . '"><a href="booking-history.php">Booking History</a></li>';
-                    echo '<li class="' . (($view->activePage == 'browse-charger') ? 'active' : '') . '"><a href="browse-charger.php">Browse Charger</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'booking-history') ? 'active' : '') . '" href="booking-history.php">Booking History</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'browse-charger') ? 'active' : '') . '" href="browse-charger.php">Browse Charger</a></li>';
                 } elseif ($role == 'Admin') {
-                    echo '<li class="nav-item dropdown ' . (($view->activePage == 'view-all-profiles' || $view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '">';
-                    echo '<a href="#" class="nav-link dropdown-toggle" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">User Management <span class="caret"></span></a>';
-                    echo '<ul class="dropdown-menu" aria-labelledby="adminDropdown">';
-                    echo '<li class="' . (($view->activePage == 'view-all-profiles') ? 'active' : '') . '"><a href="view-all-profiles.php" class="dropdown-item">View All Profiles</a></li>';
-                    echo '<li class="' . (($view->activePage == 'manage-homeowner-registration') ? 'active' : '') . '"><a href="manage-homeowner-registration.php" class="dropdown-item">Manage Homeowner Registration</a></li>';
-                    echo '</ul>';
-                    echo '</li>';
-                    echo '<li class="' . (($view->activePage == 'charge-point-management') ? 'active' : '') . '"><a href="charge-point-management.php">Charge Point Management</a></li>';
-                    echo '<li class="' . (($view->activePage == 'system-reports') ? 'active' : '') . '"><a href="system-reports.php">System Reports</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'view-all-profiles') ? 'active' : '') . '" href="view-all-profiles.php">Manage Profiles</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'charge-point-management') ? 'active' : '') . '" href="charge-point-management.php">Charge Point Management</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'system-reports') ? 'active' : '') . '" href="system-reports.php">System Reports</a></li>';
                 } else {
-                    echo '<li class="' . (($view->activePage == 'browse-charger') ? 'active' : '') . '"><a href="browse-charger.php">Browse Charger</a></li>';
+                    echo '<li class="nav-item"><a class="nav-link ' . (($view->activePage == 'browse-charger') ? 'active' : '') . '" href="browse-charger.php">Browse Charger</a></li>';
                 }
                 ?>
             </ul>
 
-       <!-- USER DROPDOWN -->
-        <div class="nav-user-wrapper">
-            <ul class="nav navbar-nav nav-user">
+            <!-- USER DROPDOWN -->
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="images/user.png" alt="User" class="nav-user-img">
                         <?php echo ($role == 'Guest') ? "Guest" : htmlspecialchars($username); ?>
                     </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <?php
                         if ($role == 'Guest') {
-                            echo '<li><a href="login.php" class="dropdown-item">Login</a></li>';
-                            echo '<li><a href="register.php" class="dropdown-item">Sign Up</a></li>';
+                            echo '<li><a class="dropdown-item" href="login.php">Login</a></li>';
+                            echo '<li><a class="dropdown-item" href="register.php">Sign Up</a></li>';
                         } else {
-                            echo '<li><a href="profile.php" class="dropdown-item">My Profile</a></li>';
-                            echo '<li><a href="logout.php" class="dropdown-item">Logout</a></li>';
+                            echo '<li><a class="dropdown-item" href="profile.php">My Profile</a></li>';
+                            echo '<li><a class="dropdown-item" href="logout.php">Logout</a></li>';
                         }
                         ?>
                     </ul>
                 </li>
             </ul>
         </div>
-        </div>
     </div>
-</section>
+</nav>
 
 <?php if ($pageHeading != "Index") : ?>
 <!-- Dynamic Section with Greeting under Welcome -->
@@ -187,8 +166,6 @@ $pageDescription = isset($pageDescriptions[$view->activePage]) ? $pageDescriptio
     <div class="container">
         <div>
             <h1><?php echo htmlspecialchars($pageHeading); ?></h1>
-            <br>          
-            <p class="lead"><?php echo htmlspecialchars($pageDescription); ?></p>
         </div>
     </div>
 </section>

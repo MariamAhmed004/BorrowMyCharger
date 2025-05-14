@@ -1,92 +1,330 @@
-/* styles.css */
+/* General styles */
 .stats-card {
-    margin-bottom: 20px;
-    border: none;
-    background-color: #e9ecef;
+    background-color: #fff;
+    border-radius: 10px;
     padding: 20px;
-    border-radius: 5px;
-    transition: transform 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    height: 100%;
+    transition: transform 0.2s;
 }
-
 .stats-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
-
+.stats-card h5 {
+    color: #555;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
 .stats-value {
     font-size: 2.5rem;
     font-weight: bold;
-    color: #299c6e;
+    color: #333;
 }
 
+/* Status items in the stats card */
+.status-counts {
+    margin-top: 10px;
+}
+.status-item {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+.status-label {
+    font-weight: 600;
+}
+
+/* Calendar styles */
 .calendar {
-    margin-top: 20px;
     background-color: #fff;
+    border-radius: 10px;
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
-
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+    gap: 5px;
 }
-
 .weekday-header {
-    text-align: center;
-    font-weight: bold;
     margin-bottom: 10px;
 }
-
-.day {
-    padding: 10px;
+.weekday-header div {
     text-align: center;
-    border: 1px solid #dee2e6;
+    font-weight: bold;
+    padding: 10px 0;
+}
+.day {
+    position: relative;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e0e0e0;
     border-radius: 5px;
-    background-color: #ffffff;
-    cursor: default; /* Disable pointer cursor */
-    transition: background-color 0.3s;
+    cursor: default;
+}
+.day.empty {
+    background-color: #f9f9f9;
+    border: none;
+}
+.day.today {
+    background-color: #e6f7ff;
+    border: 2px solid #1890ff;
+    font-weight: bold;
+}
+.has-reservation {
+    background-color: #ffe6b3; /* Pending - amber/yellow */
+}
+.has-confirmed {
+    background-color: #c8e6c9; /* Approved - green */
+}
+.has-rejected {
+    background-color: #ffcdd2; /* Rejected - red */
+}
+.booking-count {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.day:hover {
-    background-color: #e9ecef;
+/* Calendar legend */
+.calendar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+}
+.legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+.legend-color.pending {
+    background-color: #ffe6b3;
+}
+.legend-color.approved {
+    background-color: #c8e6c9;
+}
+.legend-color.rejected {
+    background-color: #ffcdd2;
 }
 
-.day.has-reservation {
-    background-color: #ffc107;
-    color: #000;
-}
-
-.day.has-confirmed {
-    background-color: #299c6e;
-    color: #fff;
-}
-
-.day.has-past {
-    background-color: #dc3545;
-    color: #fff;
-}
-
+/* Upcoming Reservations */
 .upcoming-reservations {
-    margin-top: 30px;
     background-color: #fff;
+    border-radius: 10px;
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.reservations-container {
+    max-height: 450px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #007bff #f0f0f0;
+}
+
+.reservations-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.reservations-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.reservations-container::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 10px;
 }
 
 .reservation-item {
     padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.2s;
+}
+
+.reservation-item:last-child {
+    border-bottom: none;
+}
+
+.reservation-item:hover {
+    background-color: #f9f9f9;
+}
+
+.reservation-item h6 {
+    font-weight: 600;
     margin-bottom: 10px;
-    border-left: 4px solid #299c6e;
-    background-color: #f8f9fa;
-    border-radius: 0 5px 5px 0;
+    color: #333;
+}
+
+.reservation-status {
+    margin: 10px 0;
+}
+
+.status-pending {
+    color: #f0ad4e;
+    font-weight: 600;
+    padding: 2px 8px;
+    background-color: #fff3cd;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.status-approved {
+    color: #28a745;
+    font-weight: 600;
+    padding: 2px 8px;
+    background-color: #d4edda;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.status-rejected {
+    color: #dc3545;
+    font-weight: 600;
+    padding: 2px 8px;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Pagination styling */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.pagination {
+    margin-bottom: 10px;
+}
+
+.pagination .page-link {
+    color: #007bff;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+/* Multi-status indicators for calendar days */
+.status-indicators {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    display: flex;
+    gap: 2px;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-indicator.pending {
+    background-color: #f0ad4e; /* Amber */
+}
+
+.status-indicator.approved {
+    background-color: #28a745; /* Green */
+}
+
+.status-indicator.rejected {
+    background-color: #dc3545; /* Red */
+}
+
+.day {
+    position: relative;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    cursor: default;
+    background-color: #fff;
+}
+
+/* Booking details modal styles */
+.booking-detail-item {
+    padding: 15px 0;
+}
+
+.booking-detail-item h6 {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Updated legend styles */
+.calendar-legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.legend-color.pending {
+    background-color: #f0ad4e;
+}
+
+.legend-color.approved {
+    background-color: #28a745;
+}
+
+.legend-color.rejected {
+    background-color: #dc3545;
+}
+
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
 }

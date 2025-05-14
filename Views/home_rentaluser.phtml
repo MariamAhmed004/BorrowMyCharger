@@ -1,81 +1,148 @@
 <?php require('template/header.phtml') ?>
-
 <link rel="stylesheet" href="css/homeRentalUser.css"> <!-- Link to external CSS file -->
 <script src="js/homeRentalUser.js" defer></script> <!-- Link to external JS file -->
-
 <div class="container mt-4">
     <br><br>
     
     <!-- Statistics Cards -->
     <div class="row">
-        <div class="col-md-4">
-            <div class="stats-card">
-                <h5>Active Reservations</h5>
-                <div class="stats-value"><?= htmlspecialchars($view->activeReservation); ?></div>
-            </div>
-        </div>
-        <div class="col-md-4">
+
+        <div class="col-md-3">
             <div class="stats-card">
                 <h5>Total Borrowings</h5>
                 <div class="stats-value"><?= htmlspecialchars($view->borrowingCount); ?></div>
                 <a href="booking-history.php" class="btn btn-sm btn-info mt-2">View History</a>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="stats-card">
                 <h5>Available Charging Points</h5>
                 <div class="stats-value"><?= htmlspecialchars($view->availableChargingPoints ?? 0); ?></div>
                 <a href="browse-charger.php" class="btn btn-sm btn-success mt-2">Find Chargers</a>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Reservation Status</h5>
+                <div class="status-counts">
+                    <div class="status-item">
+                        <span class="status-label">Pending:</span>
+                        <span class="status-value"><?= htmlspecialchars($view->pendingReservations); ?></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Approved:</span>
+                        <span class="status-value"><?= htmlspecialchars($view->approvedReservations); ?></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Rejected:</span>
+                        <span class="status-value"><?= htmlspecialchars($view->rejectedReservations); ?></span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
+    <br><br>
     <div class="row mt-4">
         <!-- Calendar Section -->
         <div class="col-md-8">
-            <div class="calendar">
-                <h4>My Reservation Calendar</h4>
-                <div class="calendar-header">
-                    <button id="prevMonth" class="btn btn-secondary">Previous</button>
-                    <h5 id="monthYear"></h5>
-                    <button id="nextMonth" class="btn btn-secondary">Next</button>
-                </div>
-                
-                <div class="weekday-header calendar-grid">
-                    <div>Sun</div>
-                    <div>Mon</div>
-                    <div>Tue</div>
-                    <div>Wed</div>
-                    <div>Thu</div>
-                    <div>Fri</div>
-                    <div>Sat</div>
-                </div>
-                
-                <div class="calendar-grid" id="calendar"></div>
-                
-              
-            </div>
+
+<div class="calendar">
+    <h4>My Reservation Calendar</h4>
+    <div class="calendar-header">
+        <button id="prevMonth" class="btn btn-secondary">Previous</button>
+        <h5 id="monthYear"></h5>
+        <button id="nextMonth" class="btn btn-secondary">Next</button>
+    </div>
+    
+    <div class="weekday-header calendar-grid">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+    </div>
+    
+    <div class="calendar-grid" id="calendar"></div>
+    
+    <div class="calendar-legend mt-2">
+        <div class="legend-item">
+            <div class="legend-color pending"></div>
+            <span>Pending</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color approved"></div>
+            <span>Approved</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color rejected"></div>
+            <span>Rejected</span>
+        </div>
+
+    </div>
+</div>
         </div>
         
         <!-- Upcoming Reservations -->
         <div class="col-md-4">
             <div class="upcoming-reservations">
-                <h4>Upcoming Reservations</h4>
+                <h4>Approved Upcoming Reservations</h4>
                 
                 <?php if (empty($view->upcomingReservations)): ?>
-                    <p class="text-muted">No upcoming reservations.</p>
+                    <p class="text-muted">No approved upcoming reservations.</p>
                 <?php else: ?>
-                    <?php foreach ($view->upcomingReservations as $reservation): ?>
-                        <div class="reservation-item">
-                            <h6><?= htmlspecialchars($reservation['location_name'] ?? $reservation['address']); ?></h6>
-                            <p class="mb-1">
-                                <strong>Date:</strong> <?= date('d M Y', strtotime($reservation['reservation_date'])); ?><br>
-                                <strong>Time:</strong> <?= date('H:i', strtotime($reservation['reservation_time'])); ?><br>
-                                <strong>Host:</strong> <?= htmlspecialchars($reservation['host_name']); ?>
-                            </p>
-                            <a href="reservation-details.php?id=<?= $reservation['id']; ?>" class="btn btn-sm btn-outline-primary">View Details</a>
+                    <div class="reservations-container">
+                        <?php foreach ($view->upcomingReservations as $reservation): ?>
+                            <div class="reservation-item">
+                                <h6><?= htmlspecialchars($reservation['address']); ?></h6>
+                                <p class="mb-1">
+                                    <strong>Date:</strong> <?= date('d M Y', strtotime($reservation['booking_date'])); ?><br>
+                                    <strong>Time:</strong> <?= date('H:i', strtotime($reservation['booking_time'])); ?><br>
+                                    <strong>Host:</strong> <?= htmlspecialchars($reservation['host_name']); ?>
+                                </p>
+                                <div class="reservation-status">
+                                    <span class="status-approved">
+                                        Approved
+                                    </span>
+                                </div>
+                              
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <?php if ($view->totalPages > 1): ?>
+                        <div class="pagination-container mt-3">
+                            <ul class="pagination pagination-sm justify-content-center">
+                                <?php if ($view->currentPage > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $view->currentPage - 1 ?>">Previous</a>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Previous</span>
+                                    </li>
+                                <?php endif; ?>
+                                
+                                <?php for ($i = 1; $i <= $view->totalPages; $i++): ?>
+                                    <li class="page-item <?= $i === $view->currentPage ? 'active' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                    </li>
+                                <?php endfor; ?>
+                                
+                                <?php if ($view->currentPage < $view->totalPages): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $view->currentPage + 1 ?>">Next</a>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Next</span>
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
                         </div>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
                 <?php endif; ?>
                 
                 <div class="mt-3 text-center">
@@ -89,5 +156,4 @@
 <script>
     window.bookings = <?= json_encode($view->bookings ?? []); ?>;
 </script>
-
 <?php require('template/footer.phtml') ?>

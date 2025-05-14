@@ -1,0 +1,66 @@
+.profile-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff; /* Added a background color */
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block; /* Ensure labels are block elements */
+    margin-bottom: 5px; /* Space between label and input */
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px; /* Increased padding for better usability */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.3s; /* Smooth transition for border color */
+}
+
+.form-group input:disabled {
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.form-group input:focus {
+    border-color: #008CBA; /* Change border color on focus */
+    outline: none; /* Remove default outline */
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.success {
+    color: green;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: #008CBA;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-right: 10px;
+    cursor: pointer; /* Pointer cursor for buttons */
+    transition: background-color 0.3s; /* Smooth transition for button */
+}
+
+.btn:hover {
+    background-color: #005f73;
+}
+
+.validation-error {
+    border: 1px solid red !important;
+}

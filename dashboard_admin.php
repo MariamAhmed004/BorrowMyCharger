@@ -3,24 +3,31 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 // Include the dashboard model
 require_once 'Models/AdminDashboard.php';
-
-//require a model -> for the statistics - new instance of the model
 $dashboardModel = new AdminDashboard();
 
-
-// view instance for the header 
+// Prepare view instance
 $view = new stdClass();
-$view->pageTitle = 'Dashboard';
+$view->pageTitle = 'dashboard';
 $view->activePage = 'dashboard';
 
-//Prepare view data sending the statistics after excuting the sql statements from the model
+// Prepare view data
 $view->userCount = $dashboardModel->getUserCount();
 $view->homeOwnerCount = $dashboardModel->getHomeOwnerCount();
 $view->chargePointCount = $dashboardModel->getChargePointCount();
 $view->pendingApproval = $dashboardModel->getPendingApproval();
 
+// Get more detailed stats
+$view->chargePointStatusCounts = $dashboardModel->getChargePointStatusCounts();
+$view->userStatusCounts = $dashboardModel->getUserStatusCounts();
+$view->bookingStatusCounts = $dashboardModel->getBookingStatusCounts();
+$view->userRoleCounts = $dashboardModel->getUserCountsByRole();
+$view->bookingsLastSevenDays = $dashboardModel->getBookingsLastSevenDays();
+$view->topChargePoints = $dashboardModel->getTopChargePoints();
+$view->priceStats = $dashboardModel->getChargePointPriceStats();
+$view->popularBookingDays = $dashboardModel->getPopularBookingDays();
+$view->popularBookingTimes = $dashboardModel->getPopularBookingTimes();
+
 require_once 'Views/dashboard_admin.phtml';
-
-

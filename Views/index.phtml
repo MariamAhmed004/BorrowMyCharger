@@ -143,89 +143,54 @@
                     </div>
                </div>
           </section>
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div class="section-title text-center">
+                    <h2>Featured Charging Points <small>Popular locations near you</small></h2>
+                </div>
+            </div>
 
-          <section>
-               <div class="container">
-                    <div class="row">
-                         <div class="col-md-12 col-sm-12">
-                              <div class="section-title text-center">
-                                   <h2>Featured Charging Points <small>Popular locations near you</small></h2>
-                              </div>
-                         </div>
+            <!-- Featured charging points -->
+            <?php foreach ($featuredChargePoints as $chargePoint): ?>
+                <div class="col-md-4 col-sm-4">
+                    <div class="courses-thumb courses-thumb-secondary">
+                        <div class="courses-top">
+                            <div class="courses-image" style="height: 220px; overflow: hidden;">
+                                <img src="<?= htmlspecialchars($chargePoint['charge_point_picture_url']) ?>" class="img-responsive" alt="Charge Point" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div class="courses-date">
+                                <span title="Owner"><i class="fa fa-user"></i> <?= htmlspecialchars($chargePoint['first_name'] . ' ' . $chargePoint['last_name']) ?></span>
+                                <span title="Location"><i class="fa fa-map-marker"></i> <?= htmlspecialchars($chargePoint['streetName'] . ', ' . $chargePoint['house_number'] ) ?></span>
+                                <span title="Phone">
+                                    <i class="fa fa-phone"></i>
+                                    <?= isset($chargePoint['phone_number']) ? htmlspecialchars($chargePoint['phone_number']) : 'N/A' ?>
+                                </span>
+                                <span title="Type"><i class="fa fa-plug"></i> BD<?= htmlspecialchars($chargePoint['price_per_kwh']) ?> kW</span>
+                            </div>
+                        </div>
 
-                         <!-- Featured charging points with equal height images -->
-                         <div class="col-md-4 col-sm-4">
-                              <div class="courses-thumb courses-thumb-secondary">
-                                   <div class="courses-top">
-                                        <div class="courses-image" style="height: 220px; overflow: hidden;">
-                                             <img src="images/homepage/home-charger-1.jpg" class="img-responsive" alt="Home charger" style="width: 100%; height: 100%; object-fit: cover;">
-                                        </div>
-                                        <div class="courses-date">
-                                             <span title="Owner"><i class="fa fa-user"></i> Sarah M.</span>
-                                             <span title="Location"><i class="fa fa-map-marker"></i> Manchester</span>
-                                             <span title="Type"><i class="fa fa-plug"></i> 7kW</span>
-                                        </div>
-                                   </div>
+                        <div class="courses-detail">
+                            <h3>
+                                <a href="book-charger.php?id=<?= htmlspecialchars($chargePoint['charge_point_id']) ?>">
+                                    <?= htmlspecialchars($chargePoint['city_name']) ?>, <?= htmlspecialchars($chargePoint['streetName']) ?> Charging
+                                </a>
+                            </h3>
+                            <p class="availability-status">
+                                <strong>Status:</strong> <?= htmlspecialchars($chargePoint['availability_status_title']) ?>
+                            </p>
+                        </div>
 
-                                   <div class="courses-detail">
-                                        <h3><a href="charger-details.php?id=1">Fast Charging in Quiet Neighborhood - Easy Access</a></h3>
-                                   </div>
-
-                                   <div class="courses-info">
-                                        <a href="charger-details.php?id=1" class="section-btn btn btn-primary btn-block">View Details</a>
-                                   </div>
-                              </div>
-                         </div>
-
-                         <div class="col-md-4 col-sm-4">
-                              <div class="courses-thumb courses-thumb-secondary">
-                                   <div class="courses-top">
-                                        <div class="courses-image" style="height: 220px; overflow: hidden;">
-                                             <img src="images/homepage/home-charger-2.jpg" class="img-responsive" alt="Home charger" style="width: 100%; height: 100%; object-fit: cover;">
-                                        </div>
-                                        <div class="courses-date">
-                                             <span title="Owner"><i class="fa fa-user"></i> James P.</span>
-                                             <span title="Location"><i class="fa fa-map-marker"></i> Leeds</span>
-                                             <span title="Type"><i class="fa fa-plug"></i> 11kW</span>
-                                        </div>
-                                   </div>
-
-                                   <div class="courses-detail">
-                                        <h3><a href="charger-details.php?id=2">City Center Charging - Perfect for Shopping Trips</a></h3>
-                                   </div>
-
-                                   <div class="courses-info">
-                                        <a href="charger-details.php?id=2" class="section-btn btn btn-primary btn-block">View Details</a>
-                                   </div>
-                              </div>
-                         </div>
-
-                         <div class="col-md-4 col-sm-4">
-                              <div class="courses-thumb courses-thumb-secondary">
-                                   <div class="courses-top">
-                                        <div class="courses-image" style="height: 220px; overflow: hidden;">
-                                             <img src="images/homepage/home-charger-3.jpg" class="img-responsive" alt="Home charger" style="width: 100%; height: 100%; object-fit: cover;">
-                                        </div>
-                                        <div class="courses-date">
-                                             <span title="Owner"><i class="fa fa-user"></i> Emma T.</span>
-                                             <span title="Location"><i class="fa fa-map-marker"></i> Birmingham</span>
-                                             <span title="Type"><i class="fa fa-plug"></i> 22kW</span>
-                                        </div>
-                                   </div>
-
-                                   <div class="courses-detail">
-                                        <h3><a href="charger-details.php?id=3">Premium Rapid Charger - Available 24/7</a></h3>
-                                   </div>
-
-                                   <div class="courses-info">
-                                        <a href="charger-details.php?id=3" class="section-btn btn btn-primary btn-block">View Details</a>
-                                   </div>
-                              </div>
-                         </div>
+                        <div class="courses-info">
+                            <a href="book-charger.php?id=<?= htmlspecialchars($chargePoint['charge_point_id']) ?>" class="section-btn btn btn-primary btn-block">View Details</a>
+                        </div>
                     </div>
-               </div>
-          </section>
-
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
 <!-- TESTIMONIALS -->
 <section id="testimonial">
     <div class="container">
@@ -406,7 +371,7 @@
 </section>
 
 
-  <section id="contact" style="background-color: #B68942; color: white;">
+<!--  <section id="contact" style="background-color: #B68942; color: white;">
     <div class="container">
         <div class="row">
             <div class="col-md-6 col-sm-12">
@@ -436,7 +401,7 @@
             </div>
         </div>
     </div>
-</section>
+</section>-->
 
 <!-- Improved Modal for success/error messages -->
 <div id="messageModal" class="modal">
@@ -464,7 +429,7 @@
                </div>
           </div>
      </section>
-     
+ <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzC0BK1BmIr0UHSMxkG7wFV7Kw4ZqfXqg&libraries=places"></script>
 <script src="js/contactForm.js"></script>
 <script src="js/map.js"></script>
 <script src="js/faq.js"></script>
@@ -473,5 +438,5 @@
     const chargePoints = <?php echo json_encode($chargePoints); ?>;
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjJVMZgeuOeEypf2xCiIs7vIOxXH4pakw&callback=initMap" async defer></script>
+<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjJVMZgeuOeEypf2xCiIs7vIOxXH4pakw&callback=initMap" async defer></script>-->
 <?php require('template/footer.phtml') ?>

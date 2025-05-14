@@ -140,7 +140,7 @@ function handleAddChargePoint($model, $userId) {
 
     // Process available days and times
     $availabilityData = processAvailableDaysTimes();
-
+$data['availability'] = $availabilityData;
     // Additional validation
     foreach ($data as $key => $value) {
         if ($key !== 'streetName' && $key !== 'postcode' && $key !== 'price_per_kwh') {
@@ -273,7 +273,7 @@ function handleUpdateChargePoint($model, $userId) {
 
     // Process available days and times
     $availabilityData = processAvailableDaysTimes();
-
+$data['availability'] = $availabilityData;
     // Additional validation
     foreach ($data as $key => $value) {
         if ($key !== 'charge_point_id' && $key !== 'streetName' && $key !== 'postcode' && $key !== 'price_per_kwh') {

@@ -1,27 +1,36 @@
 <?php
-// Start the session if it's not already active
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once 'Models/Database.php';
 require_once 'Models/BookingHistory.php';
 
-//handle from the header navigation to the html page
+session_start();
 $view = new stdClass();
-$view->pageTitle = 'Booking History';
+$view->pageTitle = 'booking-history';
 $view->activePage = 'booking-history';
-
-// Get user ID from the session
 $userId = $_SESSION['user_id'] ?? null;
 
 if ($userId) {
-    // Create an instance of the model
     $bookingHistory = new BookingHistory($userId);
 
-    // Fetch booking details
-    $view->bookings = $bookingHistory->getUserBookingHistory();
+    // Handle AJAX request
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $status = $_POST['status'] ?? null;
+        $page = $_POST['page'] ?? 1;
+        $limit = 8;
+
+        $totalBookings = $bookingHistory->getBookingCount($status);
+        $totalPages = ceil($totalBookings / $limit);
+        $bookings = $bookingHistory->getUserBookingHistory($status, $page, $limit);
+
+        echo json_encode([
+            'bookings' => $bookings,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+        ]);
+        exit;
+    }
 } else {
-    $view->bookings = [];
-    $errorMessage = "User ID is missing.";
+    echo json_encode(['error' => 'User ID is missing.']);
+    exit;
 }
 
 // Load the view

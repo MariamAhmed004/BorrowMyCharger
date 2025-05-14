@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
 }
 $chargePointModel = new MyChargePointModel();
-
+$featuredChargePoints = $chargePointModel->getFeaturedChargePoints();
 if (isset($_GET['filter'])) {
     $filter = $_GET['filter'];
     $minPrice = isset($_GET['min_price']) && is_numeric($_GET['min_price']) ? (float)$_GET['min_price'] : null;

@@ -9,16 +9,50 @@ class BookingHistory {
         $this->dbHandle = Database::getInstance()->getDbConnection();
     }
     //get user active reservations count
-    public function getUserBookingHistory() {
+      public function getUserBookingHistory($status = null, $page = 1, $limit = 10) {
+        $offset = ($page - 1) * $limit;
         $sql = "SELECT b.*, cpa.streetName, cpa.house_number 
-        FROM Pro_Booking b
-        JOIN Pro_ChargePoint cp ON b.charge_point_id = cp.charge_point_id
-        JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id
-        WHERE b.user_id = :user_id";
+                FROM Pro_Booking b
+                JOIN Pro_ChargePoint cp ON b.charge_point_id = cp.charge_point_id
+                JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id
+                WHERE b.user_id = :user_id";
+        
+        if ($status) {
+            $sql .= " AND b.booking_status_id = :status";
+        }
+        
+        $sql .= " LIMIT :limit OFFSET :offset";
+        
         $stmt = $this->dbHandle->prepare($sql);
-        $stmt->bindParam(':user_id',  $this->userId, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
+        
+        if ($status) {
+            $stmt->bindParam(':status', $status, PDO::PARAM_INT);
+        }
+        
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
+        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getBookingCount($status = null) {
+        $sql = "SELECT COUNT(*) FROM Pro_Booking WHERE user_id = :user_id";
+        
+        if ($status) {
+            $sql .= " AND booking_status_id = :status";
+        }
+        
+        $stmt = $this->dbHandle->prepare($sql);
+        $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
+
+        if ($status) {
+            $stmt->bindParam(':status', $status, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchColumn();
     }
     //fetch one booking details
     public function getBookingDetails($bookingId) {

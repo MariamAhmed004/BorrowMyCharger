@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 case 3:
                     $_SESSION['role'] = 'RentalUser';
-                    header('Location: home_rentaluser.php');
+                    header('Location: index.php');
                     exit;
                 default:
                     $_SESSION['role'] = 'Guest';

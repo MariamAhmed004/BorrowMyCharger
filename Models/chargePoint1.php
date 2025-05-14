@@ -9,6 +9,40 @@ class MyChargePointModel {
         $this->dbConnection = $database->getDbConnection();
     }
     
+public function getFeaturedChargePoints($limit = 3) {
+    $sql = "
+        SELECT 
+            cp.charge_point_id,
+            cp.price_per_kwh,
+            cp.charge_point_picture_url,
+            u.first_name,
+            u.last_name,
+            u.phone_number,
+            cpa.streetName,
+            cpa.house_number,
+            c.city_name,
+            avs.availability_status_title
+        FROM 
+            Pro_ChargePoint cp 
+        JOIN 
+            Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id
+        JOIN 
+            Pro_AvailabilityStatus avs ON cp.availability_status_id = avs.availability_status_id
+        JOIN 
+            Pro_User u ON cp.user_id = u.user_id
+        JOIN 
+            Pro_City c ON cpa.city_id = c.city_id
+        ORDER BY 
+            cp.charge_point_id DESC
+        LIMIT :limit";
+
+    $statement = $this->dbConnection->prepare($sql);
+    $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $statement->execute();
+
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
+}
+    
 
     public function getChargePointDetails($minPrice = null, $maxPrice = null) {
         $sql = "
@@ -130,22 +164,49 @@ public function getUnAvailableChargePoints($minPrice = null, $maxPrice = null) {
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
 
-    // Get user's charge points
-    public function getUserChargePoint($userId) {
-        $sql = "SELECT cp.*, cpa.*, c.city_name, avs.availability_status_title 
-                FROM Pro_ChargePoint cp 
-                JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id 
-                JOIN Pro_City c ON cpa.city_id = c.city_id
-                JOIN Pro_AvailabilityStatus avs ON cp.availability_status_id = avs.availability_status_id
-                WHERE cp.user_id = :user_id";
+  public function getUserChargePoint($userId) {
+    $sql = "SELECT cp.*, cpa.*, c.city_name, avs.availability_status_title, 
+                   ad.day_of_week, at.available_time
+            FROM Pro_ChargePoint cp 
+            JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id 
+            JOIN Pro_City c ON cpa.city_id = c.city_id
+            JOIN Pro_AvailabilityStatus avs ON cp.availability_status_id = avs.availability_status_id
+            LEFT JOIN Pro_AvailabilityDays ad ON cp.charge_point_id = ad.charge_point_id
+            LEFT JOIN Pro_AvailabilityTimes at ON ad.availability_day_id = at.availability_day_id
+            WHERE cp.user_id = :user_id";
                 
-        $statement = $this->dbConnection->prepare($sql);
-        $statement->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $statement->execute();
+    $statement = $this->dbConnection->prepare($sql);
+    $statement->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $statement->execute();
+
+    $chargePoints = [];
+    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+        $chargePointId = $row['charge_point_id'];
+
+        if (!isset($chargePoints[$chargePointId])) {
+            $chargePoints[$chargePointId] = $row;
+            $chargePoints[$chargePointId]['availability_days'] = []; // Initialize
+        }
+
+        if ($row['day_of_week']) {
+            $chargePoints[$chargePointId]['availability_days'][] = [
+                'day_of_week' => $row['day_of_week'],
+                'times' => [] // Initialize times array
+            ];
+        }
         
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        if ($row['available_time']) {
+            $lastIndex = count($chargePoints[$chargePointId]['availability_days']) - 1;
+            if ($lastIndex >= 0) {
+                $chargePoints[$chargePointId]['availability_days'][$lastIndex]['times'][] = [
+                    'available_time' => $row['available_time']
+                ];
+            }
+        }
     }
-    
+
+    return array_values($chargePoints); // Reset array keys
+}
     // Get all cities from the database
     public function getAllCities() {
         $sql = "SELECT * FROM Pro_City ORDER BY city_name";

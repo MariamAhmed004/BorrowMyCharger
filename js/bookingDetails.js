@@ -3,26 +3,17 @@
             const bookingId = document.getElementById('booking-id').value;
 
             function initializeMap(lat, lng, address) {
-                const map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 15,
-                    center: { lat: lat, lng: lng }
-                });
+                const map = L.map('map').setView([lat, lng], 15);
 
-                const marker = new google.maps.Marker({
-                    position: { lat: lat, lng: lng },
-                    map: map,
-                    title: "Charge Point"
-                });
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
 
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `<b>Charge Point</b><br>${address}`
-                });
-
-                marker.addListener('click', function() {
-                    infoWindow.open(map, marker);
-                });
-
-                infoWindow.open(map, marker);
+                const marker = L.marker([lat, lng]).addTo(map)
+                    .bindPopup(`<b>Charge Point</b><br>${address}`)
+                    .openPopup();
             }
 
             function showMapError(message) {

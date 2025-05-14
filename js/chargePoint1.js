@@ -77,14 +77,29 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById(`selected_times_${day.toLowerCase()}`).value = selectedTimes.join(',');
     }
     
-    // Handle day checkbox changes
+    // Handle day checkbox changes - FIXED: This was not properly showing/hiding the time pickers
     function handleDayCheckboxChange(event) {
         const day = event.target.value;
         const isChecked = event.target.checked;
         const timePickerContainer = document.getElementById(`${day.toLowerCase()}-time-picker`);
         
         if (timePickerContainer) {
+            // Make sure to show/hide the time picker container based on checkbox state
             timePickerContainer.style.display = isChecked ? 'block' : 'none';
+            
+            // If unchecking, clear the selections
+            if (!isChecked) {
+                // Clear active states from time buttons
+                timePickerContainer.querySelectorAll('.time-button.active').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Clear hidden input value
+                const hiddenInput = document.getElementById(`selected_times_${day.toLowerCase()}`);
+                if (hiddenInput) {
+                    hiddenInput.value = '';
+                }
+            }
         }
     }
     
@@ -96,74 +111,75 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-  function populateTimeSelections(chargePointData) {
-    // Reset all selections first
-    document.querySelectorAll('input[name="availableDays"]').forEach(checkbox => {
-        checkbox.checked = false;
-        const day = checkbox.value;
-        const timePickerContainer = document.getElementById(`${day.toLowerCase()}-time-picker`);
-        if (timePickerContainer) {
-            timePickerContainer.style.display = 'none';
-            // Clear active states from time buttons
-            timePickerContainer.querySelectorAll('.time-button.active').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Clear hidden input value
-            const hiddenInput = document.getElementById(`selected_times_${day.toLowerCase()}`);
-            if (hiddenInput) {
-                hiddenInput.value = '';
-            }
-        }
-    });
-    
-    // If no data or no availability, exit early
-    if (!chargePointData || !chargePointData.availability || Object.keys(chargePointData.availability).length === 0) {
-        console.log('No availability data to populate', chargePointData);
-        return;
-    }
-    
-    console.log('Populating with availability data:', chargePointData.availability);
-    
-    // For each day in the availability data
-    Object.keys(chargePointData.availability).forEach(day => {
-        // Check the day checkbox
-        const dayCheckbox = document.querySelector(`input[name="availableDays"][value="${day}"]`);
-        if (dayCheckbox) {
-            dayCheckbox.checked = true;
-            
-            // Show the time picker
+    function populateTimeSelections(chargePointData) {
+        // Reset all selections first
+        document.querySelectorAll('input[name="availableDays"]').forEach(checkbox => {
+            checkbox.checked = false;
+            const day = checkbox.value;
             const timePickerContainer = document.getElementById(`${day.toLowerCase()}-time-picker`);
             if (timePickerContainer) {
-                timePickerContainer.style.display = 'block';
+                timePickerContainer.style.display = 'none';
+                // Clear active states from time buttons
+                timePickerContainer.querySelectorAll('.time-button.active').forEach(btn => {
+                    btn.classList.remove('active');
+                });
                 
-                // Get times for this day
-                const times = chargePointData.availability[day];
+                // Clear hidden input value
+                const hiddenInput = document.getElementById(`selected_times_${day.toLowerCase()}`);
+                if (hiddenInput) {
+                    hiddenInput.value = '';
+                }
+            }
+        });
+        
+        // If no data or no availability, exit early
+        if (!chargePointData || !chargePointData.availability || Object.keys(chargePointData.availability).length === 0) {
+            console.log('No availability data to populate', chargePointData);
+            return;
+        }
+        
+        console.log('Populating with availability data:', chargePointData.availability);
+        
+        // For each day in the availability data
+        Object.keys(chargePointData.availability).forEach(day => {
+            // Check the day checkbox
+            const dayCheckbox = document.querySelector(`input[name="availableDays"][value="${day}"]`);
+            if (dayCheckbox) {
+                dayCheckbox.checked = true;
                 
-                // Select the times
-                if (Array.isArray(times)) {
-                    times.forEach(time => {
-                        const timeButton = timePickerContainer.querySelector(`.time-button[data-time="${time}"]`);
-                        if (timeButton) {
-                            timeButton.classList.add('active');
-                        } else {
-                            console.warn(`Time button for ${time} not found`);
-                        }
-                    });
+                // Show the time picker
+                const timePickerContainer = document.getElementById(`${day.toLowerCase()}-time-picker`);
+                if (timePickerContainer) {
+                    timePickerContainer.style.display = 'block';
                     
-                    // Update the hidden input
-                    updateSelectedTimes(day);
+                    // Get times for this day
+                    const times = chargePointData.availability[day];
+                    
+                    // Select the times
+                    if (Array.isArray(times)) {
+                        times.forEach(time => {
+                            const timeButton = timePickerContainer.querySelector(`.time-button[data-time="${time}"]`);
+                            if (timeButton) {
+                                timeButton.classList.add('active');
+                            } else {
+                                console.warn(`Time button for ${time} not found`);
+                            }
+                        });
+                        
+                        // Update the hidden input
+                        updateSelectedTimes(day);
+                    } else {
+                        console.warn(`Times for ${day} is not an array:`, times);
+                    }
                 } else {
-                    console.warn(`Times for ${day} is not an array:`, times);
+                    console.warn(`Time picker container for ${day} not found`);
                 }
             } else {
-                console.warn(`Time picker container for ${day} not found`);
+                console.warn(`Checkbox for day ${day} not found`);
             }
-        } else {
-            console.warn(`Checkbox for day ${day} not found`);
-        }
-    });
-}
+        });
+    }
+    
     // Add the selected days and times to the form
     function addDaysAndTimesToForm() {
         const form = document.getElementById('chargePointForm');
@@ -196,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ================= MAPS & CHARGE POINT FUNCTIONALITY =================
     // Configuration
-    const MAP_API_URL = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAjJVMZgeuOeEypf2xCiIs7vIOxXH4pakw&libraries=places';
+    const MAP_API_URL = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBzC0BK1BmIr0UHSMxkG7wFV7Kw4ZqfXqg&libraries=places';
     const DEFAULT_LOCATION = { 
         lat: 26.2285,  // Bahrain coordinates
         lng: 50.5860 
@@ -297,86 +313,138 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-  // Modify populateFormFields to transform data structure
-function populateFormFields(chargePointData) {
-    // Reset form and remove any existing error classes
-    chargePointForm.reset();
-    chargePointForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-    imagePreviewContainer.innerHTML = '';
+    // Modify populateFormFields to transform data structure
+    function populateFormFields(chargePointData) {
+        // Reset form and remove any existing error classes
+        chargePointForm.reset();
+        chargePointForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        imagePreviewContainer.innerHTML = '';
 
-    document.getElementById('chargePointId').value = chargePointData.charge_point_id;
-    document.getElementById('streetName').value = chargePointData.streetName;
-    document.getElementById('city_id').value = chargePointData.city_id;
-    document.getElementById('postcode').value = chargePointData.postcode;
-    document.getElementById('house_number').value = chargePointData.house_number;
-    document.getElementById('road').value = chargePointData.road;
-    document.getElementById('block').value = chargePointData.block;
-    document.getElementById('price_per_kwh').value = chargePointData.price_per_kwh;
-    document.getElementById('existing_picture_url').value = chargePointData.charge_point_picture_url;
-    
-    // Preview existing image
-    if (chargePointData.charge_point_picture_url) {
-        const img = document.createElement('img');
-        img.src = chargePointData.charge_point_picture_url;
-        img.classList.add('img-fluid', 'mt-2');
-        imagePreviewContainer.appendChild(img);
-    }
-
-    // Set map location
-    const mapLocation = { 
-        lat: parseFloat(chargePointData.latitude), 
-        lng: parseFloat(chargePointData.longitude) 
-    };
-    initModalMap(mapLocation);
-    
-    // Populate time selection fields
-    populateTimeSelections(chargePointData);
-}
-
-function processChargePointData(data) {
-    // Create a copy of the original data
-    const processedData = {...data};
-    
-    // If availability data is already in the right format, just ensure it's an object
-    if (typeof processedData.availability === 'object' && processedData.availability !== null) {
-        return processedData;
-    }
-    
-    // Initialize availability object if it doesn't exist
-    processedData.availability = {};
-    
-    // Check if availableDays exists and convert to expected format
-    if (data.availableDays) {
-        // Handle array format (from database)
-        if (Array.isArray(data.availableDays)) {
-            data.availableDays.forEach(dayData => {
-                // Check if dayData is an object with day and times properties
-                if (dayData && dayData.day && Array.isArray(dayData.times)) {
-                    processedData.availability[dayData.day] = dayData.times;
-                }
-            });
-        } 
-        // Handle if availableDays is already an object with day keys
-        else if (typeof data.availableDays === 'object') {
-            Object.keys(data.availableDays).forEach(day => {
-                if (Array.isArray(data.availableDays[day])) {
-                    processedData.availability[day] = data.availableDays[day];
-                }
-            });
+        document.getElementById('chargePointId').value = chargePointData.charge_point_id;
+        document.getElementById('streetName').value = chargePointData.streetName;
+        document.getElementById('city_id').value = chargePointData.city_id;
+        document.getElementById('postcode').value = chargePointData.postcode;
+        document.getElementById('house_number').value = chargePointData.house_number;
+        document.getElementById('road').value = chargePointData.road;
+        document.getElementById('block').value = chargePointData.block;
+        document.getElementById('price_per_kwh').value = chargePointData.price_per_kwh;
+        document.getElementById('existing_picture_url').value = chargePointData.charge_point_picture_url;
+        
+        // Preview existing image
+        if (chargePointData.charge_point_picture_url) {
+            const img = document.createElement('img');
+            img.src = chargePointData.charge_point_picture_url;
+            img.classList.add('img-fluid', 'mt-2');
+            imagePreviewContainer.appendChild(img);
         }
+
+        // Set map location
+        const mapLocation = { 
+            lat: parseFloat(chargePointData.latitude), 
+            lng: parseFloat(chargePointData.longitude) 
+        };
+        initModalMap(mapLocation);
+        
+        // Process the charge point data to ensure availability is in the right format
+        const processedData = processChargePointData(chargePointData);
+        
+        // Then populate the time selections
+        populateTimeSelections(processedData);
     }
-    
-    // Handle a third possible format where availability data might be nested differently
-    if (Array.isArray(data.availability)) {
-        data.availability.forEach(item => {
-            if (item && item.day && Array.isArray(item.times)) {
-                processedData.availability[item.day] = item.times;
+
+    // Populate existing selections when editing a charge point
+    function populateAvailabilityDays(availabilityDays) {
+        const dayCheckboxes = daysContainer.querySelectorAll('input[name="availableDays"]');
+        
+        // Reset all checkboxes and time buttons
+        dayCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            const day = checkbox.value;
+            const timePickerContainer = document.getElementById(`${day.toLowerCase()}-time-picker`);
+            timePickerContainer.style.display = 'none';
+            timePickerContainer.querySelectorAll('.time-button.active').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`selected_times_${day.toLowerCase()}`).value = '';
+        });
+
+        // Populate checkboxes and time buttons
+        availabilityDays.forEach(dayData => {
+            const checkbox = daysContainer.querySelector(`input[value="${dayData.day_of_week}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const timePickerContainer = document.getElementById(`${dayData.day_of_week.toLowerCase()}-time-picker`);
+                timePickerContainer.style.display = 'block';
+
+                // Select the appropriate time buttons
+                dayData.times.forEach(time => {
+                    const timeButton = timePickerContainer.querySelector(`.time-button[data-time="${time.available_time}"]`);
+                    if (timeButton) {
+                        timeButton.classList.add('active');
+                    }
+                });
+
+                // Update hidden input
+                updateSelectedTimes(dayData.day_of_week);
             }
         });
     }
-    
-    return processedData;
-}
+
+    function createTimeInput(day, timeValue) {
+        const timeInput = document.createElement('input');
+        timeInput.type = 'time';
+        timeInput.name = `${day}_time[]`;
+        timeInput.value = timeValue;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.className = 'btn btn-danger btn-sm ms-2';
+        removeBtn.onclick = function() {
+            timeInput.parentElement.remove(); // Remove the time input
+        };
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'time-input-container';
+        timeDiv.appendChild(timeInput);
+        timeDiv.appendChild(removeBtn);
+
+        return timeDiv;
+    }
+
+    function processChargePointData(data) {
+        // Create a copy of the original data
+        const processedData = {...data};
+        
+        // If availability data is already in the right format, just ensure it's an object
+        if (typeof processedData.availability === 'object' && processedData.availability !== null) {
+            return processedData;
+        }
+        
+        // Initialize availability object if it doesn't exist
+        processedData.availability = {};
+        
+        // Convert availability_days to the expected format
+        if (Array.isArray(data.availability_days)) {
+            data.availability_days.forEach(dayData => {
+                if (dayData && dayData.day_of_week) {
+                    // Initialize array for this day if it doesn't exist
+                    if (!processedData.availability[dayData.day_of_week]) {
+                        processedData.availability[dayData.day_of_week] = [];
+                    }
+                    
+                    // Add times to the day's array
+                    if (Array.isArray(dayData.times)) {
+                        dayData.times.forEach(time => {
+                            if (time && time.available_time) {
+                                processedData.availability[dayData.day_of_week].push(time.available_time);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        
+        return processedData;
+    }
+
     // Open modal
     function openModal(chargePointData = null) {
         const modalTitle = document.getElementById('modalTitle');
@@ -498,22 +566,14 @@ function processChargePointData(data) {
         });
     }
 
-   editButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const chargePointCard = btn.closest('.charge-point-card');
-        let chargePointData = JSON.parse(chargePointCard.dataset.details);
-        
-        // Add some debug information
-        console.log('Original charge point data:', chargePointData);
-        
-        // Process the data to ensure correct structure
-        chargePointData = processChargePointData(chargePointData);
-        
-        console.log('Processed charge point data:', chargePointData);
-        
-        openModal(chargePointData);
+    // Event listener for edit buttons
+    editButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const chargePointCard = btn.closest('.charge-point-card');
+            let chargePointData = JSON.parse(chargePointCard.dataset.details);
+            openModal(chargePointData);
+        });
     });
-});
 
     // Delete buttons event listeners
     deleteButtons.forEach(btn => {
@@ -550,7 +610,7 @@ function processChargePointData(data) {
     function init() {
         // Initialize time pickers
         initializeTimePickers();
-        
+
         // Add day checkbox listeners
         addDayCheckboxListeners();
         

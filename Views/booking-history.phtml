@@ -1,60 +1,108 @@
 <?php require_once('template/header.phtml'); ?>
 
 <div class="container mt-5">
-    <br/>
-    <?php if (!empty($view->bookings)): ?>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Charge Point</th>
-                <th>Booking Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($view->bookings as $booking): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($booking['streetName'] . ' ' . $booking['house_number']); ?></td>
-                        <td><?= htmlspecialchars(explode(' ', $booking['booking_date'])[0]); ?></td>
-                        <td><?= htmlspecialchars($booking['booking_time']); ?></td>
-                        
-                        <?php 
-                        // Define status text and classes
-                        $statusText = '';
-                        $statusClass = '';
-                        switch ($booking['booking_status_id']) {
-                            case 1:
-                                $statusText = 'Pending Approval';
-                                $statusClass = 'details-pending';
-                                break;
-                            case 2:
-                                $statusText = 'Approved';
-                                $statusClass = 'details-approved';
-                                break;
-                            case 3:
-                                $statusText = 'Rejected';
-                                $statusClass = 'details-declined';
-                                break;
-                            default:
-                                $statusText = 'Unknown';
-                                $statusClass = '';
-                        }
-                        ?>
+    <form id="filterForm" class="mb-3">
+        <label for="status">Filter by Status:</label>
+        <select name="status" id="status">
+            <option value="">All</option>
+            <option value="1">Pending Approval</option>
+            <option value="2">Approved</option>
+            <option value="3">Rejected</option>
+        </select>
+    </form>
 
-                        <td ><span class="<?= $statusClass; ?>"><?= htmlspecialchars($statusText); ?></span></td>
-                        <td><a href="booking-details.php?booking_id=<?= $booking['booking_id']; ?>" class="btn btn-info">View Details</a></td>
-                    </tr>
-                <?php endforeach; ?>
+    <div id="bookingTable">
+        <!-- Booking table will be loaded here -->
+    </div>
 
-            
-        </tbody>
-    </table>
-    <?php else: ?>
-        <p>No booking records found.</p>
-    <?php endif; ?>
+    <nav aria-label="Page navigation" id="pagination">
+        <ul class="pagination"></ul>
+    </nav>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function loadBookings(page = 1, status = '') {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'booking-history.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-<?php require_once('template/footer.phtml'); 
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const result = JSON.parse(xhr.responseText);
+                if (result.error) {
+                    document.getElementById('bookingTable').innerHTML = '<p>' + result.error + '</p>';
+                    return;
+                }
+
+                let bookingsHtml = '<table class="table table-striped"><thead><tr><th>Charge Point</th><th>Booking Date</th><th>Time</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                result.bookings.forEach(booking => {
+                    bookingsHtml += `<tr>
+                        <td>${booking.streetName} ${booking.house_number}</td>
+                        <td>${booking.booking_date.split(' ')[0]}</td>
+                        <td>${booking.booking_time}</td>
+                        <td><span class="${getStatusClass(booking.booking_status_id)}">${getStatusText(booking.booking_status_id)}</span></td>
+                        <td><a href="booking-details.php?booking_id=${booking.booking_id}" class="btn btn-info">View Details</a></td>
+                    </tr>`;
+                });
+                bookingsHtml += '</tbody></table>';
+                document.getElementById('bookingTable').innerHTML = bookingsHtml;
+
+                // Update pagination
+                updatePagination(result.totalPages, page);
+            }
+        };
+
+        xhr.send(`page=${page}&status=${status}`);
+    }
+
+    function updatePagination(totalPages, currentPage) {
+        let paginationHtml = '';
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>`;
+        }
+        document.getElementById('pagination').querySelector('.pagination').innerHTML = paginationHtml;
+    }
+
+    function getStatusText(statusId) {
+        switch (statusId) {
+            case 1: return 'Pending Approval';
+            case 2: return 'Approved';
+            case 3: return 'Rejected';
+            default: return 'Unknown';
+        }
+    }
+
+    function getStatusClass(statusId) {
+        switch (statusId) {
+            case 1: return 'details-pending';
+            case 2: return 'details-approved';
+            case 3: return 'details-declined';
+            default: return '';
+        }
+    }
+
+    // Load initial bookings
+    loadBookings();
+
+    // Automatically load bookings when dropdown value changes
+    document.getElementById('status').addEventListener('change', function() {
+        const status = this.value;
+        loadBookings(1, status); // Reset to page 1 on filter
+    });
+
+    // Pagination click
+    document.getElementById('pagination').addEventListener('click', function(e) {
+        if (e.target.matches('.page-link')) {
+            e.preventDefault();
+            const page = e.target.getAttribute('data-page');
+            const status = document.getElementById('status').value;
+            loadBookings(page, status);
+        }
+    });
+});
+</script>
+
+<?php require_once('template/footer.phtml'); ?>
