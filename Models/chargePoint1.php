@@ -389,7 +389,66 @@ public function getUnAvailableChargePoints($minPrice = null, $maxPrice = null) {
             throw $e;
         }
     }
-    
+    public function addChargePoint1($userId, $data) {
+    try {
+        // Log the received user ID for debugging
+        error_log('Model addChargePoint received user ID: ' . $userId);
+        
+        // Force userId to be an integer to avoid type issues
+        $userId = intval($userId);
+        
+        $this->dbConnection->beginTransaction();
+        
+        // First, insert the address
+        $addressSql = "INSERT INTO Pro_ChargePointAddress (postcode, latitude, longitude, streetName, city_id, house_number, road, block) 
+                      VALUES (:postcode, :latitude, :longitude, :streetName, :city_id, :house_number, :road, :block)";
+        
+        $addressStatement = $this->dbConnection->prepare($addressSql);
+        $addressStatement->bindParam(':postcode', $data['postcode'], PDO::PARAM_STR);
+        $addressStatement->bindParam(':latitude', $data['latitude'], PDO::PARAM_STR);
+        $addressStatement->bindParam(':longitude', $data['longitude'], PDO::PARAM_STR);
+        $addressStatement->bindParam(':streetName', $data['streetName'], PDO::PARAM_STR);
+        $addressStatement->bindParam(':city_id', $data['city_id'], PDO::PARAM_INT);
+        $addressStatement->bindParam(':house_number', $data['house_number'], PDO::PARAM_INT);
+        $addressStatement->bindParam(':road', $data['road'], PDO::PARAM_INT);
+        $addressStatement->bindParam(':block', $data['block'], PDO::PARAM_INT);
+        $addressStatement->execute();
+        
+        $addressId = $this->dbConnection->lastInsertId();
+        
+        // Default to Unavailable (2) since no time slots exist yet
+        $availabilityStatusId = 2;
+        
+        // Then insert the charge point
+        $chargePointSql = "INSERT INTO Pro_ChargePoint (price_per_kwh, charge_point_picture_url, user_id, charge_point_address_id, availability_status_id) 
+                          VALUES (:price_per_kwh, :charge_point_picture_url, :user_id, :charge_point_address_id, :availability_status_id)";
+        
+        $chargePointStatement = $this->dbConnection->prepare($chargePointSql);
+        $chargePointStatement->bindParam(':price_per_kwh', $data['price_per_kwh'], PDO::PARAM_STR);
+        $chargePointStatement->bindParam(':charge_point_picture_url', $data['charge_point_picture_url'], PDO::PARAM_STR);
+        
+        // Explicitly bind the user ID as an integer
+        error_log('Binding user_id parameter with value: ' . $userId);
+        $chargePointStatement->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        
+        $chargePointStatement->bindParam(':charge_point_address_id', $addressId, PDO::PARAM_INT);
+        $chargePointStatement->bindParam(':availability_status_id', $availabilityStatusId, PDO::PARAM_INT);
+        
+        // Execute and dump the prepared SQL for debugging
+        $chargePointStatement->execute();
+        
+        $chargePointId = $this->dbConnection->lastInsertId();
+        error_log('Inserted charge point ID: ' . $chargePointId . ' for user ID: ' . $userId);
+        
+        $this->dbConnection->commit();
+        
+        return $chargePointId;
+    } catch (PDOException $e) {
+        $this->dbConnection->rollBack();
+        error_log('PDO Exception in addChargePoint: ' . $e->getMessage());
+        throw $e;
+    }
+}
     // Update existing charge point
     public function updateChargePoint($chargePointId, $data) {
         try {
@@ -465,54 +524,115 @@ public function getUnAvailableChargePoints($minPrice = null, $maxPrice = null) {
         }
     }
     
-    // Delete charge point
-    public function deleteChargePoint($chargePointId) {
-        try {
-            $this->dbConnection->beginTransaction();
-            
-            // Get address ID
-            $sql = "SELECT charge_point_address_id FROM Pro_ChargePoint WHERE charge_point_id = :charge_point_id";
-            $statement = $this->dbConnection->prepare($sql);
-            $statement->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
-            $statement->execute();
-            
-            $chargePoint = $statement->fetch(PDO::FETCH_ASSOC);
-            if (!$chargePoint) {
-                throw new Exception('Charge point not found');
+   public function deleteChargePoint($chargePointId) {
+    try {
+        $this->dbConnection->beginTransaction();
+
+        // Get address ID
+        $sql = "SELECT charge_point_address_id FROM Pro_ChargePoint WHERE charge_point_id = :charge_point_id";
+        $statement = $this->dbConnection->prepare($sql);
+        $statement->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
+        $statement->execute();
+        
+        $chargePoint = $statement->fetch(PDO::FETCH_ASSOC);
+        if (!$chargePoint) {
+            throw new Exception('Charge point not found');
+        }
+        
+        $addressId = $chargePoint['charge_point_address_id'];
+        
+        // Delete bookings related to this charge point
+        $sqlDeleteBookings = "DELETE FROM Pro_Booking WHERE charge_point_id = :charge_point_id";
+        $stmtDeleteBookings = $this->dbConnection->prepare($sqlDeleteBookings);
+        $stmtDeleteBookings->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
+        $stmtDeleteBookings->execute();
+        
+        // Delete availability times and days
+        $this->deleteChargePointAvailability($chargePointId);
+        
+        // Delete charge point
+        $sqlDeleteCP = "DELETE FROM Pro_ChargePoint WHERE charge_point_id = :charge_point_id";
+        $stmtDeleteCP = $this->dbConnection->prepare($sqlDeleteCP);
+        $stmtDeleteCP->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
+        $stmtDeleteCP->execute();
+        
+        // Delete address
+        $sqlDeleteAddr = "DELETE FROM Pro_ChargePointAddress WHERE charge_point_address_id = :address_id";
+        $stmtDeleteAddr = $this->dbConnection->prepare($sqlDeleteAddr);
+        $stmtDeleteAddr->bindParam(':address_id', $addressId, PDO::PARAM_INT);
+        $stmtDeleteAddr->execute();
+        
+        $this->dbConnection->commit();
+        return true;
+    } catch (Exception $e) {
+        $this->dbConnection->rollBack();
+        throw $e;
+    }
+}
+     public function getAllChargePoint() {
+    $sql = "SELECT cp.*, cpa.*, c.city_name, avs.availability_status_title, 
+                   ad.day_of_week, at.available_time
+            FROM Pro_ChargePoint cp 
+            JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id 
+            JOIN Pro_City c ON cpa.city_id = c.city_id
+            JOIN Pro_AvailabilityStatus avs ON cp.availability_status_id = avs.availability_status_id
+            LEFT JOIN Pro_AvailabilityDays ad ON cp.charge_point_id = ad.charge_point_id
+            LEFT JOIN Pro_AvailabilityTimes at ON ad.availability_day_id = at.availability_day_id";
+                
+    $statement = $this->dbConnection->prepare($sql);
+    $statement->execute();
+
+    $chargePoints = [];
+    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+        $chargePointId = $row['charge_point_id'];
+
+        if (!isset($chargePoints[$chargePointId])) {
+            $chargePoints[$chargePointId] = $row;
+            $chargePoints[$chargePointId]['availability_days'] = []; // Initialize
+        }
+
+        if ($row['day_of_week']) {
+            $chargePoints[$chargePointId]['availability_days'][] = [
+                'day_of_week' => $row['day_of_week'],
+                'times' => [] // Initialize times array
+            ];
+        }
+        
+        if ($row['available_time']) {
+            $lastIndex = count($chargePoints[$chargePointId]['availability_days']) - 1;
+            if ($lastIndex >= 0) {
+                $chargePoints[$chargePointId]['availability_days'][$lastIndex]['times'][] = [
+                    'available_time' => $row['available_time']
+                ];
             }
-            
-            $addressId = $chargePoint['charge_point_address_id'];
-            
-            // Check if there are bookings for this charge point
-            $sqlCheckBookings = "SELECT COUNT(*) FROM Pro_Booking WHERE charge_point_id = :charge_point_id";
-            $stmtCheckBookings = $this->dbConnection->prepare($sqlCheckBookings);
-            $stmtCheckBookings->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
-            $stmtCheckBookings->execute();
-            
-            if ($stmtCheckBookings->fetchColumn() > 0) {
-                throw new Exception('Cannot delete charge point with active bookings');
-            }
-            
-            // Delete availability times and days
-            $this->deleteChargePointAvailability($chargePointId);
-            
-            // Delete charge point
-            $sqlDeleteCP = "DELETE FROM Pro_ChargePoint WHERE charge_point_id = :charge_point_id";
-            $stmtDeleteCP = $this->dbConnection->prepare($sqlDeleteCP);
-            $stmtDeleteCP->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
-            $stmtDeleteCP->execute();
-            
-            // Delete address
-            $sqlDeleteAddr = "DELETE FROM Pro_ChargePointAddress WHERE charge_point_address_id = :address_id";
-            $stmtDeleteAddr = $this->dbConnection->prepare($sqlDeleteAddr);
-            $stmtDeleteAddr->bindParam(':address_id', $addressId, PDO::PARAM_INT);
-            $stmtDeleteAddr->execute();
-            
-            $this->dbConnection->commit();
-            return true;
-        } catch (Exception $e) {
-            $this->dbConnection->rollBack();
-            throw $e;
         }
     }
+
+    return array_values($chargePoints); // Reset array keys
+}
+
+ 
+   public function getHomeOwnersWithoutChargePoints() {
+    $query = "SELECT u.* FROM Pro_User u
+              LEFT JOIN Pro_ChargePoint cp ON u.user_id = cp.user_id
+              WHERE u.role_id = 2 AND cp.charge_point_id IS NULL
+              AND u.user_account_status_id = 1";
+              
+    $statement = $this->dbConnection->prepare($query);
+    
+    try {
+        $statement->execute();
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        return [];
+    }
+    
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
+}
+    // Add charge point for a specific user (admin functionality)
+    public function adminAddChargePoint($userId, $data) {
+        return $this->addChargePoint($userId, $data);
+    }
+    
+    
 }

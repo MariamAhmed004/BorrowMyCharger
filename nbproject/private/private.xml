@@ -7,13 +7,16 @@
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/booking-history.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/index.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/check_user.php</file>
+            <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/adminChargePoint.js</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Models/BookingHistory.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/homeRentalUser.js</file>
+            <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/charge-point-management.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Models/BorrowRequestModel.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/css/allProfiles.css</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/borrow-request.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/systemReportsController.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/chargePoint1.js</file>
+            <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/admin-actions.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/system-reports.js</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/adminDashboard.js</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Models/AdminDashboard.php</file>
@@ -26,6 +29,7 @@
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Views/index.phtml</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Models/HomeOwnerHome.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/css/homeRentalUser.css</file>
+            <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/adminManageChargePoint.js</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/browseCharger.js</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Views/home_rentaluser.phtml</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/home_homeowner.php</file>
@@ -76,8 +80,6 @@
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Models/login.php</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Views/book-charger.phtml</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/Views/template/footer.phtml</file>
-            <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/myChargePoint.js</file>
-            <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/contactForm.js</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/css/charge-details.css</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/css/bootstrap.min.css</file>
             <file>file:/Users/maryam/Desktop/DBPProjectNewClone/BorrowMyCharger/js/availableTime.js</file>

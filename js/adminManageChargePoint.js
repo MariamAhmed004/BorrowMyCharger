@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    
     // ================= TIME SELECTION FUNCTIONALITY =================
     // Constants for time options
     const TIME_OPTIONS = [
@@ -444,74 +443,368 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return processedData;
     }
+    
+        /**
+     * Fetch homeowners without charge points
+     */
+   function fetchHomeOwnersWithoutChargePoints() {
+    // Show loading indicator
+    showAlert('Loading', 'Fetching homeowners data...', 'info');
+    
+    // Create traditional XHR object
+    var xhr = new XMLHttpRequest();
+    
+    // Configure request
+    xhr.open('GET', 'admin-actions.php?action=getHomeOwnersWithoutChargePoints', true);
+    
+    // Set up event handlers
+    xhr.onreadystatechange = function() {
+        // Check if request is complete
+        if (xhr.readyState === 4) {
+            // Remove loading alert
+            const loadingAlert = document.querySelector('.alert.alert-info');
+            if (loadingAlert) loadingAlert.remove();
+            
+            if (xhr.status === 200) {
+                // Try to parse response as JSON
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        showHomeOwnersModal(data.homeowners);
+                    } else {
+                        showAlert('Error', data.message || 'Failed to fetch homeowners', 'error');
+                    }
+                } catch (e) {
+                    console.error("Server returned non-JSON response:", xhr.responseText);
+                    showAlert('Error', 'Server returned invalid JSON. Check PHP errors.', 'error');
+                }
+            } else {
+                console.error('Server returned status:', xhr.status);
+                showAlert('Error', 'Failed to connect to server: ' + xhr.statusText, 'error');
+            }
+        }
+    };
+    
+    // Handle network errors
+    xhr.onerror = function() {
+        console.error('Network error occurred');
+        showAlert('Error', 'Network error occurred', 'error');
+    };
+    
+    // Send the request
+    xhr.send();
+}
+    
+  function showHomeOwnersModal(homeowners) {
+    // Remove existing modal if any
+    let existingModal = document.getElementById('homeownersModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal structure
+    const modal = document.createElement('div');
+    modal.id = 'homeownersModal';
+    modal.className = 'modal fade';
+    modal.tabIndex = '-1';
+    modal.setAttribute('aria-labelledby', 'homeownersModalLabel');
+    modal.setAttribute('aria-hidden', 'true');
+    
+    let modalContent = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="homeownersModalLabel">Select a Homeowner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+    `;
+    
+    if (homeowners.length === 0) {
+        modalContent += `<p class="text-center">No homeowners without charge points found.</p>`;
+    } else {
+        modalContent += `<div class="list-group">`;
+        homeowners.forEach(homeowner => {
+            modalContent += `
+                <button type="button" class="list-group-item list-group-item-action select-homeowner" 
+                        data-user-id="${homeowner.user_id}" 
+                        data-user-name="${homeowner.first_name} ${homeowner.last_name}">
+                    <strong>${homeowner.first_name} ${homeowner.last_name}</strong>
+                    <br>
+                    <small>Email: ${homeowner.email} | Phone: ${homeowner.phone_number}</small>
+                </button>
+            `;
+        });
+        modalContent += `</div>`;
+    }
+    
+    modalContent += `
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.innerHTML = modalContent;
+    document.body.appendChild(modal);
+    
+    // Initialize Bootstrap modal
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Add event listeners to homeowner buttons
+    document.querySelectorAll('.select-homeowner').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            selectHomeOwner(userId, userName);
+        });
+    });
+}
+ function selectHomeOwner(userId, userName) {
+    // Validate input
+    if (!userId || userId.trim() === '') {
+        showAlert('Error', 'Invalid user ID', 'error');
+        return;
+    }
+    
+    console.log('Selected homeowner:', userName, 'with ID:', userId);
+    
+    // Close the homeowners modal
+    const homeownersModal = document.getElementById('homeownersModal');
+    const bsHomeownersModal = bootstrap.Modal.getInstance(homeownersModal);
+    bsHomeownersModal.hide();
 
-    // Open modal
-    function openModal(chargePointData = null) {
-        const modalTitle = document.getElementById('modalTitle');
+    // Wait a bit for the modal to close properly
+    setTimeout(() => {
+        // Ensure the charge point form exists
+        let chargePointForm = document.getElementById('chargePointForm');
+        if (!chargePointForm) {
+            showAlert('Error', 'Charge point form not found', 'error');
+            return;
+        }
+
+        // Reset the form
+        chargePointForm.reset();
+
+        // Set the selected user ID in a hidden field
+        let selectedUserIdField = document.getElementById('selected_user_id');
+        if (!selectedUserIdField) {
+            selectedUserIdField = document.createElement('input');
+            selectedUserIdField.type = 'hidden';
+            selectedUserIdField.id = 'selected_user_id';
+            selectedUserIdField.name = 'selected_user_id';
+            chargePointForm.appendChild(selectedUserIdField);
+        }
+        selectedUserIdField.value = userId;
         
-        if (chargePointData) {
-            modalTitle.textContent = 'Edit Charge Point';
-            populateFormFields(chargePointData);
+        // Log to confirm user ID is set
+        console.log('User ID set in form:', selectedUserIdField.value);
+
+        // Update the modal title
+        let modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) {
+            modalTitle.textContent = `Add Charge Point for ${userName}`;
+        }
+
+        // Show the charge point modal
+        const chargePointModal = document.getElementById('chargePointModal');
+        if (chargePointModal) {
+            const bsChargePointModal = new bootstrap.Modal(chargePointModal);
+            bsChargePointModal.show();
         } else {
-            modalTitle.textContent = 'Add Charge Point';
-            chargePointForm.reset();
+            showAlert('Error', 'Charge point modal not found', 'error');
+        }
+
+        // Remove existing event listeners to avoid duplicates
+        chargePointForm.removeEventListener('submit', handleFormSubmission);
+        
+        // Add event listener for form submission
+        chargePointForm.addEventListener('submit', handleFormSubmission);
+    }, 300); // Small delay to allow the first modal to close properly
+}
+    /**
+     * Show an alert message to the user
+     */
+  function showAlert(title, message, type) {
+    // Remove existing alerts of the same type
+    const existingAlerts = document.querySelectorAll(`.alert.alert-${type === 'error' ? 'danger' : type}`);
+    existingAlerts.forEach(alert => alert.remove());
+    
+    // Create a Bootstrap alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    
+    alertDiv.innerHTML = `
+        <strong>${title}</strong>: ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert alert at the top of the container
+    const container = document.querySelector('.container.mt-5');
+    if (container) {
+        container.insertBefore(alertDiv, container.firstChild);
+    } else {
+        // Fallback if container not found
+        document.body.insertBefore(alertDiv, document.body.firstChild);
+    }
+    
+    // Auto remove after 5 seconds (except for info alerts)
+    if (type !== 'info') {
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 5000);
+    }
+}
+  // Open modal
+function openModal(chargePointData = null) {
+    const modalTitle = document.getElementById('modalTitle');
+    const chargePointModal = document.getElementById('chargePointModal');
+    const modal = chargePointModal ? new bootstrap.Modal(chargePointModal) : null;
+    const chargePointForm = document.getElementById('chargePointForm');
+
+    if (chargePointData) {
+        // Edit mode
+        modalTitle.textContent = 'Edit Charge Point';
+        if (typeof populateFormFields === 'function') {
+            populateFormFields(chargePointData);
+        }
+        if (modal) modal.show();
+    } else {
+        // Add mode
+        modalTitle.textContent = 'Add Charge Point';
+        fetchHomeOwnersWithoutChargePoints(); // Call to fetch homeowners
+        if (chargePointForm) chargePointForm.reset();
+        if (typeof initModalMap === 'function') {
             initModalMap();
         }
-        
-        modal.show();
     }
+}
 
-    // Form submission handler
-    async function handleFormSubmission(e) {
-        e.preventDefault();
-        
-        // Add days and times to the form before submission
+/**
+ * Handle form submission using traditional AJAX (XMLHttpRequest)
+ */
+function handleFormSubmission(e) {
+    e.preventDefault();
+    console.log('Form submission started');
+    
+    // Add days and times to the form before submission if that function exists
+    if (typeof addDaysAndTimesToForm === 'function') {
         addDaysAndTimesToForm();
-        
-        // Reset error states
-        chargePointForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-        
-        const formData = new FormData(chargePointForm);
-        const isEditing = !!formData.get('charge_point_id');
-        formData.append('action', isEditing ? 'update' : 'add');
-
-        try {
-            const response = await fetch('', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Close modal and reload page
-                modal.hide();
-                location.reload();
-            } else {
-                // Display error messages
-                if (result.errors) {
-                    Object.keys(result.errors).forEach(field => {
-                        const errorEl = document.getElementById(`${field}-error`);
-                        if (errorEl) {
-                            errorEl.textContent = result.errors[field];
-                            const inputEl = document.getElementById(field);
-                            if (inputEl) {
-                                inputEl.classList.add('is-invalid');
+    }
+    
+    // Reset error states
+    const chargePointForm = document.getElementById('chargePointForm');
+    chargePointForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    
+    // Show loading indicator
+    showAlert('Processing', 'Submitting form...', 'info');
+    
+    // Get form data
+    const formData = new FormData(chargePointForm);
+    const isEditing = formData.get('charge_point_id') ? true : false;
+    formData.append('action', isEditing ? 'update' : 'addChargePointForUser');
+    
+    // Get the selected user ID from the hidden field
+    const selectedUserIdField = document.getElementById('selected_user_id');
+    if (!isEditing && (!selectedUserIdField || !selectedUserIdField.value)) {
+        showAlert('Error', 'No homeowner selected. Please select a homeowner first.', 'error');
+        return;
+    }
+    if(!isEditing){
+    // Make sure user_ID is properly set before proceeding
+    console.log('Selected user ID:', selectedUserIdField.value);
+}
+    if(!isEditing){
+    // Using the correct parameter name as expected by PHP backend
+    formData.append('user_ID', selectedUserIdField.value);
+}
+  
+    
+    // Create traditional XHR object
+    var xhr = new XMLHttpRequest();
+    
+    // Configure request
+    xhr.open('POST', 'admin-actions.php', true);
+    
+    // Set up event handlers
+    xhr.onreadystatechange = function() {
+        // Check if request is complete
+        if (xhr.readyState === 4) {
+            // Remove loading alert
+            const loadingAlert = document.querySelector('.alert.alert-info');
+            if (loadingAlert) loadingAlert.remove();
+            
+            if (xhr.status === 200) {
+                // Try to parse response as JSON
+                try {
+                    console.log('Response text:', xhr.responseText);
+                    var result = JSON.parse(xhr.responseText);
+                    console.log('Server response:', result);
+                    
+                    if (result.success) {
+                        // Close modal
+                        const chargePointModal = document.getElementById('chargePointModal');
+                        if (chargePointModal) {
+                            const bsModal = bootstrap.Modal.getInstance(chargePointModal);
+                            if (bsModal) {
+                                bsModal.hide();
                             }
                         }
-                    });
+                        
+                        // Show success message
+                        showAlert('Success', 'Charge point saved successfully.', 'success');
+                        
+                        // Reload page after a slight delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        // Display validation errors if any
+                        if (result.errors) {
+                            Object.keys(result.errors).forEach(field => {
+                                const errorEl = document.getElementById(`${field}-error`);
+                                if (errorEl) {
+                                    errorEl.textContent = result.errors[field];
+                                    const inputEl = document.getElementById(field);
+                                    if (inputEl) {
+                                        inputEl.classList.add('is-invalid');
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Display general error message if any
+                        if (result.message) {
+                            showAlert('Error', result.message, 'error');
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                    console.error('Server returned non-JSON response:', xhr.responseText);
+                    showAlert('Error', 'Server returned invalid JSON. Check PHP errors.', 'error');
                 }
-                
-                if (result.message) {
-                    alert(result.message);
-                }
+            } else {
+                console.error('Server returned status:', xhr.status);
+                showAlert('Error', 'Server error: ' + xhr.statusText, 'error');
             }
-        } catch (error) {
-            console.error('Submission error:', error);
-            alert('An error occurred while submitting the form.');
         }
-    }
-
+    };
+    
+    // Handle network errors
+    xhr.onerror = function() {
+        console.error('Network error occurred');
+        showAlert('Error', 'Network error occurred', 'error');
+    };
+    
+    // Send the form data
+    xhr.send(formData);
+}
     // Delete charge point
     async function handleDeleteChargePoint(chargePointId) {
         if (!confirm('Are you sure you want to delete this charge point?')) return;
@@ -556,12 +849,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add charge point button
     if (addChargePointBtn) {
         addChargePointBtn.addEventListener('click', () => {
-            // Check if user already has a charge point before allowing them to add one
-            const chargePointCards = document.querySelectorAll('.charge-point-card');
-            if (chargePointCards.length > 0) {
-                alert('You can only have one charge point. Please edit or delete your existing charge point.');
-                return;
-            }
             openModal();
         });
     }

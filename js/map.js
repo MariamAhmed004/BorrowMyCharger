@@ -2,13 +2,15 @@ let markers = []; // Array to hold all markers
 let map; // Declare map variable
 
 function initMap() {
-    const bahrainCenter = { lat: 26.0667, lng: 50.5577 };
+    const bahrainCenter = [26.0667, 50.5577];
 
-    // Initialize Google Map
-    map = new google.maps.Map(document.getElementById("charger-map"), {
-        center: bahrainCenter,
-        zoom: 10,
-    });
+    // Initialize Leaflet Map
+    map = L.map('charger-map').setView(bahrainCenter, 10);
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+    }).addTo(map);
 
     loadMarkers("all");
     addUserLocationMarker();
@@ -31,7 +33,7 @@ function loadMarkers(filter) {
     const maxPrice = parseFloat(document.getElementById("max-price").value) || Infinity;
 
     // Clear existing markers from map
-    markers.forEach(marker => marker.setMap(null));
+    markers.forEach(marker => map.removeLayer(marker));
     markers = [];
 
     const xhr = new XMLHttpRequest();
@@ -43,12 +45,9 @@ function loadMarkers(filter) {
                 const price = parseFloat(point.price_per_kwh);
 
                 if (price >= minPrice && price <= maxPrice) {
-                    const position = { lat: parseFloat(point.latitude), lng: parseFloat(point.longitude) };
+                    const position = [parseFloat(point.latitude), parseFloat(point.longitude)];
 
-                    const marker = new google.maps.Marker({
-                        position: position,
-                        map: map,
-                    });
+                    const marker = L.marker(position).addTo(map);
 
                     const popupContent = `
                         <strong>Charge Point ID:</strong> ${point.charge_point_id}<br>
@@ -61,13 +60,7 @@ function loadMarkers(filter) {
                         <img src="${point.charge_point_picture_url}" alt="Charge Point Image" style="width:100px;height:auto;">
                     `;
 
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: popupContent,
-                    });
-
-                    marker.addListener("click", () => {
-                        infoWindow.open(map, marker);
-                    });
+                    marker.bindPopup(popupContent);
 
                     markers.push(marker);
                 }
@@ -80,30 +73,17 @@ function loadMarkers(filter) {
 function addUserLocationMarker() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
-            const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
-            const userMarker = new google.maps.Marker({
-                position: userLocation,
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
-                    fillColor: "blue", // Change color here
-                    fillOpacity: 1,
-                    strokeWeight: 2,
-                    strokeColor: "white"
-                },
-            });
+            const userLocation = [position.coords.latitude, position.coords.longitude];
+            const userMarker = L.marker(userLocation, {
+                icon: L.divIcon({
+                    className: 'user-marker',
+                    html: '<div style="background-color: blue; border-radius: 50%; width: 20px; height: 20px; border: 2px solid white;"></div>'
+                })
+            }).addTo(map);
 
-            const userInfoWindow = new google.maps.InfoWindow({
-                content: "Your current location",
-            });
-
-            userMarker.addListener("click", () => {
-                userInfoWindow.open(map, userMarker);
-            });
-
+            userMarker.bindPopup("Your current location").openPopup();
             markers.push(userMarker);
-            map.setCenter(userLocation); // Center the map on user location
+            map.setView(userLocation); // Center the map on user location
         }, () => {
             console.error("Geolocation service failed.");
         });
