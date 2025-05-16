@@ -1,106 +1,5 @@
 <?php require('template/header.phtml') ?>
-<style>
-    /* Day checkboxes */
-    .day-checkbox-container {
-        margin-bottom: 20px;
-    }
-    .day-checkbox-container label {
-        display: inline-block;
-        margin-right: 10px;
-        font-weight: normal;
-    }
-    
-    /* Time picker container */
-    .time-picker-container {
-        display: block; /* Changed from none to block */
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-    }
-    
-    /* Time selection styles */
-    .time-selection-container {
-        margin-bottom: 15px;
-    }
-    
-    .time-label {
-        font-weight: 500;
-        margin-bottom: 8px;
-    }
-    
-    .time-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-bottom: 15px;
-    }
-    
-    .time-button {
-        padding: 5px 10px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-    
-    .time-button.active {
-        background-color: #007bff;
-        color: white;
-        border-color: #007bff;
-    }
-    
-    .modal {
-        z-index: 1055;
-    }
-
-    .modal-backdrop {
-        z-index: 1040;
-    }
-
-    /* Adjusted image size */
-    .charge-point-img {
-        width: 100%;
-        height: 220px; /* Fixed height */
-        object-fit: cover; /* This prevents stretching */
-        object-position: center; /* Centers the image */
-    }
-    
-    /* Improved card styles */
-    .charge-point-card {
-        height: 100%;
-        max-width: 380px; /* Control the max width for better image proportions */
-        margin: 0 auto; /* Center the card if narrower than container */
-        box-shadow: 0 4px 8px rgba(0,0,0,.1);
-        border-radius: 8px;
-        overflow: hidden;
-        transition: transform 0.3s ease;
-    }
-    
-    .charge-point-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    /* Map card styling */
-    .map-card {
-        height: 100%;
-        box-shadow: 0 4px 8px rgba(0,0,0,.1);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    /* Improved availability list styling */
-    .availability-list li {
-        padding: 5px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .availability-list li:last-child {
-        border-bottom: none;
-    }
-</style>
+<link rel="stylesheet" href="css/my-charge-point.css">
 
 <div class="container mt-5">
     <div id="chargePointsContainer">
@@ -182,7 +81,7 @@
                 </div>
                 <div class="col-md-7 ps-md-2"> <!-- Increased width from 6 to 7 columns -->
                     <div class="card map-card">
-                        <div class="card-body p-0"> <!-- Removed padding to make map fill card -->
+                        <div class="card-body p-0"> 
                             <h5 class="card-title p-3 mb-0 bg-light">Location</h5>
                             <div id="mainMapContainer" class="border-top" style="height: 400px;"></div>
                         </div>
@@ -290,7 +189,7 @@
 
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Location</label>
-                                    <div id="mapContainer" class="border rounded" style="height: 400px;"></div>
+                                    <div id="modalMapContainer" class="border-top" style="height: 400px;"></div>
                                     <input type="hidden" name="latitude" id="latitude" required>
                                     <input type="hidden" name="longitude" id="longitude" required>
                                     <small class="text-muted">Click on the map or drag the marker to set your charge point location</small>
@@ -310,4 +209,4 @@
 </div>
 <br><br>
 <?php require('template/footer.phtml') ?>
-<script src="js/j.js"></script>
+<script src="js/chargePoint1.js"></script>

@@ -1,220 +1,128 @@
-<?php
-$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Guest';
-?>
-
-<head>
-  <style>
-    .container-custom {
-      display: flex;
-      flex-wrap: wrap;
-      margin: 2rem auto;
-      width: 90%;
-      max-width: 1200px;
-    }
-
-    .left-panel {
-      width: 100%;
-      padding: 20px;
-      background-color: white;
-      border: 1px solid black;
-      margin-bottom: 20px;
-    }
-
-    .form-control {
-      border-radius: 0;
-      margin-bottom: 1rem;
-    }
-
-    .btn-search {
-      background-color: #0099cc;
-      color: white;
-      border-radius: 0;
-      width: 100%;
-    }
-
-    .btn-search:hover {
-      background-color: #0077aa;
-    }
-
-    #chargePointsContainer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      width: 100%;
-    }
-
-    .charge-point {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 20px;
-      background-color: white;
-      border: 1px solid black;
-      margin: 10px;
-      color: black;
-      width: 300px;
-      box-sizing: border-box;
-    }
-
-    .charge-point img {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 10px;
-    }
-
-    @media (max-width: 576px) {
-      .charge-point {
-        width: 100%;
-        margin: 10px 0;
-      }
-    }
-
-    .filter-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .filter-item {
-      margin-right: 10px;
-    }
-
-    .filter-item:last-child {
-      margin-right: 0;
-    }
-
-    .btn {
-      border-radius: 20px;
-    }
-
-    .form-control {
-      width: auto;
-    }
-    
-    /* Pagination Styles */
-    .pagination-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    
-    .pagination {
-      display: flex;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    
-    .page-link {
-      padding: 8px 16px;
-      margin: 0 5px;
-      border: 1px solid #ddd;
-      background-color: #fff;
-      color: #0099cc;
-      text-decoration: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    
-    .page-link.active {
-      background-color: #0099cc;
-      color: white;
-      border-color: #0099cc;
-    }
-    
-    .page-link:hover:not(.active) {
-      background-color: #f1f1f1;
-    }
-  </style>
-</head>
-
-<body>
 <?php require('template/header.phtml') ?>
-
+ <link rel="stylesheet" href="css/browse-charger.css">
+<br>
 <div class="container-custom">
   <div class="left-panel">
-    <h5><strong>Filters</strong></h5>
-    <div class="filter-row">
-      <select class="form-control filter-item" id="locationSelect">
-        <option value="">Location</option>
-        <?php foreach ($view->cities as $city): ?>
-          <option value="<?= htmlspecialchars($city['city_id'] ?? '') ?>">
-            <?= htmlspecialchars($city['city_name'] ?? '') ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-      <select class="form-control filter-item" id="priceRangeSelect">
-        <option value="">Price Range (BHD)</option>
-        <option value="0-2">0 BHD - 2 BHD</option>
-        <option value="2-5">2 BHD - 5 BHD</option>
-        <option value="5-10">5 BHD - 10 BHD</option>
-        <option value="10-20">10 BHD - 20 BHD</option>
-      </select>
-      <select class="form-control filter-item" id="availabilitySelect">
-        <option value="">Availability</option>
-        <?php foreach ($view->availabilityStatus as $status): ?>
-          <option value="<?= htmlspecialchars($status['availability_status_id'] ?? '') ?>">
-            <?= htmlspecialchars($status['availability_status_title'] ?? '') ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-      <button class="btn btn-secondary filter-item" id="resetBtn">Reset</button>
-    </div>
+    <h4 class="filter-title">Find a Charging Station</h4>
+<div class="search-boxes">
+  <div class="search-box">
+    <label for="locationSearch" class="form-label">Search by Location</label>
+    <input type="text" class="form-control" id="locationSearch" placeholder="Enter location name">
   </div>
+  <div class="search-box">
+    <label for="availabilitySearch" class="form-label">Search by Availability</label>
+    <input type="text" class="form-control" id="availabilitySearch" placeholder="Enter availability status">
+  </div>
+</div>
 
+<h5 class="filter-subtitle">Filter Options</h5>
+<div class="filter-row">
+  <div class="filter-item">
+    <label for="locationSelect" class="form-label">Location</label>
+    <select class="form-select" id="locationSelect">
+      <option value="">All Locations</option>
+      <?php foreach ($view->cities as $city): ?>
+        <option value="<?= htmlspecialchars($city['city_id'] ?? '') ?>">
+          <?= htmlspecialchars($city['city_name'] ?? '') ?>
+        </option>
+      <?php endforeach; ?>
+    </select>
+  </div>
+  
+  <div class="filter-item">
+    <label for="priceRangeSelect" class="form-label">Price Range</label>
+    <select class="form-select" id="priceRangeSelect">
+      <option value="">All Prices</option>
+      <option value="0-2">0 BHD - 2 BHD</option>
+      <option value="2-5">2 BHD - 5 BHD</option>
+      <option value="5-10">5 BHD - 10 BHD</option>
+      <option value="10-20">10 BHD - 20 BHD</option>
+    </select>
+  </div>
+  
+  <div class="filter-item">
+    <label for="availabilitySelect" class="form-label">Availability</label>
+    <select class="form-select" id="availabilitySelect">
+      <option value="">All Statuses</option>
+      <?php foreach ($view->availabilityStatus as $status): ?>
+        <option value="<?= htmlspecialchars($status['availability_status_id'] ?? '') ?>">
+          <?= htmlspecialchars($status['availability_status_title'] ?? '') ?>
+        </option>
+      <?php endforeach; ?>
+    </select>
+  </div>
+  
+  <div class="filter-item">
+    <label class="invisible form-label">Reset</label>
+    <button class="btn btn-secondary w-100" id="resetBtn">Reset Filters</button>
+  </div>
+</div>
+  </div>
+  <h3 class="section-title">Available Charging Stations</h3>
+  <div class="results-stats">
+    <span id="resultsCount">Showing all charging stations</span>
+  </div>
   <div id="chargePointsContainer">
     <?php if (!empty($view->chargePoints)): ?>
       <?php foreach ($view->chargePoints as $chargePoint): ?>
         <div class="charge-point">
-          <img src="<?= htmlspecialchars($chargePoint['chargePointPictureUrl'] ?? '') ?>" alt="Charge Point Image">
-          <div>
-            <h5><strong>Charge Point</strong></h5>
-            <p>
-              <?= htmlspecialchars('Block ' . ($chargePoint['block'] ?? '') . ', Road ' . ($chargePoint['road'] ?? '') . ', House ' . ($chargePoint['houseNumber'] ?? '') . ', ' . ($chargePoint['streetName'] ?? '') . ', Postcode ' . ($chargePoint['postcode'] ?? '')) ?>
-            </p>
-            <p>
-              <?= htmlspecialchars($chargePoint['cityName'] ?? '') ?>
-            </p>
-            <p><?= htmlspecialchars(number_format((float)($chargePoint['pricePerKwh'] ?? 0), 3)) ?> BHD per kWh</p>
-            <p>Availability: <?= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '') ?></p>
+          <div class="charge-point-image">
+            <img src="<?= htmlspecialchars($chargePoint['chargePointPictureUrl'] ?? '') ?>" alt="Charge Point Image">
+            <span class="status-badge <?= strtolower(str_replace(' ', '-', $chargePoint['availabilityStatusTitle'] ?? '')) ?>">
+              <?= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '') ?>
+            </span>
+          </div>
+          <div class="charge-point-details">
+            <h5 class="charge-point-title">Charging Station</h5>
+            <div class="location">
+              <i class="bi bi-geo-alt-fill"></i>
+              <p>
+                <?= htmlspecialchars('Block ' . ($chargePoint['block'] ?? '') . ', Road ' . ($chargePoint['road'] ?? '') . ', House ' . ($chargePoint['houseNumber'] ?? '') . ', ' . ($chargePoint['streetName'] ?? '') . ', Postcode ' . ($chargePoint['postcode'] ?? '')) ?>
+              </p>
+            </div>
+            <p class="city"><i class="bi bi-building"></i> <?= htmlspecialchars($chargePoint['cityName'] ?? '') ?></p>
+            <p class="price"><i class="bi bi-currency-exchange"></i> <?= htmlspecialchars(number_format((float)($chargePoint['pricePerKwh'] ?? 0), 3)) ?> BHD per kWh</p>
             <a href="#" class="book-btn" data-role="<?= $role ?>" data-id="<?= htmlspecialchars($chargePoint['chargePointId'] ?? '') ?>">
-              <button class="btn btn-success">Book</button>
+              <button class="btn btn-primary">Book Now</button>
             </a>
           </div>
         </div>
       <?php endforeach; ?>
     <?php else: ?>
-      <p>No charge points available.</p>
+      <div class="no-results">
+        <i class="bi bi-exclamation-circle"></i>
+        <p>No charge points available.</p>
+      </div>
     <?php endif; ?>
-    
-    <!-- Pagination -->
-    <div class="pagination-container">
-      <?php if ($view->totalPages > 1): ?>
-        <div class="pagination">
-          <?php if ($view->currentPage > 1): ?>
-            <a href="?page=<?= $view->currentPage - 1 ?>" class="page-link" data-page="<?= $view->currentPage - 1 ?>">Previous</a>
-          <?php endif; ?>
-          
-          <?php
-          $startPage = max(1, $view->currentPage - 2);
-          $endPage = min($view->totalPages, $view->currentPage + 2);
-          
-          for ($i = $startPage; $i <= $endPage; $i++):
-            $activeClass = ($i == $view->currentPage) ? 'active' : '';
-          ?>
-            <a href="?page=<?= $i ?>" class="page-link <?= $activeClass ?>" data-page="<?= $i ?>"><?= $i ?></a>
-          <?php endfor; ?>
-          
-          <?php if ($view->currentPage < $view->totalPages): ?>
-            <a href="?page=<?= $view->currentPage + 1 ?>" class="page-link" data-page="<?= $view->currentPage + 1 ?>">Next</a>
-          <?php endif; ?>
-        </div>
+<!-- Pagination -->
+<div class="pagination-container">
+  <?php if ($view->totalPages > 1): ?>
+    <div class="pagination">
+      <?php if ($view->currentPage > 1): ?>
+        <a href="?page=<?= $view->currentPage - 1 ?>" class="page-link" data-page="<?= $view->currentPage - 1 ?>">
+          <i class="bi bi-chevron-left"></i> Previous
+        </a>
+      <?php endif; ?>
+      
+      <?php
+      $startPage = max(1, $view->currentPage - 2);
+      $endPage = min($view->totalPages, $view->currentPage + 2);
+      
+      for ($i = $startPage; $i <= $endPage; $i++):
+        $activeClass = ($i == $view->currentPage) ? 'active' : '';
+      ?>
+        <a href="?page=<?= $i ?>" class="page-link <?= $activeClass ?>" data-page="<?= $i ?>"><?= $i ?></a>
+      <?php endfor; ?>
+      
+      <?php if ($view->currentPage < $view->totalPages): ?>
+        <a href="?page=<?= $view->currentPage + 1 ?>" class="page-link" data-page="<?= $view->currentPage + 1 ?>">
+          Next <i class="bi bi-chevron-right"></i>
+        </a>
       <?php endif; ?>
     </div>
+  <?php endif; ?>
+</div>
   </div>
 </div>
-
 <script src="js/browseCharger.js"></script>
 <?php require('template/footer.phtml') ?>
-</body>

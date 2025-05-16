@@ -1,7 +1,7 @@
 <?php require('template/header.phtml') ?>
 
 <div class="container mt-4">
-    <h2>Booking Requests for Your Charge Points</h2>
+    <h2>Booking Requests for Your Charge Point</h2>
     
     <?php if (isset($view->actionMessage)): ?>
         <div class="alert <?php echo strpos($view->actionMessage, 'Failed') !== false ? 'alert-danger' : 'alert-success'; ?>" role="alert">
@@ -34,7 +34,7 @@
                         <td><?php echo date('d M Y', strtotime($booking['booking_date'])); ?></td>
                         <td><?php echo date('H:i', strtotime($booking['booking_time'])); ?></td>
                         <td><?php echo htmlspecialchars($booking['streetName'] . ', ' . $booking['postcode']); ?></td>
-                        <td>£<?php echo number_format($booking['price_per_kwh'], 2); ?>/kWh</td>
+                        <td>BD<?php echo number_format($booking['price_per_kwh'], 2); ?>/kWh</td>
                         <td>
                             <span class="badge <?php 
                                 echo $booking['booking_status_id'] == 1 ? 'bg-warning' : 

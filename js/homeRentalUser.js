@@ -83,13 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     dayCell.appendChild(countBadge);
                 }
                 
-                // Add click event for showing booking details
-                dayCell.addEventListener('click', function() {
-                    showBookingDetails(dayBookings, dateToCheck);
-                });
-                
-                // Make clickable cells look interactive
-                dayCell.style.cursor = 'pointer';
+         
             }
             
             // Mark today's date
@@ -102,33 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to show booking details using tooltip or redirection
-    function showBookingDetails(bookings, date) {
-        // If only one booking, go directly to that booking's details
-        if (bookings.length === 1) {
-            window.location.href = `reservation-details.php?id=${bookings[0].booking_id}`;
-            return;
-        }
-        
-        
-        // Format date for display
-        const displayDate = new Date(date).toLocaleDateString();
-        
-        // Create an alert message with booking info
-        let alertMessage = `Bookings for ${displayDate}:\n\n`;
-        
-        bookings.forEach((booking, index) => {
-            alertMessage += `${index + 1}. Time: ${booking.booking_time} - Status: ${booking.status}\n`;
-        });
-        
-        alertMessage += `\nClick OK to view all your bookings.`;
-        
-        alert(alertMessage);
-        
-        // Redirect to booking history page
-        window.location.href = 'booking-history.php';
-    }
-
+  
     prevMonth.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar(window.bookings);

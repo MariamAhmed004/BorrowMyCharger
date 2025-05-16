@@ -7,36 +7,27 @@ class BrowseCharger {
         $this->db = Database::getInstance()->getDbConnection();
     }
     
-    public function getChargers($page = 1, $limit = 12) {
+      public function getChargers($page = 1, $limit = 8) {
         $offset = ($page - 1) * $limit;
-        $sql = "
-        SELECT
-            cp.charge_point_id AS chargePointId,
-            cp.price_per_kwh AS pricePerKwh,
-            cp.charge_point_picture_url AS chargePointPictureUrl,
-            addr.charge_point_address_id AS chargePointAddressId,
-            addr.postcode AS postcode,
-            addr.latitude AS latitude,
-            addr.longitude AS longitude,
-            addr.streetName AS streetName,
-            addr.house_number AS houseNumber,
-            addr.road AS road,
-            addr.block AS block,
-            c.city_id AS cityId,
-            c.city_name AS cityName,
-            avail.availability_status_id AS availabilityStatusId,
-            avail.availability_status_title AS availabilityStatusTitle
-        FROM
-            Pro_ChargePoint cp
-        LEFT JOIN
-            Pro_ChargePointAddress addr ON cp.charge_point_address_id = addr.charge_point_address_id
-        LEFT JOIN
-            Pro_City c ON addr.city_id = c.city_id
-        LEFT JOIN
-            Pro_AvailabilityStatus avail ON cp.availability_status_id = avail.availability_status_id
-        LIMIT :limit OFFSET :offset";
         
-        $stmt = $this->db->prepare($sql);
+        $query = "SELECT cp.charge_point_id as chargePointId, 
+                        cp.price_per_kwh as pricePerKwh, 
+                        cp.charge_point_picture_url as chargePointPictureUrl, 
+                        cpa.postcode, 
+                        cpa.streetName as streetName, 
+                        cpa.house_number as houseNumber, 
+                        cpa.road, 
+                        cpa.block, 
+                        c.city_name as cityName, 
+                        ast.availability_status_title as availabilityStatusTitle 
+                FROM Pro_ChargePoint cp 
+                JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id 
+                JOIN Pro_City c ON cpa.city_id = c.city_id 
+                JOIN Pro_AvailabilityStatus ast ON cp.availability_status_id = ast.availability_status_id 
+                ORDER BY cp.charge_point_id DESC 
+                LIMIT :limit OFFSET :offset";
+        
+        $stmt = $this->db->prepare($query);
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -44,147 +35,147 @@ class BrowseCharger {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function getFilteredChargers($location, $priceRange, $availability, $page = 1, $limit = 12) {
+    // Get filtered charge points
+    public function getFilteredChargers($location = '', $priceRange = '', $availabilityStatus = '', $page = 1, $limit = 12, $locationQuery = '', $availabilityQuery = '') {
         $offset = ($page - 1) * $limit;
-        $sql = "
-        SELECT
-            cp.charge_point_id AS chargePointId,
-            cp.price_per_kwh AS pricePerKwh,
-            cp.charge_point_picture_url AS chargePointPictureUrl,
-            addr.charge_point_address_id AS chargePointAddressId,
-            addr.postcode AS postcode,
-            addr.latitude AS latitude,
-            addr.longitude AS longitude,
-            addr.streetName AS streetName,
-            addr.house_number AS houseNumber,
-            addr.road AS road,
-            addr.block AS block,
-            c.city_id AS cityId,
-            c.city_name AS cityName,
-            avail.availability_status_id AS availabilityStatusId,
-            avail.availability_status_title AS availabilityStatusTitle
-        FROM
-            Pro_ChargePoint cp
-        LEFT JOIN
-            Pro_ChargePointAddress addr ON cp.charge_point_address_id = addr.charge_point_address_id
-        LEFT JOIN
-            Pro_City c ON addr.city_id = c.city_id
-        LEFT JOIN
-            Pro_AvailabilityStatus avail ON cp.availability_status_id = avail.availability_status_id
-        WHERE 1=1
-        ";
+        $params = [];
         
+        $query = "SELECT cp.charge_point_id as chargePointId, 
+                        cp.price_per_kwh as pricePerKwh, 
+                        cp.charge_point_picture_url as chargePointPictureUrl, 
+                        cpa.postcode, 
+                        cpa.streetName, 
+                        cpa.house_number as houseNumber, 
+                        cpa.road, 
+                        cpa.block, 
+                        c.city_name as cityName, 
+                        ast.availability_status_title as availabilityStatusTitle 
+                FROM Pro_ChargePoint cp 
+                JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id 
+                JOIN Pro_City c ON cpa.city_id = c.city_id 
+                JOIN Pro_AvailabilityStatus ast ON cp.availability_status_id = ast.availability_status_id 
+                WHERE 1=1";
+        
+        // Filter by location (city)
         if (!empty($location)) {
-            $sql .= " AND c.city_id = :location";
+            $query .= " AND cpa.city_id = :cityId";
+            $params[':cityId'] = $location;
         }
         
+        // Filter by location search query (city name)
+        if (!empty($locationQuery)) {
+            $query .= " AND LOWER(c.city_name) LIKE :locationQuery";
+            $params[':locationQuery'] = '%' . strtolower($locationQuery) . '%';
+        }
+        
+        // Filter by price range
         if (!empty($priceRange)) {
-            $priceRangeParts = explode('-', $priceRange);
-            if (count($priceRangeParts) == 2) {
-                $sql .= " AND cp.price_per_kwh BETWEEN :priceMin AND :priceMax";
-            } elseif ($priceRange == '20+') {
-                $sql .= " AND cp.price_per_kwh > 20";
-            }
+            list($min, $max) = explode('-', $priceRange);
+            $query .= " AND cp.price_per_kwh BETWEEN :minPrice AND :maxPrice";
+            $params[':minPrice'] = $min;
+            $params[':maxPrice'] = $max;
         }
         
-        if (!empty($availability)) {
-            $sql .= " AND avail.availability_status_id = :availability";
+        // Filter by availability status
+        if (!empty($availabilityStatus)) {
+            $query .= " AND cp.availability_status_id = :availabilityStatusId";
+            $params[':availabilityStatusId'] = $availabilityStatus;
         }
         
-        $sql .= " LIMIT :limit OFFSET :offset";
-        $stmt = $this->db->prepare($sql);
-        
-        if (!empty($location)) {
-            $stmt->bindParam(':location', $location, PDO::PARAM_INT);
+        // Filter by availability search query
+        if (!empty($availabilityQuery)) {
+            $query .= " AND LOWER(ast.availability_status_title) LIKE :availabilityQuery";
+            $params[':availabilityQuery'] = '%' . strtolower($availabilityQuery) . '%';
         }
         
-        if (!empty($priceRange) && $priceRangeParts = explode('-', $priceRange)) {
-            if (count($priceRangeParts) == 2) {
-                $stmt->bindParam(':priceMin', $priceRangeParts[0], PDO::PARAM_INT);
-                $stmt->bindParam(':priceMax', $priceRangeParts[1], PDO::PARAM_INT);
-            }
-        }
+        $query .= " ORDER BY cp.charge_point_id DESC LIMIT :limit OFFSET :offset";
+        $params[':limit'] = $limit;
+        $params[':offset'] = $offset;
         
-        if (!empty($availability)) {
-            $stmt->bindParam(':availability', $availability, PDO::PARAM_STR);
+        $stmt = $this->db->prepare($query);
+        foreach ($params as $key => $value) {
+            $paramType = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+            $stmt->bindValue($key, $value, $paramType);
         }
-        
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+     // Get total number of charge points
     public function getTotalChargers() {
-        $sql = "SELECT COUNT(*) as total FROM Pro_ChargePoint";
-        $stmt = $this->db->prepare($sql);
+        $query = "SELECT COUNT(*) as total FROM Pro_ChargePoint";
+        $stmt = $this->db->prepare($query);
         $stmt->execute();
+        
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'];
     }
     
-    public function getTotalFilteredChargers($location, $priceRange, $availability) {
-        $sql = "
-        SELECT
-            COUNT(*) as total
-        FROM
-            Pro_ChargePoint cp
-        LEFT JOIN
-            Pro_ChargePointAddress addr ON cp.charge_point_address_id = addr.charge_point_address_id
-        LEFT JOIN
-            Pro_City c ON addr.city_id = c.city_id
-        LEFT JOIN
-            Pro_AvailabilityStatus avail ON cp.availability_status_id = avail.availability_status_id
-        WHERE 1=1
-        ";
-        
-        if (!empty($location)) {
-            $sql .= " AND c.city_id = :location";
-        }
-        
-        if (!empty($priceRange)) {
-            $priceRangeParts = explode('-', $priceRange);
-            if (count($priceRangeParts) == 2) {
-                $sql .= " AND cp.price_per_kwh BETWEEN :priceMin AND :priceMax";
-            } elseif ($priceRange == '20+') {
-                $sql .= " AND cp.price_per_kwh > 20";
-            }
-        }
-        
-        if (!empty($availability)) {
-            $sql .= " AND avail.availability_status_id = :availability";
-        }
-        
-        $stmt = $this->db->prepare($sql);
-        
-        if (!empty($location)) {
-            $stmt->bindParam(':location', $location, PDO::PARAM_INT);
-        }
-        
-        if (!empty($priceRange) && $priceRangeParts = explode('-', $priceRange)) {
-            if (count($priceRangeParts) == 2) {
-                $stmt->bindParam(':priceMin', $priceRangeParts[0], PDO::PARAM_INT);
-                $stmt->bindParam(':priceMax', $priceRangeParts[1], PDO::PARAM_INT);
-            }
-        }
-        
-        if (!empty($availability)) {
-            $stmt->bindParam(':availability', $availability, PDO::PARAM_STR);
-        }
-        
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['total'];
-    }
-    
+    // Get availability status options
     public function getAvailabilityStatus() {
-        $sql = "SELECT availability_status_id, availability_status_title FROM Pro_AvailabilityStatus";
-        $stmt = $this->db->prepare($sql);
+        $query = "SELECT availability_status_id, availability_status_title FROM Pro_AvailabilityStatus";
+        $stmt = $this->db->prepare($query);
         $stmt->execute();
+        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+     // Get total number of filtered charge points (for pagination)
+    public function getTotalFilteredChargers($location = '', $priceRange = '', $availabilityStatus = '', $locationQuery = '', $availabilityQuery = '') {
+        $params = [];
+        
+        $query = "SELECT COUNT(*) as total
+                FROM Pro_ChargePoint cp 
+                JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id 
+                JOIN Pro_City c ON cpa.city_id = c.city_id 
+                JOIN Pro_AvailabilityStatus ast ON cp.availability_status_id = ast.availability_status_id 
+                WHERE 1=1";
+        
+        // Filter by location (city)
+        if (!empty($location)) {
+            $query .= " AND cpa.city_id = :cityId";
+            $params[':cityId'] = $location;
+        }
+        
+        // Filter by location search query (city name)
+        if (!empty($locationQuery)) {
+            $query .= " AND LOWER(c.city_name) LIKE :locationQuery";
+            $params[':locationQuery'] = '%' . strtolower($locationQuery) . '%';
+        }
+        
+        // Filter by price range
+        if (!empty($priceRange)) {
+            list($min, $max) = explode('-', $priceRange);
+            $query .= " AND cp.price_per_kwh BETWEEN :minPrice AND :maxPrice";
+            $params[':minPrice'] = $min;
+            $params[':maxPrice'] = $max;
+        }
+        
+        // Filter by availability status
+        if (!empty($availabilityStatus)) {
+            $query .= " AND cp.availability_status_id = :availabilityStatusId";
+            $params[':availabilityStatusId'] = $availabilityStatus;
+        }
+        
+        // Filter by availability search query
+        if (!empty($availabilityQuery)) {
+            $query .= " AND LOWER(ast.availability_status_title) LIKE :availabilityQuery";
+            $params[':availabilityQuery'] = '%' . strtolower($availabilityQuery) . '%';
+        }
+        
+        $stmt = $this->db->prepare($query);
+        foreach ($params as $key => $value) {
+            $paramType = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+            $stmt->bindValue($key, $value, $paramType);
+        }
+        $stmt->execute();
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'];
+    }
+    
+   
     public function getChargerById($id) {
         $sql = "
         SELECT

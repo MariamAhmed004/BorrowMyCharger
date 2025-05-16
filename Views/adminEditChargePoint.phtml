@@ -1,0 +1,555 @@
+<?php require('template/header.phtml'); ?>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Edit Charge Point</h1>
+                <a href="charge-point-management.php" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Charge Points
+                </a>
+            </div>
+
+            <!-- Alert Messages -->
+            <?php if (isset($_SESSION['message'])): ?>
+                <div class="alert alert-<?php echo $_SESSION['messageType'] === 'error' ? 'danger' : 'success'; ?> alert-dismissible fade show" role="alert">
+                    <?php echo htmlspecialchars($_SESSION['message']); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <?php unset($_SESSION['message']); unset($_SESSION['messageType']); ?>
+            <?php endif; ?>
+            
+            <?php if ($error): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <?php echo htmlspecialchars($error); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($success): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <?php echo htmlspecialchars($success); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <input type="hidden" name="charge_point_address_id" value="<?php echo htmlspecialchars($chargePoint['charge_point_address_id'] ?? ''); ?>">
+                        
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="price_per_kwh" class="form-label">Price per kWh</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="price_per_kwh" name="price_per_kwh" 
+                                            step="0.01" min="0" value="<?php echo htmlspecialchars($chargePoint['price_per_kwh'] ?? ''); ?>" required>
+                                    </div>
+                                    <div class="invalid-feedback">Please enter a valid price.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="availability_status_id" class="form-label">Availability Status</label>
+                                    <select class="form-select" id="availability_status_id" name="availability_status_id" required>
+                                        <option value="">Select status</option>
+                                        <?php foreach ($availabilityStatuses as $status): ?>
+                                            <option value="<?php echo htmlspecialchars($status['availability_status_id']); ?>"
+                                                <?php if (($chargePoint['availability_status_id'] ?? '') == $status['availability_status_id']) echo 'selected'; ?>>
+                                                <?php echo htmlspecialchars($status['availability_status_title']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a status.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="streetName" class="form-label">Street Name</label>
+                                    <input type="text" class="form-control" id="streetName" name="streetName" 
+                                        value="<?php echo htmlspecialchars($chargePoint['streetName'] ?? ''); ?>" required>
+                                    <div class="invalid-feedback">Please enter a street name.</div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="latitude" class="form-label">Latitude</label>
+                                        <input type="number" class="form-control" id="latitude" name="latitude" step="any" 
+                                            value="<?php echo htmlspecialchars($chargePoint['latitude'] ?? ''); ?>" required readonly>
+                                        <div class="form-text">Updated automatically when moving the marker</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="longitude" class="form-label">Longitude</label>
+                                        <input type="number" class="form-control" id="longitude" name="longitude" step="any" 
+                                            value="<?php echo htmlspecialchars($chargePoint['longitude'] ?? ''); ?>" required readonly>
+                                        <div class="form-text">Updated automatically when moving the marker</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Picture</label>
+                                    <div class="card">
+                                        <div class="card-body text-center p-3">
+                                            <?php if (!empty($chargePoint['charge_point_picture_url'])): ?>
+                                                <img src="<?php echo htmlspecialchars($chargePoint['charge_point_picture_url']); ?>" 
+                                                    alt="Charge Point" class="img-fluid rounded" style="max-height: 200px;">
+                                            <?php else: ?>
+                                                <div class="text-muted">No image available</div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="charge_point_picture" class="form-label">Upload New Picture</label>
+                                    <input type="file" class="form-control" id="charge_point_picture" name="charge_point_picture">
+                                    <div class="form-text">Supported formats: JPG, PNG, GIF (max 5MB)</div>
+                                </div>
+                                
+     <div class="mb-3">
+                                    <label for="postcode" class="form-label">Postcode</label>
+                                    <input type="text" class="form-control" id="postcode" name="postcode" value="<?php echo htmlspecialchars($chargePoint['postcode'] ?? ''); ?>" required>
+                                    <div class="invalid-feedback">Please enter a postcode.</div>
+                                </div>
+                    
+      
+
+                    <div class="mb-3">
+                        <label for="city_id" class="form-label">City</label>
+                        <select class="form-select" id="city_id" name="city_id" required>
+                            <option value="" selected>Select city</option>
+                            <?php foreach ($view->cities as $city): ?>
+                                <option value="<?php echo htmlspecialchars($city['city_id']); ?>"
+                                    <?php if (($chargePoint['city_id'] ?? '') == $city['city_id']) echo 'selected'; ?>>
+                                    <?php echo htmlspecialchars($city['city_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="invalid-feedback">Please select a city.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="house_number" class="form-label">House Number</label>
+                        <input type="text" class="form-control" id="house_number" name="house_number" 
+                            value="<?php echo htmlspecialchars($chargePoint['house_number'] ?? ''); ?>" required>
+                        <div class="invalid-feedback">Please enter a house number.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="road" class="form-label">Road</label>
+                        <input type="text" class="form-control" id="road" name="road" 
+                            value="<?php echo htmlspecialchars($chargePoint['road'] ?? ''); ?>" required>
+                        <div class="invalid-feedback">Please enter a road name.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="block" class="form-label">Block</label>
+                        <input type="text" class="form-control" id="block" name="block" 
+                            value="<?php echo htmlspecialchars($chargePoint['block'] ?? ''); ?>" required>
+                        <div class="invalid-feedback">Please enter a block.</div>
+                    </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Availability Schedule Section -->
+                        <div class="mt-4">
+                            <h4>Availability Schedule</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle"></i> 
+                                        Set hour values when this charge point is available (e.g., 9,10,11,12,13,14). If no hours are specified, 
+                                        the charge point will be marked as unavailable.
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Day</th>
+                                                    <th>Available Hours (comma separated, 24-hour format)</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php 
+                                                // Ensure we have all 7 days of the week
+                                                $daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                                                $availabilityDayMap = [];
+                                                
+                                                // Create a lookup map for existing days
+                                                foreach ($availabilityDays as $day) {
+                                                    $availabilityDayMap[$day['day_of_week']] = $day;
+                                                }
+                                                
+                                    // Create mapping of times by day ID
+$timesByDayId = [];
+foreach ($availabilityTimes as $time) {
+    $dayId = $time['availability_day_id'];
+    if (!isset($timesByDayId[$dayId])) {
+        $timesByDayId[$dayId] = [];
+    }
+    
+    // Extract hour from time format (HH:MM)
+    $timeValue = $time['available_time'];
+    $hour = (int)substr($timeValue, 0, 2);
+    $timesByDayId[$dayId][] = $hour;
+}
+
+// Loop through all days of week
+foreach ($daysOfWeek as $dayOfWeek): 
+    $dayId = isset($availabilityDayMap[$dayOfWeek]) ? $availabilityDayMap[$dayOfWeek]['availability_day_id'] : '';
+    $timeSlots = isset($timesByDayId[$dayId]) ? $timesByDayId[$dayId] : [];
+    $timeValue = !empty($timeSlots) ? implode(',', $timeSlots) : '';
+?>
+                                                <tr>
+                                                    <td class="align-middle">
+                                                        <strong><?php echo htmlspecialchars($dayOfWeek); ?></strong>
+                                                        <?php if ($dayId): ?>
+                                                            <input type="hidden" name="day_ids[<?php echo $dayOfWeek; ?>]" value="<?php echo htmlspecialchars($dayId); ?>">
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <div class="time-slot-container">
+                                                            <input type="text" class="form-control time-slot-input" 
+                                                                id="availability_<?php echo htmlspecialchars($dayOfWeek); ?>"
+                                                                name="availability_times[<?php echo $dayId ?: $dayOfWeek; ?>]" 
+                                                                placeholder="e.g. 9,10,11,12,13,14,15,16,17"
+                                                                value="<?php echo htmlspecialchars($timeValue); ?>"
+                                                                pattern="^(\d{1,2}(,\s*)?)*$">
+                                                            <div class="invalid-feedback">
+                                                                Please use comma-separated hour values (e.g., 9,10,11,12,13,14)
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="align-middle">
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" class="btn btn-outline-primary add-business-hours" data-day="<?php echo htmlspecialchars($dayOfWeek); ?>">
+                                                                <i class="bi bi-clock"></i> Business Hours
+                                                            </button>
+                                                            <button type="button" class="btn btn-outline-secondary add-all-hours" data-day="<?php echo htmlspecialchars($dayOfWeek); ?>">
+                                                                <i class="bi bi-calendar-check"></i> All Day
+                                                            </button>
+                                                            <button type="button" class="btn btn-outline-danger clear-time-slots" data-day="<?php echo htmlspecialchars($dayOfWeek); ?>">
+                                                                <i class="bi bi-trash"></i> Clear
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Time slot templates and helpers -->
+                                    <div class="mt-3">
+                                        <h5>Quick Templates</h5>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-2 apply-business-hours">
+                                            Business Hours (9-17) to All
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-2 apply-all-hours">
+                                            All Hours (0-23) to All
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-2 clear-all-slots">
+                                            Clear All Days
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary apply-weekdays">
+                                            Business Hours to Weekdays Only
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Map Section -->
+                        <div class="mt-4">
+                            <h4>Location <span class="badge bg-info">Click on map to set location</span></h4>
+                            <div class="card">
+                                <div class="card-body p-0">
+                                    <div id="map" style="height: 400px; border-radius: 0.25rem;"></div>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">Click anywhere on the map to set the marker location</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="adminChargePointsController.php" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<style>
+    .time-slot-container {
+        position: relative;
+    }
+    
+    .time-slot-input.is-valid {
+        border-color: #198754;
+        padding-right: calc(1.5em + .75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(.375em + .1875rem) center;
+        background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+    }
+    
+    .time-slot-input.is-invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + .75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(.375em + .1875rem) center;
+        background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+    }
+</style>
+
+<script>
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch all forms with the class 'needs-validation'
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        // Loop over each form and prevent submission if fields are invalid
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+        
+        // Initialize map
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+        
+        // Initial coordinates (fallback to default if not available)
+        const lat = parseFloat(latInput.value) || 51.505;
+        const lng = parseFloat(lngInput.value) || -0.09;
+        
+        // Create map
+        const map = L.map('map').setView([lat, lng], 13);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Create marker at initial position
+        let marker = L.marker([lat, lng]).addTo(map);
+        
+        // Update marker and coordinates when clicking on the map
+        map.on('click', function(e) {
+            // Remove existing marker
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            // Create new marker at clicked position
+            marker = L.marker(e.latlng).addTo(map);
+            
+            // Update form fields
+            latInput.value = e.latlng.lat.toFixed(6);
+            lngInput.value = e.latlng.lng.toFixed(6);
+        });
+        
+        // Availability time slot handling
+        const timeSlotInputs = document.querySelectorAll('.time-slot-input');
+        const availabilityStatusSelect = document.getElementById('availability_status_id');
+        
+        // Helper function to validate hour format
+        function isValidHourFormat(input) {
+            // Check if the input is in the format of comma-separated numbers (0-23)
+            const hourPattern = /^(\d{1,2}(,\s*)?)*$/;
+            if (!hourPattern.test(input)) {
+                return false;
+            }
+            
+            // Check that each number is a valid hour (0-23)
+            const hours = input.split(',');
+            for (let hour of hours) {
+                hour = hour.trim();
+                if (hour === '') continue;
+                
+                const hourNum = parseInt(hour, 10);
+                if (isNaN(hourNum) || hourNum < 0 || hourNum > 23) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        // Add business hours (9-17) to a day
+        function addBusinessHours(dayElement) {
+            dayElement.value = '9,10,11,12,13,14,15,16,17';
+            validateTimeSlots();
+        }
+        
+        // Add all hours (0-23) to a day
+        function addAllHours(dayElement) {
+            dayElement.value = '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23';
+            validateTimeSlots();
+        }
+        
+        // Add event listeners for business hours buttons
+        document.querySelectorAll('.add-business-hours').forEach(button => {
+            button.addEventListener('click', function() {
+                const day = this.getAttribute('data-day');
+                const input = document.getElementById('availability_' + day);
+                addBusinessHours(input);
+            });
+        });
+        
+        // Add event listeners for all hours buttons
+        document.querySelectorAll('.add-all-hours').forEach(button => {
+            button.addEventListener('click', function() {
+                const day = this.getAttribute('data-day');
+                const input = document.getElementById('availability_' + day);
+                addAllHours(input);
+            });
+        });
+        
+        // Clear time slots for a specific day
+        document.querySelectorAll('.clear-time-slots').forEach(button => {
+            button.addEventListener('click', function() {
+                const day = this.getAttribute('data-day');
+                const input = document.getElementById('availability_' + day);
+                input.value = '';
+                validateTimeSlots();
+            });
+        });
+        
+        // Apply business hours to all days
+        document.querySelector('.apply-business-hours').addEventListener('click', function() {
+            timeSlotInputs.forEach(input => {
+                addBusinessHours(input);
+            });
+        });
+        
+        // Apply all hours to all days
+        document.querySelector('.apply-all-hours').addEventListener('click', function() {
+            timeSlotInputs.forEach(input => {
+                addAllHours(input);
+            });
+        });
+        
+        // Apply business hours to weekdays only
+        document.querySelector('.apply-weekdays').addEventListener('click', function() {
+            const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            
+            timeSlotInputs.forEach(input => {
+                const day = input.id.replace('availability_', '');
+                if (weekdays.includes(day)) {
+                    addBusinessHours(input);
+                }
+            });
+        });
+        
+        // Clear all time slots
+        document.querySelector('.clear-all-slots').addEventListener('click', function() {
+            timeSlotInputs.forEach(input => {
+                input.value = '';
+            });
+            validateTimeSlots();
+        });
+        
+        // Validate time slots and update availability status if needed
+        function validateTimeSlots() {
+            let hasValidTimeSlots = false;
+            
+            timeSlotInputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    if (isValidHourFormat(value)) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                        hasValidTimeSlots = true;
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                    }
+                } else {
+                    input.classList.remove('is-invalid');
+                    input.classList.remove('is-valid');
+                }
+            });
+            
+            // If no valid time slots, set availability status to unavailable
+            // Find the "unavailable" option in the select element
+            if (!hasValidTimeSlots) {
+                const unavailableOption = Array.from(availabilityStatusSelect.options).find(option => 
+                    option.textContent.toLowerCase().includes('unavailable'));
+                
+                if (unavailableOption) {
+                    availabilityStatusSelect.value = unavailableOption.value;
+                }
+            }
+        }
+        
+        // Initial validation
+        validateTimeSlots();
+        
+        // Add validation on time slot input change
+        timeSlotInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                validateTimeSlots();
+            });
+            
+            input.addEventListener('input', function() {
+                // Simple inline validation while typing
+                const value = this.value.trim();
+                if (value === '' || isValidHourFormat(value)) {
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+        
+        // Add validation on form submission
+        document.querySelector('form').addEventListener('submit', function(event) {
+            validateTimeSlots();
+            
+            // Check if any time slot input is invalid
+            const invalidInputs = document.querySelectorAll('.time-slot-input.is-invalid');
+            if (invalidInputs.length > 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Scroll to the first invalid input
+                invalidInputs[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Show alert
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                errorAlert.role = 'alert';
+                errorAlert.innerHTML = `
+                    <strong>Invalid hour format!</strong> Please use comma-separated hours (0-23).
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                document.querySelector('.card-body').insertBefore(errorAlert, document.querySelector('.card-body').firstChild);
+            }
+        });
+    });
+</script>
+
+<?php require('template/footer.phtml'); ?>

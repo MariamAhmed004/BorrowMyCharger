@@ -19,19 +19,19 @@ $userId = $_SESSION['user_id'];
 // Set up the view
 $view = new stdClass();
 $view->pageTitle = 'Home';
-$view->activePage = 'home';
+$view->activePage = 'dashboard';
 
 // Create an instance of the model and pass the user id
 $homeOwnerHome = new HomeOwnerHome($userId);
-
+// Get bookings for the calendar
+$view->bookings = $homeOwnerHome->getAllBookings();
 // Get statistics for the dashboard
 $view->chargePointsCount = $homeOwnerHome->getChargePointsCount();
 $view->pendingRequestsCount = $homeOwnerHome->getPendingBookingRequestsCount();
 $view->totalBookingsCount = $homeOwnerHome->getTotalBookingsCount();
 $view->approvedBookingsCount = $homeOwnerHome->getApprovedBookingsCount();
 
-// Get bookings for the calendar
-$view->bookings = $homeOwnerHome->getAllBookings();
+
 
 // Get upcoming bookings
 $view->upcomingBookings = $homeOwnerHome->getUpcomingBookings();

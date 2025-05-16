@@ -1,54 +1,62 @@
+<?php require_once('template/header.phtml'); ?>
+<link rel="stylesheet" href="css/userProfile.css">
 
-    <?php require_once('template/header.phtml'); ?>
-
-    <div class="profile-container">
-        <button type="button" id="editButton" class="btn">Edit Profile</button>
-        <form method="POST" action="">
-            <button type="submit" name="delete_account" class="btn" style="background-color: #e63946;">Delete Account</button>
-        </form>
-
-        <?php if (!empty($errorMessage)): ?>
-            <div class="error"><?php echo $errorMessage; ?></div>
-        <?php endif; ?>
-
-
-        <form id="profileForm" method="POST" action="" novalidate>
-            <div class="form-group">
-                <label for="first_name">First Name:</label>
-                <input type="text" id="first_name" name="first_name" value="<?php echo htmlspecialchars($userData['first_name']); ?>" disabled required>
-                <div class="error" id="first_name_error"></div>
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-4">
+                <button type="button" id="editButton" class="btn btn-outline-primary">Edit Profile</button>
+                <form method="POST" action="">
+                    <button type="submit" name="delete_account" class="btn btn-outline-danger">Delete Account</button>
+                </form>
             </div>
 
-            <div class="form-group">
-                <label for="last_name">Last Name:</label>
-                <input type="text" id="last_name" name="last_name" value="<?php echo htmlspecialchars($userData['last_name']); ?>" disabled required>
-                <div class="error" id="last_name_error"></div>
-            </div>
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alert alert-danger"><?php echo $errorMessage; ?></div>
+            <?php endif; ?>
 
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" value="<?php echo htmlspecialchars($userData['email']); ?>" disabled readonly>
-                <small>Email cannot be changed</small>
-            </div>
+            <form id="profileForm" method="POST" action="" novalidate>
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name"
+                        value="<?php echo htmlspecialchars($userData['first_name']); ?>" disabled required>
+                    <div class="invalid-feedback" id="first_name_error"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="phone_number">Phone Number:</label>
-                <input type="text" id="phone_number" name="phone_number" value="<?php echo htmlspecialchars($userData['phone_number']); ?>" disabled required>
-                <div class="error" id="phone_number_error"></div>
-            </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name"
+                        value="<?php echo htmlspecialchars($userData['last_name']); ?>" disabled required>
+                    <div class="invalid-feedback" id="last_name_error"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" value="<?php echo htmlspecialchars($userData['username']); ?>" disabled readonly>
-                <small>Username cannot be changed</small>
-            </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email"
+                        value="<?php echo htmlspecialchars($userData['email']); ?>" disabled readonly>
+                    <div class="form-text">Email cannot be changed</div>
+                </div>
 
-            <input type="hidden" name="save_profile" value="1">
-            <button type="submit" id="saveButton" class="btn" style="display: none;">Save</button>
-        </form>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number"
+                        value="<?php echo htmlspecialchars($userData['phone_number']); ?>" disabled required>
+                    <div class="invalid-feedback" id="phone_number_error"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username"
+                        value="<?php echo htmlspecialchars($userData['username']); ?>" disabled readonly>
+                    <div class="form-text">Username cannot be changed</div>
+                </div>
+
+                <input type="hidden" name="save_profile" value="1">
+                <button type="submit" id="saveButton" class="btn btn-success d-none">Save</button>
+            </form>
+        </div>
     </div>
+</div>
 
 <script src="js/userProfile.js"></script>
-
 <?php require_once('template/footer.phtml'); ?>
-<link rel="stylesheet" href="css/userProfile.css">

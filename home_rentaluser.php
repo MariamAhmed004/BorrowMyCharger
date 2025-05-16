@@ -8,7 +8,7 @@ $userId = $_SESSION['user_id'];
 //handle from the header navigation to the html page
 $view = new stdClass();
 $view->pageTitle = 'Home';
-$view->activePage = 'home';
+$view->activePage = 'dashboard';
 
 //create an instance of the model and pass the user id
 $rentalUserHome = new RentalUserHome($userId);

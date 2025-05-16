@@ -1,0 +1,102 @@
+
+    /* Day checkboxes */
+    .day-checkbox-container {
+        margin-bottom: 20px;
+    }
+    .day-checkbox-container label {
+        display: inline-block;
+        margin-right: 10px;
+        font-weight: normal;
+    }
+    
+    /* Time picker container */
+    .time-picker-container {
+        display: block; /* Changed from none to block */
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    
+    /* Time selection styles */
+    .time-selection-container {
+        margin-bottom: 15px;
+    }
+    
+    .time-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    .time-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .time-button {
+        padding: 5px 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .time-button.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .modal {
+        z-index: 1055;
+    }
+
+    .modal-backdrop {
+        z-index: 1040;
+    }
+
+    /* Adjusted image size */
+    .charge-point-img {
+        width: 100%;
+        height: 220px; /* Fixed height */
+        object-fit: cover; /* This prevents stretching */
+        object-position: center; /* Centers the image */
+    }
+    
+    /* Improved card styles */
+    .charge-point-card {
+        height: 100%;
+        max-width: 380px; /* Control the max width for better image proportions */
+        margin: 0 auto; /* Center the card if narrower than container */
+        box-shadow: 0 4px 8px rgba(0,0,0,.1);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    
+    .charge-point-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Map card styling */
+    .map-card {
+        height: 100%;
+        box-shadow: 0 4px 8px rgba(0,0,0,.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    /* Improved availability list styling */
+    .availability-list li {
+        padding: 5px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .availability-list li:last-child {
+        border-bottom: none;
+    }
+

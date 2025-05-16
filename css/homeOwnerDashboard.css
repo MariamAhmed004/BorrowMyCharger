@@ -1,0 +1,98 @@
+
+    .stats-card {
+        margin-bottom: 20px;
+        border: none;
+        background-color: #e9ecef;
+        padding: 20px;
+        border-radius: 5px;
+        transition: transform 0.3s;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stats-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #299c6e;
+    }
+    
+    .calendar {
+        margin-top: 20px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+    }
+    
+    .weekday-header {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .day {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .day:hover {
+        background-color: #e9ecef;
+    }
+    
+    .day.has-pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .day.has-approved {
+        background-color: #299c6e;
+        color: #fff;
+    }
+    
+    .day.has-rejected {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    
+    .day.empty {
+        border: none;
+        background-color: transparent;
+        cursor: default;
+    }
+    
+    .upcoming-bookings {
+        margin-top: 30px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .booking-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #299c6e;
+        background-color: #f8f9fa;
+        border-radius: 0 5px 5px 0;
+    }

@@ -322,7 +322,7 @@ function renderChargePointsTable(chargePoints) {
                 <td>${cp.first_name} ${cp.last_name}</td>
                 <td>${cp.streetName}, ${cp.postcode}</td>
                 <td>${cp.city_name}</td>
-                <td>£${parseFloat(cp.price_per_kwh).toFixed(2)}</td>
+                <td>BD${parseFloat(cp.price_per_kwh).toFixed(2)}</td>
                 <td>${cp.availability_status_title}</td>
                 <td>${cp.email}<br>${cp.phone_number || 'N/A'}</td>
             </tr>

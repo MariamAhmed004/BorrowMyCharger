@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = new bootstrap.Modal(document.getElementById('chargePointModal'));
     const addChargePointBtn = document.getElementById('addChargePointBtn');
     const chargePointForm = document.getElementById('chargePointForm');
-    const modalMapContainer = document.getElementById('mapContainer');
+const modalMapContainer = document.getElementById('modalMapContainer');
     const mainMapContainer = document.getElementById('mainMapContainer');
     const latitudeInput = document.getElementById('latitude');
     const longitudeInput = document.getElementById('longitude');
@@ -233,40 +233,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const chargePointPictureInput = document.getElementById('charge_point_picture');
 
-    // Initialize map in the modal
-    function initModalMap(initialLocation = DEFAULT_LOCATION) {
-        // Clear previous map container
-        modalMapContainer.innerHTML = '';
-        
-        // Create a new div for the Leaflet map
-        const mapDiv = document.createElement('div');
-        mapDiv.style.height = '400px'; // Set height for the map
-        modalMapContainer.appendChild(mapDiv);
-        
-        // Create map
-        modalMap = L.map(mapDiv).setView([initialLocation.lat, initialLocation.lng], 10);
-        
-        // Add OpenStreetMap tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(modalMap);
-        
-        // Create marker
-        modalMarker = L.marker([initialLocation.lat, initialLocation.lng], {
-            draggable: true
-        }).addTo(modalMap);
-        
-        // Add event listeners for marker
-        modalMarker.on('dragend', updateMarkerLocation);
-        modalMap.on('click', function(event) {
-            modalMarker.setLatLng(event.latlng);
-            updateMarkerLocation({ latlng: event.latlng });
-        });
-        
-        // Update initial location
-        updateMarkerLocation({ latlng: modalMarker.getLatLng() });
+   // Initialize map in the modal
+function initModalMap(initialLocation = DEFAULT_LOCATION) {
+    // Clear previous map if it exists
+    if (modalMap) {
+        modalMap.remove();
     }
-
+    
+    // Use the existing container directly instead of creating a new div
+    modalMap = L.map(modalMapContainer).setView([initialLocation.lat, initialLocation.lng], 10);
+    
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(modalMap);
+    
+    // Create marker
+    modalMarker = L.marker([initialLocation.lat, initialLocation.lng], {
+        draggable: true
+    }).addTo(modalMap);
+    
+    // Add event listeners for marker
+    modalMarker.on('dragend', updateMarkerLocation);
+    modalMap.on('click', function(event) {
+        modalMarker.setLatLng(event.latlng);
+        updateMarkerLocation({ latlng: event.latlng });
+    });
+    
+    // Update initial location
+    updateMarkerLocation({ latlng: modalMarker.getLatLng() });
+    
+    // Force a resize event to ensure the map fills its container
+    setTimeout(() => {
+        modalMap.invalidateSize();
+    }, 100);
+}
+document.getElementById('chargePointModal').addEventListener('shown.bs.modal', function () {
+    if (modalMap) {
+        modalMap.invalidateSize();
+    }
+});
     // Initialize map on the main page
     function initMainMap(location = DEFAULT_LOCATION) {
         if (!mainMapContainer) {
@@ -601,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Load Leaflet CSS
             const cssLink = document.createElement('link');
             cssLink.rel = 'stylesheet';
-            cssLink.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            cssLink.href = 'leaflet/leaflet.css';
             cssLink.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
             cssLink.crossOrigin = '';
             document.head.appendChild(cssLink);
