@@ -111,44 +111,40 @@ class BookCharger {
      * @return array Result with success status and message
      */
     public function addBooking($userId, $chargePointId, $bookingDate, $bookingTime) {
-        // Convert 'dd-mm-yyyy' to 'yyyy-mm-dd' for database
-        $dateParts = explode("-", $bookingDate);
-        $formattedDate = "{$dateParts[2]}-{$dateParts[1]}-{$dateParts[0]}"; // Converts '12-05-2025' to '2025-05-12'
-        
-        // Double check if the time slot is already booked
-        if ($this->isAlreadyBooked($chargePointId, $formattedDate, $bookingTime)) {
-            return [
-                'success' => false,
-                'message' => 'This time slot is already booked. Please select another time.'
-            ];
-        }
-        
-        $sql = "INSERT INTO Pro_Booking (user_id, charge_point_id, booking_date, booking_time, booking_status_id)
-                VALUES (:user_id, :charge_point_id, :booking_date, :booking_time, 1)"; // Status ID set to Pending
-                
-        $stmt = $this->dbHandle->prepare($sql);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
-        $stmt->bindParam(':booking_date', $formattedDate, PDO::PARAM_STR);
-        $stmt->bindParam(':booking_time', $bookingTime, PDO::PARAM_STR);
+    $dateParts = explode("-", $bookingDate);
+    $formattedDate = "{$dateParts[2]}-{$dateParts[1]}-{$dateParts[0]}";
 
-        $result = $stmt->execute();
-        
-        if ($result) {
-            // After successful booking, check if this was the last available slot
-            $this->checkAndUpdateAvailability($chargePointId);
-            
-            return [
-                'success' => true,
-                'message' => 'Booking successfully created!'
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Booking failed. Please try again.'
-            ];
-        }
+    if ($this->isAlreadyBooked($chargePointId, $formattedDate, $bookingTime)) {
+        return [
+            'success' => false,
+            'message' => 'This time slot is already booked. Please select another time.'
+        ];
     }
+    
+    $sql = "INSERT INTO Pro_Booking (user_id, charge_point_id, booking_date, booking_time, booking_status_id)
+            VALUES (:user_id, :charge_point_id, :booking_date, :booking_time, 1)";
+    
+    $stmt = $this->dbHandle->prepare($sql);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':charge_point_id', $chargePointId, PDO::PARAM_INT);
+    $stmt->bindParam(':booking_date', $formattedDate, PDO::PARAM_STR);
+    $stmt->bindParam(':booking_time', $bookingTime, PDO::PARAM_STR);
+
+    $result = $stmt->execute();
+    
+    if ($result) {
+        $this->checkAndUpdateAvailability($chargePointId);
+        return [
+            'success' => true,
+            'message' => 'Booking successfully created!'
+        ];
+    } else {
+        return [
+            'success' => false,
+            'message' => 'Booking failed. Please try again.'
+        ];
+    }
+}
     
     /**
      * Get available days for a charge point within the specified number of days

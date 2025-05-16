@@ -100,67 +100,48 @@ if ($id) {
         $view->weekDates = array_intersect_key($weekDates, array_flip($availableDays));
         $view->chargerPointId = $id;
         
-        // Handle form submission with AJAX-compatible response
+        // Handle form submission
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $userId = $_POST['user_id'] ?? null;
             $chargePointId = $_POST['charge_point_id'] ?? null;
             $bookingDate = $_POST['selected_date'] ?? null;
             $bookingTime = $_POST['selected_time'] ?? null;
 
-            // Check if this is an AJAX request
-            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                       strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
             if ($userId && $chargePointId && $bookingDate && $bookingTime) {
-                // Validate that the time slot is still available before booking
-                $dateParts = explode("-", $bookingDate);
-                $formattedDate = "{$dateParts[2]}-{$dateParts[1]}-{$dateParts[0]}"; // Convert to yyyy-mm-dd
+                // Add the booking using the method from BookCharger model
+                $result = $bookingModel->addBooking($userId, $chargePointId, $bookingDate, $bookingTime);
                 
-                if ($bookingModel->isAlreadyBooked($chargePointId, $formattedDate, $bookingTime)) {
-                    $errorMessage = 'This time slot is no longer available. Please select another time.';
-                    $view->errorMessage = $errorMessage;
-                    
-                    if ($isAjax) {
-                        echo "<script>alert('$errorMessage');</script>";
-                    } else {
-                        echo "<script>alert('$errorMessage');</script>";
-                    }
+                if ($isAjax) {
+                    // Return JSON response for AJAX requests
+                    header('Content-Type: application/json');
+                    echo json_encode($result);
+                    exit;
                 } else {
-                    $result = $bookingModel->addBooking($userId, $chargePointId, $bookingDate, $bookingTime);
-
+                    // Handle form submission for non-AJAX requests
                     if ($result['success']) {
-                        // Successful booking
-                        if ($isAjax) {
-                            echo "success:" . $result['message'];
-                        } else {
-                            echo "<script>alert('{$result['message']}'); window.location.href='index.php';</script>";
-                            exit;
-                        }
+                        // Redirect with a success message
+                        echo "<script>alert('{$result['message']}'); window.location.href='index.php';</script>";
+                        exit;
                     } else {
-                        // Failed booking
+                        // Set error message to display in the view
                         $view->errorMessage = $result['message'];
-                        
-                        if ($isAjax) {
-                            echo "<script>alert('{$result['message']}');</script>";
-                        } else {
-                            echo "<script>alert('{$result['message']}');</script>";
-                        }
                     }
                 }
             } else {
                 $errorMessage = 'All fields are required.';
-                $view->errorMessage = $errorMessage;
-                
                 if ($isAjax) {
-                    echo "<script>alert('$errorMessage');</script>";
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => false,
+                        'message' => $errorMessage
+                    ]);
+                    exit;
                 } else {
-                    echo "<script>alert('$errorMessage');</script>";
+                    $view->errorMessage = $errorMessage;
                 }
-            }
-            
-            // If this is an AJAX request, we've sent the response so we can exit
-            if ($isAjax) {
-                exit;
             }
         }
     } else {

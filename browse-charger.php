@@ -62,9 +62,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 'true') {
             $html .= '<div class="charge-point">';
             $html .= '<div class="charge-point-image">';
             $html .= '<img src="' . htmlspecialchars($chargePoint['chargePointPictureUrl'] ?? '') . '" alt="Charge Point Image">';
-            $html .= '<span class="status-badge ' . strtolower(str_replace(' ', '-', $chargePoint['availabilityStatusTitle'] ?? '')) . '">';
-            $html .= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '');
-            $html .= '</span>';
+   $html .= '<span class="status-badge ' . strtolower(str_replace(' ', '-', $chargePoint['availabilityStatusTitle'] ?? '')) . '" data-last-status="' . htmlspecialchars($chargePoint['availabilityStatusId'] ?? '') . '">';
+$html .= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '');
+$html .= '</span>';
             $html .= '</div>';
             
             $html .= '<div class="charge-point-details">';

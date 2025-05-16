@@ -9,24 +9,24 @@ class Profiles {
     }
     
     public function getAllProfiles() {
-        $stmt = $this->_db->prepare("
-            SELECT 
-                u.user_id, 
-                u.first_name, 
-                u.last_name, 
-                u.username,
-                u.email, 
-                r.role_title,
-                s.user_account_status_title,
-                s.user_account_status_id
-            FROM Pro_User u 
-            JOIN Pro_Role r ON u.role_id = r.role_id
-            LEFT JOIN Pro_UserAccountStatus s ON u.user_account_status_id = s.user_account_status_id
-        "); 
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    
+    $stmt = $this->_db->prepare("
+        SELECT 
+            u.user_id, 
+            u.first_name, 
+            u.last_name, 
+            u.username,
+            u.email, 
+            r.role_title,
+            s.user_account_status_title,
+            s.user_account_status_id
+        FROM Pro_User u 
+        JOIN Pro_Role r ON u.role_id = r.role_id
+        LEFT JOIN Pro_UserAccountStatus s ON u.user_account_status_id = s.user_account_status_id
+        WHERE u.role_id IN (2, 3)
+    "); 
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
     public function getUniqueNames() {
         $stmt = $this->_db->prepare("SELECT DISTINCT CONCAT(first_name, ' ', last_name) AS full_name FROM Pro_User");
         $stmt->execute();
@@ -39,11 +39,15 @@ class Profiles {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function getRoles() {
-        $stmt = $this->_db->prepare("SELECT role_id, role_title FROM Pro_Role");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+  public function getRoles() {
+    $stmt = $this->_db->prepare("
+        SELECT role_id, role_title 
+        FROM Pro_Role 
+        WHERE role_id != 1
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
     
    public function deleteUser($userId) {
     try {

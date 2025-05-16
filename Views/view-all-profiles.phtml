@@ -1,111 +1,127 @@
 <?php require('template/header.phtml') ?>
    <link rel="stylesheet" href="css/allProfiles.css">
-
+   <br>
 <div class="container mt-5">
+    <div class="filter-container row mb-4">
+        <div class="col-md-3 col-sm-6 mb-2">
+            <select id="nameFilter" onchange="filterTable()" class="form-control">
+                <option value="">Filter by Name</option>
+                <?php foreach ($view->uniqueNames as $name): ?>
+                    <option value="<?php echo htmlspecialchars($name); ?>"><?php echo htmlspecialchars($name); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
-    <div class="filter-container">
-        <select id="nameFilter" onchange="filterTable()">
-            <option value="">Filter by Name</option>
-            <?php foreach ($view->uniqueNames as $name): ?>
-                <option value="<?php echo htmlspecialchars($name); ?>"><?php echo htmlspecialchars($name); ?></option>
-            <?php endforeach; ?>
-        </select>
-
-        <select id="roleFilter" onchange="filterTable()">
-            <option value="">Filter by Role</option>
-            <?php foreach ($view->roles as $role): ?>
-                <option value="<?php echo htmlspecialchars($role['role_title']); ?>">
-                    <?php echo htmlspecialchars($role['role_title']); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        <div class="col-md-3 col-sm-6 mb-2">
+            <select id="roleFilter" onchange="filterTable()" class="form-control">
+                <option value="">Filter by Role</option>
+                <?php foreach ($view->roles as $role): ?>
+                    <option value="<?php echo htmlspecialchars($role['role_title']); ?>">
+                        <?php echo htmlspecialchars($role['role_title']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
         
-        <select id="statusFilter" onchange="filterTable()">
-            <option value="">Filter by Status</option>
-            <?php foreach ($view->accountStatuses as $status): ?>
-                <option value="<?php echo htmlspecialchars($status['user_account_status_title']); ?>">
-                    <?php echo htmlspecialchars($status['user_account_status_title']); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        <div class="col-md-3 col-sm-6 mb-2">
+            <select id="statusFilter" onchange="filterTable()" class="form-control">
+                <option value="">Filter by Status</option>
+                <?php foreach ($view->accountStatuses as $status): ?>
+                    <option value="<?php echo htmlspecialchars($status['user_account_status_title']); ?>">
+                        <?php echo htmlspecialchars($status['user_account_status_title']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
-        <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+        <div class="col-md-3 col-sm-6 mb-2">
+            <button class="btn btn-secondary w-100" onclick="clearFilters()">Clear Filters</button>
+        </div>
     </div>
 
-    <div id="tableContainer">
-        <table class="table table-bordered" id="profilesTable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Account Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($view->profiles)): ?>
-                    <tr>
-                        <td colspan="6" class="text-center">
-                            <div class="alert alert-info my-3">No users found.</div>
-                        </td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($view->profiles as $profile): ?>
-                        <tr data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>">
-                            <td><?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?></td>
-                            <td><?php echo htmlspecialchars($profile['email']); ?></td>
-                            <td><?php echo htmlspecialchars($profile['username']); ?></td>
-                            <td><?php echo htmlspecialchars($profile['role_title']); ?></td>
-                            <td>
-                                <span class="status-badge status-<?php echo strtolower(htmlspecialchars($profile['user_account_status_title'])); ?>">
-                                    <?php echo htmlspecialchars($profile['user_account_status_title']); ?>
-                                </span>
-                            </td>
-                            <td class="actions-cell">
-                                <?php if (strtolower($profile['user_account_status_title']) === 'suspended'): ?>
-                                    <a href="#" class="link unsuspend-link" 
-                                       data-action="unsuspend" 
-                                       data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
-                                       data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
-                                        Unsuspend
-                                    </a>
-                                <?php else: ?>
-                                    <a href="#" class="link suspend-link" 
-                                       data-action="suspend" 
-                                       data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
-                                       data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
-                                        Suspend
-                                    </a>
-                                <?php endif; ?>
-                                
-                                <?php if (strtolower($profile['role_title']) === 'homeowner' && strtolower($profile['user_account_status_title']) === 'pending'): ?>
-                                    <a href="#" class="link approve-link" 
-                                       data-action="approve" 
-                                       data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
-                                       data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
-                                        Approve
-                                    </a>
-                                <?php endif; ?>
-                                
-                                <a href="#" class="link delete-link" 
-                                   data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
-                                   data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
-                                    Delete
-                                </a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        
-        <!-- No results message (hidden by default) -->
-        <div id="noResultsMessage" class="alert alert-warning my-4 text-center" style="display: none;">
-            <i class="fa fa-exclamation-circle mr-2"></i>
-            No users found matching your search criteria. Please try different filters.
+    <div class="card" style="border: 1px solid var(--medium-gray); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div class="card-header" style="background-color: var(--teal); color: white; border-bottom: 0;">
+            <h4 class="mb-0">User Profiles</h4>
         </div>
+        <div class="card-body p-0">
+            <div id="tableContainer" class="table-responsive">
+                <table class="table table-bordered mb-0" id="profilesTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Account Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($view->profiles)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="alert alert-info my-3">No users found.</div>
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($view->profiles as $profile): ?>
+                                <tr data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>">
+                                    <td data-label="Name"><?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?></td>
+                                    <td data-label="Email"><?php echo htmlspecialchars($profile['email']); ?></td>
+                                    <td data-label="Username"><?php echo htmlspecialchars($profile['username']); ?></td>
+                                    <td data-label="Role"><?php echo htmlspecialchars($profile['role_title']); ?></td>
+                                    <td data-label="Status">
+                                        <span class="status-badge status-<?php echo strtolower(htmlspecialchars($profile['user_account_status_title'])); ?>">
+                                            <?php echo htmlspecialchars($profile['user_account_status_title']); ?>
+                                        </span>
+                                    </td>
+                                    <td data-label="Actions" class="actions-cell">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <?php if (strtolower($profile['user_account_status_title']) === 'suspended'): ?>
+                                                <a href="#" class="link unsuspend-link" 
+                                                   data-action="unsuspend" 
+                                                   data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                                   data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                                    Unsuspend
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="#" class="link suspend-link" 
+                                                   data-action="suspend" 
+                                                   data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                                   data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                                    Suspend
+                                                </a>
+                                            <?php endif; ?>
+                                            
+                                            <?php if (strtolower($profile['role_title']) === 'homeowner' && strtolower($profile['user_account_status_title']) === 'pending'): ?>
+                                                <a href="#" class="link approve-link" 
+                                                   data-action="approve" 
+                                                   data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                                   data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                                    Approve
+                                                </a>
+                                            <?php endif; ?>
+                                            
+                                            <a href="#" class="link delete-link" 
+                                               data-user-id="<?php echo htmlspecialchars($profile['user_id']); ?>"
+                                               data-name="<?php echo htmlspecialchars($profile['first_name']); ?>">
+                                                Delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- No results message (hidden by default) -->
+    <div id="noResultsMessage" class="alert alert-warning my-4 text-center" style="display: none; border-color: var(--medium-gray);">
+        <i class="fa fa-exclamation-circle mr-2"></i>
+        No users found matching your search criteria. Please try different filters.
     </div>
 </div>
 
@@ -113,27 +129,37 @@
 <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            <div class="modal-header" style="background-color: var(--teal); color: white;">
+                <h5 class="modal-title" id="detailsModalLabel">User Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <div class="profile-info">
-                    <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-picture">
-                    <h5 id="modalUserName"></h5>
+                <div class="profile-info text-center mb-3">
+                    <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-picture rounded-circle mb-2">
+                    <h5 id="modalUserName" class="mb-0"></h5>
                 </div>
-                <div class="d-flex">
-                    <div class="info-box" id="modalChargePointContainer">
-                        <h5 class="black-text">Total Last Charge Point</h5>
-                        <p id="modalChargePoint" class="red-text"></p>
+                <div class="row">
+                    <div class="col-md-6 mb-3" id="modalChargePointContainer">
+                        <div class="info-box p-3 h-100" style="border: 1px solid var(--light-gray); border-radius: 5px; background-color: #f9f9f9;">
+                            <h5 class="black-text" style="color: var(--deep-emerald);">Total Last Charge Point</h5>
+                            <p id="modalChargePoint" class="red-text mb-0" style="color: var(--dark-gray); font-weight: bold;"></p>
+                        </div>
                     </div>
-                    <div class="info-box" id="modalBookingRequestsContainer">
-                        <h5 class="black-text">Number of Booking Requests</h5>
-                        <p id="modalBookingRequests" class="red-text"></p>
+                    <div class="col-md-6 mb-3" id="modalBookingRequestsContainer">
+                        <div class="info-box p-3 h-100" style="border: 1px solid var(--light-gray); border-radius: 5px; background-color: #f9f9f9;">
+                            <h5 class="black-text" style="color: var(--deep-emerald);">Number of Booking Requests</h5>
+                            <p id="modalBookingRequests" class="red-text mb-0" style="color: var(--dark-gray); font-weight: bold;"></p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
 <script src="js/viewAllProfiles.js"></script>
+<br><br>
 <?php require('template/footer.phtml') ?>

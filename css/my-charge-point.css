@@ -100,3 +100,7 @@
         border-bottom: none;
     }
 
+#mainMapContainer, .map-card { 
+    height: 500px;
+    
+}

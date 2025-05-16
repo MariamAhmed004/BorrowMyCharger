@@ -1,5 +1,6 @@
 <?php
 require_once 'Models/Database.php';
+
 class BookingHistory {
     private $dbHandle;  
     private $userId;
@@ -8,10 +9,12 @@ class BookingHistory {
         $this->userId = $userId;
         $this->dbHandle = Database::getInstance()->getDbConnection();
     }
-    //get user active reservations count
-      public function getUserBookingHistory($status = null, $page = 1, $limit = 10) {
+    
+    //get user booking history with optional status filter
+    public function getUserBookingHistory($status = null, $page = 1, $limit = 10) {
         $offset = ($page - 1) * $limit;
-        $sql = "SELECT b.*, cpa.streetName, cpa.house_number 
+        $sql = "SELECT b.*, cpa.streetName, cpa.house_number, 
+                b.last_updated_at
                 FROM Pro_Booking b
                 JOIN Pro_ChargePoint cp ON b.charge_point_id = cp.charge_point_id
                 JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id
@@ -21,7 +24,8 @@ class BookingHistory {
             $sql .= " AND b.booking_status_id = :status";
         }
         
-        $sql .= " LIMIT :limit OFFSET :offset";
+        $sql .= " ORDER BY b.booking_date DESC, b.booking_time DESC 
+                  LIMIT :limit OFFSET :offset";
         
         $stmt = $this->dbHandle->prepare($sql);
         $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
@@ -36,7 +40,7 @@ class BookingHistory {
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
     public function getBookingCount($status = null) {
         $sql = "SELECT COUNT(*) FROM Pro_Booking WHERE user_id = :user_id";
         
@@ -46,14 +50,13 @@ class BookingHistory {
         
         $stmt = $this->dbHandle->prepare($sql);
         $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
-
         if ($status) {
             $stmt->bindParam(':status', $status, PDO::PARAM_INT);
         }
-
         $stmt->execute();
         return $stmt->fetchColumn();
     }
+    
     //fetch one booking details
     public function getBookingDetails($bookingId) {
         $sql = "SELECT 
@@ -81,5 +84,28 @@ class BookingHistory {
         $stmt->bindParam(':booking_id', $bookingId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    // method to check for recently updated bookings
+    public function getRecentlyUpdatedBookings($lastCheckTime, $status = null) {
+        $sql = "SELECT b.booking_id, b.booking_status_id, b.last_updated_at 
+                FROM Pro_Booking b
+                WHERE b.user_id = :user_id 
+                AND b.last_updated_at > :last_check_time";
+                
+        if ($status) {
+            $sql .= " AND b.booking_status_id = :status";
+        }
+        
+        $stmt = $this->dbHandle->prepare($sql);
+        $stmt->bindParam(':user_id', $this->userId, PDO::PARAM_INT);
+        $stmt->bindParam(':last_check_time', $lastCheckTime, PDO::PARAM_STR);
+        
+        if ($status) {
+            $stmt->bindParam(':status', $status, PDO::PARAM_INT);
+        }
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

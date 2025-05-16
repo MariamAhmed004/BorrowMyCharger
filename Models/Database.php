@@ -1,5 +1,5 @@
 <?php
-//108.142.248.238
+
 class Database {
     protected static $_dbInstance = null;
     protected $_dbHandle;

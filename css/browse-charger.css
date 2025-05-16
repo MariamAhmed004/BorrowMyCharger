@@ -3,9 +3,46 @@
     display: flex;
     flex-direction: column;
     margin: auto;
-    width: 90%; /* Fixed incorrect 1000% */
-    max-width: 1200px; /* Added max-width in pixels */
+    width: 90%; 
+    max-width: 1200px; 
 }
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transition: all 0.3s ease;
+}
+
+/* Status colors */
+.available {
+    background-color: #28a745;
+}
+
+.in-use {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.out-of-service {
+    background-color: #dc3545;
+}
+
+.under-maintenance {
+    background-color: #6c757d;
+}
+
+/* Status update animation */
+.status-updated {
+    animation: pulse 2s;
+}
+
 
 /* Filter panel */
 .left-panel {
@@ -307,4 +344,8 @@
     .left-panel {
         padding: 1.5rem;
     }
+}
+
+.chargePointsContainer{
+    margin: auto 0; 
 }

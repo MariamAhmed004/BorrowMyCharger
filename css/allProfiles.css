@@ -133,3 +133,140 @@
         background-color: #cce5ff;
         color: #004085;
     }
+
+:root {
+    --dark-gray: #61656F;
+    --medium-gray: #748771;
+    --deep-emerald: #044827;
+    --teal: #2F6867;
+    --light-gray: #E8E8E8;
+}
+
+/* Table styling with colors from the provided palette */
+#profilesTable {
+    border: 1px solid var(--medium-gray);
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#profilesTable thead {
+    background-color: var(--teal);
+    color: white;
+}
+
+#profilesTable th {
+    border-color: var(--medium-gray);
+    font-weight: 600;
+    padding: 12px 15px;
+}
+
+#profilesTable td {
+    border-color: var(--light-gray);
+    padding: 10px 15px;
+}
+
+#profilesTable tbody tr:nth-child(even) {
+    background-color: rgba(116, 135, 113, 0.1); /* lighter version of medium-gray */
+}
+
+#profilesTable tbody tr:hover {
+    background-color: rgba(47, 104, 103, 0.1); /* lighter version of teal */
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+    background-color: var(--dark-gray);
+}
+
+.status-badge.status-active {
+    background-color: var(--deep-emerald);
+}
+
+.status-badge.status-pending {
+    background-color: var(--medium-gray);
+}
+
+.status-badge.status-suspended {
+    background-color: var(--dark-gray);
+}
+
+.actions-cell .link {
+    color: var(--teal);
+    font-weight: 500;
+    text-decoration: none;
+    margin-right: 12px;
+    transition: color 0.2s;
+}
+
+.actions-cell .link:hover {
+    color: var(--deep-emerald);
+    text-decoration: underline;
+}
+
+.filter-container select,
+.filter-container button {
+    border: 1px solid var(--medium-gray);
+    border-radius: 4px;
+}
+
+.filter-container select {
+    background-color: white;
+    color: var(--dark-gray);
+}
+
+.filter-container .btn-secondary {
+    background-color: var(--teal);
+    border-color: var(--teal);
+}
+
+.filter-container .btn-secondary:hover {
+    background-color: var(--deep-emerald);
+    border-color: var(--deep-emerald);
+}
+
+/* Additional responsive styles */
+@media (max-width: 767.98px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .actions-cell {
+        min-width: 120px;
+    }
+    
+    .filter-container select, 
+    .filter-container button {
+        width: 100%;
+    }
+    
+    .actions-cell .link {
+        margin-right: 8px;
+        display: inline-block;
+    }
+}
+
+/* Style for the filter container */
+.filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Additional styles for better spacing on mobile */
+@media (max-width: 575.98px) {
+    .actions-cell .link {
+        margin-bottom: 5px;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+}

@@ -1,63 +1,80 @@
 <?php require('template/header.phtml') ?>
 <link rel="stylesheet" href="css/homeOwnerDashboard.css">
 <div class="container mt-4">
-    <p class="lead">Welcome back! Here's an overview of your charge points and bookings.</p>
-<!-- Statistics Cards -->
-<div class="row">
-    <div class="col-md-3">
-        <div class="stats-card">
-            <h5>Charge Points</h5>
-            <div class="stats-value"><?= htmlspecialchars($view->chargePointsCount); ?></div>
+    <p class="lead">Welcome back! Here's an overview of your bookings.</p>
+    
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Pending Requests</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->pendingRequestsCount); ?></div>
+                <?php if ($view->pendingRequestsCount > 0): ?>
+                    <a href="borrow-request.php" class="btn btn-sm btn-warning mt-2">View Requests</a>
+                <?php endif; ?>
+            </div>
+        </div>
+                <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Rejected Requests</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->rejectedRequestsCount); ?></div>
+       
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Approved Bookings</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->approvedBookingsCount); ?></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>Total Bookings</h5>
+                <div class="stats-value"><?= htmlspecialchars($view->totalBookingsCount); ?></div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stats-card">
-            <h5>Pending Requests</h5>
-            <div class="stats-value"><?= htmlspecialchars($view->pendingRequestsCount); ?></div>
-            <?php if ($view->pendingRequestsCount > 0): ?>
-                <a href="borrowrequest.php" class="btn btn-sm btn-warning mt-2">View Requests</a>
-            <?php endif; ?>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stats-card">
-            <h5>Approved Bookings</h5>
-            <div class="stats-value"><?= htmlspecialchars($view->approvedBookingsCount); ?></div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stats-card">
-            <h5>Total Bookings</h5>
-            <div class="stats-value"><?= htmlspecialchars($view->totalBookingsCount); ?></div>
-        </div>
-    </div>
-</div>
 
-<div class="row mt-4">
+    <div class="row mt-4">
+        <!-- Upcoming Bookings -->
+        <div class="col-md-12">
+            <div class="upcoming-bookings">
+                <h4>Upcoming Bookings</h4>
+                
+                <?php if (empty($view->upcomingBookings)): ?>
+                    <p class="text-muted">No upcoming bookings.</p>
+                <?php else: ?>
+                    <?php foreach ($view->upcomingBookings as $booking): ?>
+                        <div class="booking-item">
+                            <h6><?= htmlspecialchars($booking['first_name'] . ' ' . $booking['last_name']); ?></h6>
+                            <p class="mb-1">
+                                <strong>Date:</strong> <?= date('d M Y', strtotime($booking['booking_date'])); ?><br>
+                                <strong>Time:</strong> <?= date('H:i', strtotime($booking['booking_time'])); ?><br>
+                                <strong>Location:</strong> <?= htmlspecialchars($booking['streetName'] . ', ' . $booking['postcode']); ?>
+                            </p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
 
-    <!-- Upcoming Bookings -->
-    <div class="col-md-12">
-        <div class="upcoming-bookings">
-            <h4>Upcoming Bookings</h4>
-            
-            <?php if (empty($view->upcomingBookings)): ?>
-                <p class="text-muted">No upcoming bookings.</p>
-            <?php else: ?>
-                <?php foreach ($view->upcomingBookings as $booking): ?>
-                    <div class="booking-item">
-                        <h6><?= htmlspecialchars($booking['first_name'] . ' ' . $booking['last_name']); ?></h6>
-                        <p class="mb-1">
-                            <strong>Date:</strong> <?= date('d M Y', strtotime($booking['booking_date'])); ?><br>
-                            <strong>Time:</strong> <?= date('H:i', strtotime($booking['booking_time'])); ?><br>
-                            <strong>Location:</strong> <?= htmlspecialchars($booking['streetName'] . ', ' . $booking['postcode']); ?>
-                        </p>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+            <!-- Pagination Controls -->
+            <div class="pagination mt-4">
+                <?php if ($view->currentPage > 1): ?>
+                    <a href="?page=<?= $view->currentPage - 1; ?>" class="btn btn-secondary">Previous</a>
+                <?php endif; ?>
+
+                <?php for ($i = 1; $i <= $view->totalPages; $i++): ?>
+                    <a href="?page=<?= $i; ?>" class="btn <?= $i == $view->currentPage ? 'btn-primary' : 'btn-light'; ?>">
+                        <?= $i; ?>
+                    </a>
+                <?php endfor; ?>
+
+                <?php if ($view->currentPage < $view->totalPages): ?>
+                    <a href="?page=<?= $view->currentPage + 1; ?>" class="btn btn-secondary">Next</a>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
-</div>
 </div>
 <br><br>
-
 <?php require('template/footer.phtml') ?>

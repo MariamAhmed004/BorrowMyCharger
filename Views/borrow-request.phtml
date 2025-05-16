@@ -1,66 +1,97 @@
-<?php require('template/header.phtml') ?>
-
+<?php require('template/header.phtml'); ?>
 <div class="container mt-4">
     <h2>Booking Requests for Your Charge Point</h2>
     
+    <!-- Original PHP alert for form submissions -->
     <?php if (isset($view->actionMessage)): ?>
         <div class="alert <?php echo strpos($view->actionMessage, 'Failed') !== false ? 'alert-danger' : 'alert-success'; ?>" role="alert">
             <?php echo $view->actionMessage; ?>
         </div>
     <?php endif; ?>
     
-    <?php if (empty($view->bookingRequests)): ?>
-        <div class="alert alert-info">You have no booking requests at this time.</div>
-    <?php else: ?>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Customer</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Charge Point</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($view->bookingRequests as $booking): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($booking['booking_id']); ?></td>
-                        <td><?php echo htmlspecialchars($booking['first_name'] . ' ' . $booking['last_name']); ?></td>
-                        <td><?php echo date('d M Y', strtotime($booking['booking_date'])); ?></td>
-                        <td><?php echo date('H:i', strtotime($booking['booking_time'])); ?></td>
-                        <td><?php echo htmlspecialchars($booking['streetName'] . ', ' . $booking['postcode']); ?></td>
-                        <td>BD<?php echo number_format($booking['price_per_kwh'], 2); ?>/kWh</td>
-                        <td>
-                            <span class="badge <?php 
-                                echo $booking['booking_status_id'] == 1 ? 'bg-warning' : 
-                                    ($booking['booking_status_id'] == 2 ? 'bg-success' : 'bg-danger'); 
-                            ?>">
-                                <?php echo htmlspecialchars($booking['booking_status_title']); ?>
-                            </span>
-                        </td>
-                            <td><a href="borrow-request-details.php?booking_id=<?= $booking['booking_id']; ?>" class="btn btn-info">View Details</a></td>
-                        <td>
-                            <?php if ($booking['booking_status_id'] == 1): // Pending ?>
-                                <form method="post" class="d-inline">
-                                    <input type="hidden" name="booking_id" value="<?php echo $booking['booking_id']; ?>">
-                                    <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
-                                    <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
-                                </form>
-                            <?php else: ?>
-                                <span class="text-muted">Processed</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+    <!-- AJAX response message container -->
+    <div id="ajax-message" class="alert" style="display: none;" role="alert"></div>
+    
+    <!-- Loading indicator -->
+    <div id="loading-indicator" style="display: none;" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
-    <?php endif; ?>
-</div>
+    </div>
+    
+    <div id="booking-requests-container">
+        <?php if (empty($view->bookingRequests)): ?>
+            <div id="no-requests-message" class="alert alert-info">You have no booking requests at this time.</div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table id="booking-requests-table" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Charge Point</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booking-requests-body">
+                        <?php foreach ($view->bookingRequests as $booking): ?>
+                        <tr id="booking-row-<?php echo htmlspecialchars($booking['booking_id']); ?>" data-id="<?php echo htmlspecialchars($booking['booking_id']); ?>">
+                            <td><?php echo htmlspecialchars($booking['booking_id']); ?></td>
+                            <td><?php echo htmlspecialchars($booking['first_name'] . ' ' . $booking['last_name']); ?></td>
+                            <td><?php echo date('d M Y', strtotime($booking['booking_date'])); ?></td>
+                            <td><?php echo date('H:i', strtotime($booking['booking_time'])); ?></td>
+                            <td><?php echo htmlspecialchars($booking['streetName'] . ', ' . $booking['postcode']); ?></td>
+                            <td>BD<?php echo number_format($booking['price_per_kwh'], 2); ?>/kWh</td>
+                            <td>
+                                <span class="badge <?php 
+                                    echo $booking['booking_status_id'] == 1 ? 'bg-warning' : 
+                                        ($booking['booking_status_id'] == 2 ? 'bg-success' : 'bg-danger'); 
+                                ?>">
+                                    <?php echo htmlspecialchars($booking['booking_status_title']); ?>
+                                </span>
+                            </td>
+                            <td><a href="borrow-request-details.php?booking_id=<?= $booking['booking_id']; ?>" class="btn btn-info">View Details</a></td>
+                            <td>
+                                <?php if ($booking['booking_status_id'] == 1): // Pending ?>
+                                    <form class="d-inline booking-action-form">
+                                        <input type="hidden" name="booking_id" value="<?php echo $booking['booking_id']; ?>">
+                                        <button type="submit" name="action" value="approve" class="btn btn-sm btn-success approve-btn">Approve</button>
+                                        <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger reject-btn">Reject</button>
+                                    </form>
+                                <?php else: ?>
+                                    <span class="text-muted">Processed</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-<?php require('template/footer.phtml') ?>
+            <!-- Pagination -->
+            <div class="pagination mt-4">
+                <?php if ($view->currentPage > 1): ?>
+                    <a href="?page=<?php echo $view->currentPage - 1; ?>" class="btn btn-secondary">Previous</a>
+                <?php endif; ?>
+
+                <?php for ($i = 1; $i <= $view->totalPages; $i++): ?>
+                    <a href="?page=<?php echo $i; ?>" class="btn <?php echo $i == $view->currentPage ? 'btn-primary' : 'btn-light'; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+
+                <?php if ($view->currentPage < $view->totalPages): ?>
+                    <a href="?page=<?php echo $view->currentPage + 1; ?>" class="btn btn-secondary">Next</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+<br><br>
+<script src="js/borrow-request.js"></script>
+<?php require('template/footer.phtml'); ?>

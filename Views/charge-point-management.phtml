@@ -1,19 +1,76 @@
 <?php require('template/header.phtml'); ?>
 <link rel="stylesheet" href="css/charge-point-management.css">
+<br><br>
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div id="message-container">
+                <?php if ($view->message): ?>
+                    <div class="message <?php echo $view->messageType; ?>"><?php echo htmlspecialchars($view->message); ?></div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-12">
+            <button id="addChargePointBtn" class="btn btn-primary">
+                <i class="fa fa-plus-circle me-2"></i>Add Charge Point
+            </button>
+        </div>
+    </div>
 
-<h1><?php echo htmlspecialchars($view->pageTitle); ?></h1>
-<div id="message-container">
-    <?php if ($view->message): ?>
-        <div class="message <?php echo $view->messageType; ?>"><?php echo htmlspecialchars($view->message); ?></div>
-    <?php endif; ?>
+    <div class="row">
+        <div class="col-12">
+            <div class="card charge-point-card">
+                <div class="card-header">
+                    <h4 class="mb-0">Charge Points</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered data-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Owner</th>
+                                    <th>Price per kWh</th>
+                                    <th>Availability</th>
+                                    <th>Address</th>
+                                    <th>Picture</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="charge-points-container">
+                                <?php foreach ($view->chargePoints as $chargePoint): ?>
+                                    <tr data-id="<?php echo htmlspecialchars($chargePoint['charge_point_id']); ?>">
+                                        <td data-label="ID"><?php echo htmlspecialchars($chargePoint['charge_point_id']); ?></td>
+                                        <td data-label="Owner"><?php echo htmlspecialchars($chargePoint['owner']); ?></td>
+                                        <td data-label="Price"><?php echo htmlspecialchars($chargePoint['price_per_kwh']); ?></td>
+                                        <td data-label="Availability"><?php echo htmlspecialchars($chargePoint['availability']); ?></td>
+                                        <td data-label="Address"><?php echo htmlspecialchars($chargePoint['streetName']); ?></td>
+                                        <td data-label="Picture">
+                                            <img src="<?php echo htmlspecialchars($chargePoint['charge_point_picture_url']); ?>" alt="Charge Point" class="thumbnail">
+                                        </td>
+                                        <td data-label="Actions" class="actions">
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <button class="btn btn-edit" onclick="window.location.href='adminEditChargePoint.php?id=<?php echo htmlspecialchars($chargePoint['charge_point_id']); ?>'">Edit</button>
+                                                <button class="btn btn-delete" onclick="deleteChargePoint(<?php echo htmlspecialchars($chargePoint['charge_point_id']); ?>, this)">Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<button id="addChargePointBtn" class="btn btn-primary mb-3">
-    Add Charge Point
-</button>
 
 <!-- Homeowner Selection Modal -->
 <div class="modal fade" id="homeownerModal" tabindex="-1" aria-labelledby="homeownerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="homeownerModalLabel">Select Homeowner</h5>
@@ -41,59 +98,6 @@
     </div>
 </div>
 
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Owner</th>
-            <th>Price per kWh</th>
-            <th>Availability</th>
-            <th>Address</th>
-            <th>Picture</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody id="charge-points-container">
-        <?php foreach ($view->chargePoints as $chargePoint): ?>
-            <tr data-id="<?php echo htmlspecialchars($chargePoint['charge_point_id']); ?>">
-                <td><?php echo htmlspecialchars($chargePoint['charge_point_id']); ?></td>
-                <td><?php echo htmlspecialchars($chargePoint['owner']); ?></td>
-                <td><?php echo htmlspecialchars($chargePoint['price_per_kwh']); ?></td>
-                <td><?php echo htmlspecialchars($chargePoint['availability']); ?></td>
-                <td><?php echo htmlspecialchars($chargePoint['streetName']); ?></td>
-                <td><img src="<?php echo htmlspecialchars($chargePoint['charge_point_picture_url']); ?>" alt="Charge Point" class="thumbnail"></td>
-                <td class="actions">
-                    <button class="btn btn-edit" onclick="window.location.href='adminEditChargePoint.php?id=<?php echo htmlspecialchars($chargePoint['charge_point_id']); ?>'">Edit</button>
-                    <button class="btn btn-delete" onclick="deleteChargePoint(<?php echo htmlspecialchars($chargePoint['charge_point_id']); ?>, this)">Delete</button>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
-
-<script>
-    // Add Charge Point Modal Functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get the button that opens the modal
-        const addChargePointBtn = document.getElementById('addChargePointBtn');
-        
-        // Get the modal
-        const homeownerModal = new bootstrap.Modal(document.getElementById('homeownerModal'));
-        
-        // When the user clicks on the button, open the modal
-        addChargePointBtn.addEventListener('click', function() {
-            homeownerModal.show();
-        });
-        
-        // Add click event listeners to all homeowner items
-        const homeownerItems = document.querySelectorAll('.homeowner-item');
-        homeownerItems.forEach(function(item) {
-            item.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                window.location.href = 'adminAddChargePoint.php?user_id=' + userId;
-            });
-        });
-    });
-</script>
 <script src="js/adminManageChargePoint.js"></script>
+<br><br>
 <?php require('template/footer.phtml'); ?>

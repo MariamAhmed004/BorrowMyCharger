@@ -1,300 +1,192 @@
 <?php require_once('template/header.phtml'); ?>
-<div class="container mt-5">
-    <!-- Top Section: Title, Description, Location info, and Image -->
-    <h1>Book Charging Point</h1>
-
-    <?php if (isset($view->errorMessage)): ?>
-    <div class="alert alert-danger">
-        <?= htmlspecialchars($view->errorMessage) ?>
-    </div>
-    <?php endif; ?>
-
-    <div class="row">
-        <!-- Left Column: Location info -->
-        <div class="col-md-6">
-            <h4>Location</h4>
-            <div class="form-group">
-                <label><strong>Home:</strong> <?= htmlspecialchars($view->chargerDetails['houseNumber']) ?>, <?= htmlspecialchars($view->chargerDetails['streetName']) ?></label>
+<div class="container py-5">
+    <!-- Top Section: Title and Error Message -->
+    <div class="row mb-4">
+        <div class="col-12">
+           
+            <?php if (isset($view->errorMessage)): ?>
+            <div class="alert alert-danger">
+                <?= htmlspecialchars($view->errorMessage) ?>
             </div>
-            <div class="form-group">
-                <label><strong>Road:</strong> <?= htmlspecialchars($view->chargerDetails['road']) ?></label>
-            </div>
-            <div class="form-group">
-                <label><strong>City:</strong> <?= htmlspecialchars($view->chargerDetails['cityName']) ?></label>
-            </div>
-            <div class="form-group">
-                <label><strong>Price:</strong></label><br />
-                <span><?= htmlspecialchars($view->chargerDetails['pricePerKwh']) ?> BHD / kWh</span>
-            </div>
-        </div>
-
-        <!-- Right Column: Image -->
-        <div class="col-md-6 text-center">
-            <img src="<?= htmlspecialchars($view->chargerDetails['chargePointPictureUrl']) ?>" alt="Charge Point Image" class="charge-point-image" />
+            <?php endif; ?>
         </div>
     </div>
-    
-    <!-- Map Container -->
-    <h4>Location on Map</h4>
-    <div id="map" style="height: 400px; width: 100%; margin-bottom: 20px;"></div>
 
-    <!-- Availability Section (Centered & Full-Width) -->
-    <div class="availability-container">
-        <h4 class="text-left">Availability</h4>
-
-        <?php if ($view->hasAvailability): ?>
-        <form id="bookingForm" action="book-charger.php" method="POST">
-            <input type="hidden" name="user_id" value="<?= htmlspecialchars($_SESSION['user_id'] ?? '') ?>">
-            <input type="hidden" name="charge_point_id" value="<?= $view->chargerPointId ?>">
-            <input type="hidden" name="selected_date" id="selected-date" value="">
-            <input type="hidden" name="selected_time" id="selected-time" value="">
-            
-            <div class="row no-gutters">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="availability-date">Select Availability Date:</label>
+    <!-- Charger Details Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row">
+                <!-- Left Column: Location info -->
+                <div class="col-md-6">
+                    <div class="location-info">
+                        <h4 class="card-title border-bottom pb-2">Location</h4>
+                        <div class="mb-3">
+                            <label class="fw-bold">Home:</label>
+                            <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['houseNumber']) ?>, <?= htmlspecialchars($view->chargerDetails['streetName']) ?></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Road:</label>
+                            <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['road']) ?></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">City:</label>
+                            <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['cityName']) ?></span>
+                        </div>
+                        <div class="mb-4">
+                            <label class="fw-bold">Price:</label>
+                            <span class="ms-2 badge bg-success"><?= htmlspecialchars($view->chargerDetails['pricePerKwh']) ?> BHD / kWh</span>
+                        </div>
                         
-                        <select class="form-control" id="availability-date" onchange="showTimeOptions()">
-                            <option value="">Select Date</option>
-                            <!-- Only show days that have available time slots -->
-                            <?php foreach ($view->availableDays as $day): 
-                            if (isset($view->weekDates[$day])): ?>
-                                <option value="<?= htmlspecialchars($day) ?>">
-                                    <?= htmlspecialchars($day . ' (' . $view->weekDates[$day]['display'] . ')') ?>
-                                </option>
-                            <?php endif;
-                            endforeach; ?>
-                        </select>
+                        <h4 class="card-title border-bottom pb-2">Homeowner Information</h4>
+                        <div class="mb-3">
+                            <label class="fw-bold">Name:</label>
+                            <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['homeownerFullName']) ?></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Phone:</label>
+                            <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['homeownerPhone']) ?></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Email:</label>
+                            <span class="ms-2"><a href="mailto:<?= htmlspecialchars($view->chargerDetails['homeownerEmail']) ?>"><?= htmlspecialchars($view->chargerDetails['homeownerEmail']) ?></a></span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Time Options as buttons -->
-            <div class="time-options" id="time-options">
-                <!-- Time options will be populated dynamically -->
+                <!-- Right Column: Image -->
+                <div class="col-md-6 d-flex align-items-center justify-content-center">
+                    <img src="<?= htmlspecialchars($view->chargerDetails['chargePointPictureUrl']) ?>" alt="Charge Point Image" class="img-fluid rounded charge-point-image" />
+                </div>
             </div>
-
-            <!-- Submit Button -->
-            <div class="submit-button">
-                <button type="button" class="btn btn-primary" id="book-button" disabled>Book Now</button>
-            </div>
-        </form>
-        <?php else: ?>
-        <div class="no-availability-message alert alert-warning">
-            <p>This charging point currently has no available time slots for the upcoming week.</p>
         </div>
-        <?php endif; ?>
+    </div>
+
+    <!-- Map Container -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Location on Map</h4>
+            <div id="map" class="map-container"></div>
+        </div>
+    </div>
+
+    <!-- Availability Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Availability</h4>
+
+            <?php if ($view->hasAvailability): ?>
+            <form id="bookingForm" action="book-charger.php" method="POST">
+                <input type="hidden" name="user_id" value="<?= htmlspecialchars($_SESSION['user_id'] ?? '') ?>">
+                <input type="hidden" name="charge_point_id" value="<?= $view->chargerPointId ?>">
+                <input type="hidden" name="selected_date" id="selected-date" value="">
+                <input type="hidden" name="selected_time" id="selected-time" value="">
+                
+                <div class="mb-4">
+                    <label for="availability-date" class="form-label">Select Availability Date:</label>
+                    <select class="form-select" id="availability-date" onchange="showTimeOptions()">
+                        <option value="">Select Date</option>
+                        <?php foreach ($view->availableDays as $day): 
+                        if (isset($view->weekDates[$day])): ?>
+                            <option value="<?= htmlspecialchars($day) ?>">
+                                <?= htmlspecialchars($day . ' (' . $view->weekDates[$day]['display'] . ')') ?>
+                            </option>
+                        <?php endif;
+                        endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Time Options -->
+                <div id="time-options" class="time-options mb-4">
+                    <!-- Time options will be populated dynamically -->
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary btn-lg px-5" id="book-button" disabled>Book Now</button>
+                </div>
+            </form>
+            <?php else: ?>
+            <div class="alert alert-warning">
+                <p class="mb-0">This charging point currently has no available time slots for the upcoming week.</p>
+            </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
 <!-- Success Modal -->
-<div id="bookingSuccessModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Booking Successful!</h2>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="success-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
+<div id="bookingSuccessModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">Booking Successful!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <p>Your charging point has been booked successfully!</p>
-            <div class="booking-details">
-                <p><strong>Date:</strong> <span id="modal-date"></span></p>
-                <p><strong>Time:</strong> <span id="modal-time"></span></p>
-                <p><strong>Location:</strong> <span id="modal-location"></span></p>
+            <div class="modal-body text-center">
+                <div class="success-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <p class="fs-5 mt-3">Your charging point has been booked successfully!</p>
+                <div class="booking-details mt-4">
+                    <p><strong>Date:</strong> <span id="modal-date"></span></p>
+                    <p><strong>Time:</strong> <span id="modal-time"></span></p>
+                    <p><strong>Location:</strong> <span id="modal-location"></span></p>
+                </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button id="viewBookingsBtn" class="btn btn-primary">View My Bookings</button>
-            <button id="browsemoreBtn" class="btn btn-secondary">Browse More Chargers</button>
+            <div class="modal-footer">
+                <button id="viewBookingsBtn" class="btn btn-primary">View My Bookings</button>
+                <button id="browsemoreBtn" class="btn btn-secondary">Browse More Chargers</button>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Error Modal -->
+<div id="bookingErrorModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">Booking Failed</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="error-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+                <p class="fs-5 mt-3" id="error-message">This time slot has been booked by another user. Please select another time.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="tryAgainBtn" class="btn btn-primary">Try Again</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/book-charger.js"></script>
+<link rel="stylesheet" href="css/book-charger.css">
+
+<!-- Variables for JS -->
 <script>
     // Store the available times as a JavaScript object
     const availableTimes = <?= json_encode($view->availableTimes) ?>;
     const weekDates = <?= json_encode($view->weekDates) ?>;
-
-    // Function to show time options based on the selected day
-    function showTimeOptions() {
-        const selectedDay = document.getElementById('availability-date').value;
-        const timeOptionsContainer = document.getElementById('time-options');
-        const bookButton = document.getElementById('book-button');
-        const selectedTimeInput = document.getElementById('selected-time');
-        const selectedDateInput = document.getElementById('selected-date');
-        
-        // Get the corresponding date for the selected day
-        const selectedDate = selectedDay ? weekDates[selectedDay].display : '';
-        
-        // Update the selected date hidden input
-        selectedDateInput.value = selectedDate;
-
-        // Reset the button to disabled and clear the selected time
-        bookButton.disabled = true;
-        selectedTimeInput.value = '';
-        
-        // Clear previous time options
-        timeOptionsContainer.innerHTML = '';
-        
-        // Check if the selected day has any available times
-        if (selectedDay && availableTimes[selectedDay] && availableTimes[selectedDay].length > 0) {
-            // Populate available times for the selected day as buttons
-            availableTimes[selectedDay].forEach(time => {
-                const timeButton = document.createElement('div');
-                timeButton.className = 'time-option';
-                
-                // Format the time to be more readable (e.g., "14:00:00" to "2:00 PM")
-                const timeObj = new Date(`1970-01-01T${time}`);
-                const formattedTime = timeObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                timeButton.textContent = formattedTime;
-                timeButton.dataset.time = time;
-                timeButton.dataset.formattedTime = formattedTime;
-                
-                // Add click event to select time
-                timeButton.addEventListener('click', function() {
-                    // Remove selected class from all time options
-                    document.querySelectorAll('.time-option').forEach(el => {
-                        el.classList.remove('selected');
-                    });
-                    
-                    // Add selected class to the clicked option
-                    this.classList.add('selected');
-                    
-                    // Store the selected time
-                    selectedTimeInput.value = this.dataset.time;
-                    
-                    // Enable the book button
-                    bookButton.disabled = false;
-                });
-                
-                timeOptionsContainer.appendChild(timeButton);
-            });
-        } else if (selectedDay) {
-            // Show a message if no times are available
-            const noTimesMessage = document.createElement('div');
-            noTimesMessage.className = 'alert alert-warning';
-            noTimesMessage.textContent = 'No available time slots for this day.';
-            timeOptionsContainer.appendChild(noTimesMessage);
-        }
-    }
     
-    // Handle the booking submission via AJAX
-    document.getElementById('book-button')?.addEventListener('click', function() {
-        const bookingForm = document.getElementById('bookingForm');
-        const userId = bookingForm.querySelector('[name="user_id"]').value;
-        const chargePointId = bookingForm.querySelector('[name="charge_point_id"]').value;
-        const selectedDate = document.getElementById('selected-date').value;
-        const selectedTime = document.getElementById('selected-time').value;
-
-        if (!selectedDate || !selectedTime) {
-            alert('Please select both date and time.');
-            return;
-        }
-
-        // Create form data for the AJAX request
-        const formData = new FormData();
-        formData.append('user_id', userId);
-        formData.append('charge_point_id', chargePointId);
-        formData.append('selected_date', selectedDate);
-        formData.append('selected_time', selectedTime);
-
-        // Send the AJAX request
-        fetch('book-charger.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(data => {
-            // Check if the response contains success message
-            if (data.includes('success')) {
-                // Show the success modal with booking details
-                const modal = document.getElementById('bookingSuccessModal');
-                document.getElementById('modal-date').textContent = selectedDate;
-                
-                // Get the formatted time from the selected time option
-                const selectedTimeEl = document.querySelector('.time-option.selected');
-                const formattedTime = selectedTimeEl ? selectedTimeEl.dataset.formattedTime : '';
-                document.getElementById('modal-time').textContent = formattedTime;
-                
-                // Get location details
-                const location = `<?= htmlspecialchars($view->chargerDetails['houseNumber']) ?>, <?= htmlspecialchars($view->chargerDetails['streetName']) ?>, <?= htmlspecialchars($view->chargerDetails['cityName']) ?>`;
-                document.getElementById('modal-location').textContent = location;
-                
-                // Show the modal
-                modal.style.display = 'block';
-            } else {
-                // Handle error
-                const errorMsg = data.match(/<script>alert\('(.+?)'\);<\/script>/);
-                if (errorMsg && errorMsg[1]) {
-                    alert(errorMsg[1]);
-                } else {
-                    alert('There was an error processing your booking. Please try again.');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('There was an error processing your booking. Please try again.');
-        });
-    });
-
-    // Modal functionality
-    const modal = document.getElementById('bookingSuccessModal');
-    const closeBtn = document.getElementsByClassName('close')[0];
-    const viewBookingsBtn = document.getElementById('viewBookingsBtn');
-    const browsemoreBtn = document.getElementById('browsemoreBtn');
-
-    // Close the modal and redirect
-    function closeModalAndRedirect() {
-        modal.style.display = 'none';
-        window.location.href = 'browse-charger.php';
-    }
-
-    // When the user clicks on <span> (x), close the modal and redirect
-    closeBtn.onclick = closeModalAndRedirect;
-
-    // When the user clicks the "Browse More Chargers" button
-    browsemoreBtn.onclick = closeModalAndRedirect;
-
-    // When the user clicks the "View My Bookings" button
-    viewBookingsBtn.onclick = function() {
-        modal.style.display = 'none';
-        window.location.href = 'booking-history.php';
+    // Charger location data
+    const chargerLocation = {
+        lat: <?= htmlspecialchars($view->chargerDetails['latitude']) ?>,
+        lng: <?= htmlspecialchars($view->chargerDetails['longitude']) ?>,
+        address: "<?= htmlspecialchars($view->chargerDetails['streetName']) ?>, <?= htmlspecialchars($view->chargerDetails['cityName']) ?>",
+        houseNumber: "<?= htmlspecialchars($view->chargerDetails['houseNumber']) ?>",
+        streetName: "<?= htmlspecialchars($view->chargerDetails['streetName']) ?>",
+        city: "<?= htmlspecialchars($view->chargerDetails['cityName']) ?>"
     };
-
-    // When the user clicks anywhere outside of the modal, close it and redirect
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            closeModalAndRedirect();
-        }
-    }
-
-    // Initialize the Leaflet Map
-    function initMap() {
-        const lat = <?= htmlspecialchars($view->chargerDetails['latitude']) ?>; // Replace with actual latitude
-        const lng = <?= htmlspecialchars($view->chargerDetails['longitude']) ?>; // Replace with actual longitude
-        const address = "<?= htmlspecialchars($view->chargerDetails['streetName']) ?>, <?= htmlspecialchars($view->chargerDetails['cityName']) ?>";
-
-        const map = L.map('map').setView([lat, lng], 15);
-
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        const marker = L.marker([lat, lng]).addTo(map)
-            .bindPopup("<b>Charge Point</b><br>" + address)
-            .openPopup();
-    }
-
-    // Load the map
-    document.addEventListener('DOMContentLoaded', initMap);
 </script>
+
 <?php require_once('template/footer.phtml'); ?>

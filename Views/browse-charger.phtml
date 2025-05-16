@@ -1,5 +1,6 @@
 <?php require('template/header.phtml') ?>
  <link rel="stylesheet" href="css/browse-charger.css">
+ <link rel="stylesheet" href="css/status-polling.css">
 <br>
 <div class="container-custom">
   <div class="left-panel">
@@ -68,9 +69,10 @@
         <div class="charge-point">
           <div class="charge-point-image">
             <img src="<?= htmlspecialchars($chargePoint['chargePointPictureUrl'] ?? '') ?>" alt="Charge Point Image">
-            <span class="status-badge <?= strtolower(str_replace(' ', '-', $chargePoint['availabilityStatusTitle'] ?? '')) ?>">
-              <?= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '') ?>
-            </span>
+       
+<span class="status-badge <?= strtolower(str_replace(' ', '-', $chargePoint['availabilityStatusTitle'] ?? '')) ?>" data-last-status="<?= htmlspecialchars($chargePoint['availabilityStatusId'] ?? '') ?>">
+  <?= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '') ?>
+</span>
           </div>
           <div class="charge-point-details">
             <h5 class="charge-point-title">Charging Station</h5>
@@ -125,4 +127,5 @@
   </div>
 </div>
 <script src="js/browseCharger.js"></script>
+<script src="js/status-polling.js"></script>
 <?php require('template/footer.phtml') ?>

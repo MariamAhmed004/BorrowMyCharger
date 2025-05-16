@@ -14,24 +14,27 @@ class BorrowRequestModel {
      * @param int $homeownerId The ID of the homeowner
      * @return array Array of booking requests
      */
-    public function getBookingRequestsByHomeownerId($homeownerId) {
-        $sql = "SELECT b.booking_id, b.booking_date, b.booking_time, b.booking_status_id, 
-                       bs.booking_status_title, u.username, u.first_name, u.last_name, 
-                       cp.charge_point_id, cp.price_per_kwh, cpa.postcode, cpa.streetName
-                FROM Pro_Booking b
-                JOIN Pro_BookingStatus bs ON b.booking_status_id = bs.booking_status_id
-                JOIN Pro_User u ON b.user_id = u.user_id
-                JOIN Pro_ChargePoint cp ON b.charge_point_id = cp.charge_point_id
-                JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id
-                WHERE cp.user_id = :homeownerId
-                ORDER BY b.booking_date DESC, b.booking_time DESC";
-                
-        $statement = $this->_dbHandle->prepare($sql);
-        $statement->bindParam(':homeownerId', $homeownerId, PDO::PARAM_INT);
-        $statement->execute();
-        
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
+   public function getBookingRequestsByHomeownerId($homeownerId, $limit, $offset) {
+    $sql = "SELECT b.booking_id, b.booking_date, b.booking_time, b.booking_status_id, 
+                   bs.booking_status_title, u.username, u.first_name, u.last_name, 
+                   cp.charge_point_id, cp.price_per_kwh, cpa.postcode, cpa.streetName
+            FROM Pro_Booking b
+            JOIN Pro_BookingStatus bs ON b.booking_status_id = bs.booking_status_id
+            JOIN Pro_User u ON b.user_id = u.user_id
+            JOIN Pro_ChargePoint cp ON b.charge_point_id = cp.charge_point_id
+            JOIN Pro_ChargePointAddress cpa ON cp.charge_point_address_id = cpa.charge_point_address_id
+            WHERE cp.user_id = :homeownerId
+            ORDER BY b.booking_date DESC, b.booking_time DESC
+            LIMIT :limit OFFSET :offset";
+    
+    $statement = $this->_dbHandle->prepare($sql);
+    $statement->bindParam(':homeownerId', $homeownerId, PDO::PARAM_INT);
+    $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
+    $statement->bindParam(':offset', $offset, PDO::PARAM_INT);
+    $statement->execute();
+    
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
+}
     
     /**
      * Update the booking status (approve or reject)

@@ -20,3 +20,27 @@ function deleteChargePoint(chargePointId, buttonElement) {
         xhr.send();
     }
 }
+
+
+    // Add Charge Point Modal Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the button that opens the modal
+        const addChargePointBtn = document.getElementById('addChargePointBtn');
+        
+        // Get the modal
+        const homeownerModal = new bootstrap.Modal(document.getElementById('homeownerModal'));
+        
+        // When the user clicks on the button, open the modal
+        addChargePointBtn.addEventListener('click', function() {
+            homeownerModal.show();
+        });
+        
+        // Add click event listeners to all homeowner items
+        const homeownerItems = document.querySelectorAll('.homeowner-item');
+        homeownerItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                window.location.href = 'adminAddChargePoint.php?user_id=' + userId;
+            });
+        });
+    });
