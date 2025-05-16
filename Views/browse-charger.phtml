@@ -16,7 +16,7 @@
   </div>
 </div>
 
-<h5 class="filter-subtitle">Filter Options</h5>
+<h5 class="filter-subtitle">Or Use Filter Options</h5>
 <div class="filter-row">
   <div class="filter-item">
     <label for="locationSelect" class="form-label">Location</label>
@@ -84,9 +84,15 @@
             </div>
             <p class="city"><i class="bi bi-building"></i> <?= htmlspecialchars($chargePoint['cityName'] ?? '') ?></p>
             <p class="price"><i class="bi bi-currency-exchange"></i> <?= htmlspecialchars(number_format((float)($chargePoint['pricePerKwh'] ?? 0), 3)) ?> BHD per kWh</p>
-            <a href="#" class="book-btn" data-role="<?= $role ?>" data-id="<?= htmlspecialchars($chargePoint['chargePointId'] ?? '') ?>">
-              <button class="btn btn-primary">Book Now</button>
-            </a>
+            <?php if ($chargePoint['availabilityStatusId'] == 3): ?>
+              <div class="book-btn">
+                <button class="btn btn-secondary" disabled>Pending</button>
+              </div>
+            <?php else: ?>
+              <a href="#" class="book-btn" data-role="<?= $role ?>" data-id="<?= htmlspecialchars($chargePoint['chargePointId'] ?? '') ?>">
+                <button class="btn btn-primary">Book Now</button>
+              </a>
+            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>

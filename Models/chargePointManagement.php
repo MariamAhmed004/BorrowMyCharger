@@ -413,8 +413,8 @@ public function updateChargePointAddress($addressId, $streetName, $latitude, $lo
             
             $addressId = $this->db->lastInsertId();
             
-            // Default to Unavailable (2) 
-            $availabilityStatusId = 2;
+            // Default to available 
+            $availabilityStatusId = 1;
             
             // Then insert the charge point
             $chargePointSql = "INSERT INTO Pro_ChargePoint (price_per_kwh, charge_point_picture_url, user_id, charge_point_address_id, availability_status_id) 

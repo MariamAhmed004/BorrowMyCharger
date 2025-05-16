@@ -62,9 +62,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 'true') {
             $html .= '<div class="charge-point">';
             $html .= '<div class="charge-point-image">';
             $html .= '<img src="' . htmlspecialchars($chargePoint['chargePointPictureUrl'] ?? '') . '" alt="Charge Point Image">';
-   $html .= '<span class="status-badge ' . strtolower(str_replace(' ', '-', $chargePoint['availabilityStatusTitle'] ?? '')) . '" data-last-status="' . htmlspecialchars($chargePoint['availabilityStatusId'] ?? '') . '">';
-$html .= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '');
-$html .= '</span>';
+            $html .= '<span class="status-badge ' . strtolower(str_replace(' ', '-', $chargePoint['availabilityStatusTitle'] ?? '')) . '" data-last-status="' . htmlspecialchars($chargePoint['availabilityStatusId'] ?? '') . '">';
+            $html .= htmlspecialchars($chargePoint['availabilityStatusTitle'] ?? '');
+            $html .= '</span>';
             $html .= '</div>';
             
             $html .= '<div class="charge-point-details">';
@@ -75,9 +75,18 @@ $html .= '</span>';
             $html .= '</div>';
             $html .= '<p class="city"><i class="bi bi-building"></i> ' . htmlspecialchars($chargePoint['cityName'] ?? '') . '</p>';
             $html .= '<p class="price"><i class="bi bi-currency-exchange"></i> ' . htmlspecialchars(number_format((float)($chargePoint['pricePerKwh'] ?? 0), 3)) . ' BHD per kWh</p>';
-            $html .= '<a href="#" class="book-btn" data-role="' . ($_SESSION['role'] ?? 'Guest') . '" data-id="' . htmlspecialchars($chargePoint['chargePointId'] ?? '') . '">';
-            $html .= '<button class="btn btn-primary">Book Now</button>';
-            $html .= '</a>';
+            
+            // Check if the availability status is pending (ID 3)
+            if ($chargePoint['availabilityStatusId'] == 3) {
+                $html .= '<div class="book-btn">';
+                $html .= '<button class="btn btn-secondary" disabled>Pending</button>';
+                $html .= '</div>';
+            } else {
+                $html .= '<a href="#" class="book-btn" data-role="' . ($_SESSION['role'] ?? 'Guest') . '" data-id="' . htmlspecialchars($chargePoint['chargePointId'] ?? '') . '">';
+                $html .= '<button class="btn btn-primary">Book Now</button>';
+                $html .= '</a>';
+            }
+            
             $html .= '</div>';
             $html .= '</div>';
         }
