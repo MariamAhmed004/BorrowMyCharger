@@ -3,12 +3,12 @@ require_once 'Models/Database.php';
 class Register
 {
     private $_db;
-    
+
     public function __construct()
     {
         $this->_db = Database::getInstance()->getDbConnection();
     }
-    
+
     public function createUser($username, $firstname, $lastname, $email, $password, $phoneNumber, $roleId = null, $accountStatusId = null)
     {
         $sql = "INSERT INTO Pro_User (username, first_name, last_name, password, email, phone_number, role_id, user_account_status_id)
@@ -26,7 +26,7 @@ class Register
         $stmt->bindParam(':account_status_id', $accountStatusId);
         return $stmt->execute();
     }
-    
+
     public function checkUserExists($username, $email)
     {
         $sql = "SELECT COUNT(*) FROM Pro_User WHERE username = :username OR email = :email";
@@ -34,9 +34,9 @@ class Register
         $stmt->bindParam(':username', $username);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
-        return $stmt->fetchColumn() > 0; // Returns true if either username or email exists
+        return $stmt->fetchColumn() > 0;
     }
-    
+
     public function checkSpecificField($field, $value)
     {
         $sql = "SELECT COUNT(*) FROM Pro_User WHERE $field = :value";

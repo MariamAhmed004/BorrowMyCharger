@@ -1,99 +1,113 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title><?= htmlspecialchars($view->pageTitle) ?></title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/owl.carousel.css">
-    <link rel="stylesheet" href="css/owl.theme.default.min.css">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="auth-body-wrapper">
-    <div class="container">
-        <div class="row auth-main-card register-main-card">
-            <!-- Left Column - Image -->
-            <div class="col-md-4 p-0 auth-image-column">
-                <img src="images/login/login-img.jpg" alt="Register background image" class="auth-image">
-                <div class="auth-image-text-overlay">
-                    <h2 class="mb-4">Create an Account</h2>
-                    <p>Join us today and start your journey!</p>
-                </div>
-            </div>
-            
-            <!-- Right Column - Register Form -->
-            <div class="col-md-8 auth-form-column">
-                <div class="form-content">
-                    <h1 class="auth-page-heading">Sign Up</h1>
-                    <p class="mb-4" style="color: #746f71;">Enter your details to create your account</p>
-                    
-                    <?php if (!empty($view->errorMessage)) : ?>
-                        <div class="alert alert-danger"><?= htmlspecialchars($view->errorMessage) ?></div>
-                    <?php endif; ?>
-                    
-                    <form action="" method="POST">
-                        <div class="register-form-row">
-                            <div class="register-input-group">
-                                <label for="username" class="auth-label">Username</label>
-                                <input type="text" id="username" name="username" class="auth-input" required>
-                                <div class="error-message"></div>
-                            </div>
-                            <div class="register-input-group">
-                                <label for="firstname" class="auth-label">Firstname</label>
-                                <input type="text" id="firstname" name="firstname" class="auth-input" required>
-                                <div class="error-message"></div>
-                            </div>
-                        </div>
-                        <div class="register-form-row">
-                            <div class="register-input-group">
-                                <label for="lastname" class="auth-label">Lastname</label>
-                                <input type="text" id="lastname" name="lastname" class="auth-input" required>
-                                <div class="error-message"></div>
-                            </div>
-                            <div class="register-input-group">
-                                <label for="email" class="auth-label">Email</label>
-                                <input type="email" id="email" name="email" class="auth-input" required>
-                                <div class="error-message"></div>
-                            </div>
-                        </div>
-                        <div class="register-form-row">
-                            <div class="register-input-group">
-                                <label for="password" class="auth-label">Password</label>
-                                <input type="password" id="password" name="password" class="auth-input" required>
-                                <div class="error-message"></div>
-                            </div>
-                            <div class="register-input-group">
-                                <label for="phone" class="auth-label">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" class="auth-input" required>
-                                <div class="error-message"></div>
-                            </div>
-                        </div>
-                        <div class="register-form-row">
-                            <div class="register-input-group" style="width: 100%;">
-                                <label for="user-type" class="auth-label">User Type</label>
-                                <select id="user-type" name="user_type" class="auth-input" required>
-                                    <option value="" selected>Select User Type</option>
-                                    <option value="home-owner">Home Owner</option>
-                                    <option value="rental-user">Rental User</option>
-                                </select>
-                                <div class="error-message"></div>
-                            </div>
-                        </div>
-                        <div class="register-button-container">
-                            <button type="submit" class="auth-submit-button">Register</button>
-                        </div>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <title><?= htmlspecialchars($view->pageTitle) ?></title> 
+    <meta charset="UTF-8"> 
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> 
+    <link rel="stylesheet" href="css/bootstrap.min.css"> 
+    <link rel="stylesheet" href="css/font-awesome.min.css"> 
+    <link rel="stylesheet" href="css/owl.carousel.css"> 
+    <link rel="stylesheet" href="css/owl.theme.default.min.css"> 
+    <link rel="stylesheet" href="css/register.css">
+    <!-- Google reCAPTCHA with callbacks --> 
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+
+</head> 
+<body class="auth-body-wrapper"> 
+    <div class="container"> 
+        <div class="row auth-main-card register-main-card"> 
+            <!-- Left Column - Image --> 
+            <div class="col-md-4 p-0 auth-image-column"> 
+                <img src="images/login/login-img.jpg" alt="Register background image" class="auth-image"> 
+                <div class="auth-image-text-overlay"> 
+                    <h2 class="mb-4">Create an Account</h2> 
+                    <p>Join us today and start your journey!</p> 
+                </div> 
+            </div> 
+             
+            <!-- Right Column - Register Form --> 
+            <div class="col-md-8 auth-form-column"> 
+                <div class="form-content"> 
+                    <h1 class="auth-page-heading">Sign Up</h1> 
+                    <p class="mb-4" style="color: #746f71;">Enter your details to create your account</p> 
+                     
+                    <?php if (!empty($view->errorMessage)) : ?> 
+                        <div class="alert alert-danger"><?= htmlspecialchars($view->errorMessage) ?></div> 
+                    <?php endif; ?> 
+                     
+                    <form action="" method="POST"> 
+                        <div class="register-form-row"> 
+                            <div class="register-input-group"> 
+                                <label for="username" class="auth-label">Username</label> 
+                                <input type="text" id="username" name="username" class="auth-input" required> 
+                               <div class="error-message" id="username-error"></div> 
+                            </div> 
+                            <div class="register-input-group"> 
+                                <label for="firstname" class="auth-label">Firstname</label> 
+                                <input type="text" id="firstname" name="firstname" class="auth-input" required> 
+                                <div class="error-message" id="firstname-error"></div> 
+                            </div> 
+                        </div> 
+                        <div class="register-form-row"> 
+                            <div class="register-input-group"> 
+                                <label for="lastname" class="auth-label">Lastname</label> 
+                                <input type="text" id="lastname" name="lastname" class="auth-input" required> 
+                                <div class="error-message" id="lastname-error"></div> 
+                            </div> 
+                            <div class="register-input-group"> 
+                                <label for="email" class="auth-label">Email</label> 
+                                <input type="email" id="email" name="email" class="auth-input" required> 
+                                <div class="error-message" id="email-error"></div> 
+                            </div> 
+                        </div> 
+                        <div class="register-form-row" > 
+                            <div class="register-input-group" style="margin-bottom: 25px;"> 
+                                <label for="password" class="auth-label">Password</label> 
+                                <input type="password" id="password" name="password" class="auth-input" required> 
+                                <div class="error-message" id="password-error"></div> 
+                            </div> 
+                            <div class="register-input-group"> 
+                                <label for="phone" class="auth-label">Phone Number</label> 
+                                <input type="tel" id="phone" name="phone" class="auth-input" required> 
+                                <div class="error-message" id="phone-error"></div> 
+                            </div> 
+                        </div> 
+                        <div class="register-form-row"> 
+                            <div class="register-input-group" style="width: 100%;"> 
+                                <label for="user-type" class="auth-label">User Type</label> 
+                                <select id="user-type" name="user_type" class="auth-input" required> 
+                                    <option value="" selected>Select User Type</option> 
+                                    <option value="home-owner">Home Owner</option> 
+                                    <option value="rental-user">Rental User</option> 
+                                </select> 
+                                <div class="error-message"></div> 
+                            </div> 
+                        </div> 
+                        <br> 
+                        <p class="mb-4" style="color: #746f71;">Confirm by checking the checkbox to register your account</p> 
+                        <div class="g-recaptcha" 
+                             data-sitekey="6LduVzorAAAAAJ9N3K8l_4imS5ZscwmRLBXLdVNN" 
+                             data-callback="enableRegisterButton" 
+                             data-expired-callback="disableRegisterButton"> 
+                        </div> 
                         
-                    </form>
-                    
-                    <p class="auth-link-text">Already have an account? <a href="login.php" class="auth-link">Login</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <div class="register-button-container"> 
+                            <button type="submit" class="auth-submit-button" id="register-button" disabled> 
+                                Register 
+                            </button> 
+                        </div> 
+                    </form> 
+                     
+                    <p class="auth-link-text">Already have an account? <a href="login.php" class="auth-link">Login</a></p> 
+                </div> 
+            </div> 
+        </div> 
+    </div> 
 
-    <script src="js/register.js"></script>
 
-</body>
+    <!-- External JS --> 
+    <script src="js/register.js" defer></script> 
+</body> 
 </html>

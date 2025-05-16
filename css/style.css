@@ -1751,65 +1751,9 @@ https://templatemo.com/tm-516-known
     }
     
     
-    /*login page*/
-            /* Login-specific styles */
-        .login-main-card {
-            max-width: 1100px; /* Match register page width */
-            height: 650px; /* Match register page height */
-        }
+
         
-        .login-form-content {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .login-form-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .login-form {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .login-form-fields {
-            flex-grow: 0;
-        }
-        
-        .login-button-container {
-            margin-top: auto;
-            padding-top: 30px;
-            margin-bottom: 20px;
-        }
-        
-    /* Register-specific styles */
-        .register-main-card {
-            max-width: 1100px;
-            height: 650px; /* Slightly taller than the login card to accommodate more fields */
-        }
-        
-        .register-form-row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -10px;
-        }
-        
-        .register-input-group {
-            padding: 0 10px;
-            margin-bottom: 1.5rem;
-            flex: 1 0 50%;
-        }
-        
-        @media (max-width: 767.98px) {
-            .register-input-group {
-                flex: 1 0 100%;
-            }
-        }
-    
+   
     .test-carousel {
     display: flex;
     overflow: hidden;

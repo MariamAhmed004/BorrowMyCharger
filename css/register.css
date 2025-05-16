@@ -1,0 +1,238 @@
+
+        :root {
+            --primary-color: #345E4A;
+            --text-color: #333;
+            --light-gray: #f8f9fa;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: var(--text-color);
+        }
+        
+        .auth-body-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .auth-main-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+        
+        .register-main-card {
+            height: auto;
+        }
+        
+       .auth-image-column {
+    position: relative;
+    padding: 0 !important;
+    height: 100vh;
+    flex: 1;
+    min-height: 100vh;
+}
+
+        .auth-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            min-height: 100%;
+        }
+        
+        .auth-image-text-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(52, 94, 74, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .auth-image-text-overlay h2 {
+            font-weight: 600;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .auth-image-text-overlay p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .auth-form-column {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .form-content {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .auth-page-heading {
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .auth-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .auth-input, .auth-input:focus {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 5px;
+            font-size: 14px;
+            background-color: white;
+            transition: border-color 0.3s;
+        }
+        
+        .auth-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 94, 74, 0.1);
+        }
+        
+        .register-form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .register-input-group {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+            height: 18px;
+        }
+        
+        .auth-submit-button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+        
+        .auth-submit-button:hover:not(:disabled) {
+            background-color: #2a4d3c;
+        }
+        
+        .auth-submit-button:disabled {
+            background-color: #8aaa9a;
+            cursor: not-allowed;
+        }
+        
+        .register-button-container {
+            margin-top: 20px;
+        }
+        
+        .auth-link-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .auth-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+        
+        .g-recaptcha {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 767px) {
+            .auth-image-column {
+                display: none;
+            }
+            
+            .register-form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .auth-form-column {
+                padding: 20px 15px;
+            }
+            
+            .form-content {
+                padding: 0;
+            }
+            
+            .auth-main-card {
+                margin: 0 10px;
+            }
+            
+            .g-recaptcha {
+                transform: scale(0.9);
+                transform-origin: left center;
+            }
+        }
+        
+        @media (min-width: 768px) and (max-width: 991px) {
+            .register-form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .auth-image-column {
+                min-height: 1200px;
+            }
+        }

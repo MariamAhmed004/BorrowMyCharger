@@ -1,6 +1,81 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector('form');
+    const recaptchaCheckbox = document.querySelector('.g-recaptcha');
 
+    // Add live validation for each input field
+    document.getElementById('username').addEventListener('input', function () {
+        const username = this.value.trim();
+        if (!validateUsername(username)) {
+            showError('username', 'Username must be at least 3 characters and cannot contain spaces.');
+        } else {
+            clearError('username');
+        }
+    });
+
+    document.getElementById('firstname').addEventListener('input', function () {
+        const firstname = this.value.trim();
+        if (!validateName(firstname)) {
+            showError('firstname', 'First name must be at least 2 letters and cannot contain numbers.');
+        } else {
+            clearError('firstname');
+        }
+    });
+
+    document.getElementById('lastname').addEventListener('input', function () {
+        const lastname = this.value.trim();
+        if (!validateName(lastname)) {
+            showError('lastname', 'Last name must be at least 2 letters and cannot contain numbers.');
+        } else {
+            clearError('lastname');
+        }
+    });
+
+    document.getElementById('email').addEventListener('input', function () {
+        const email = this.value.trim();
+        if (!validateEmail(email)) {
+            showError('email', 'Invalid email format.');
+        } else {
+            clearError('email');
+        }
+    });
+
+    document.getElementById('password').addEventListener('input', function () {
+        const password = this.value.trim();
+        clearError('password'); // Clear previous errors
+
+        // Combined password validation
+        const errors = [];
+        if (password.length < 8) {
+            errors.push('at least 8 characters');
+        }
+        if (!/[A-Z]/.test(password)) {
+            errors.push('at least 1 uppercase letter');
+        }
+        if (!/[a-z]/.test(password)) {
+            errors.push('at least 1 lowercase letter');
+        }
+        if (!/\d/.test(password)) {
+            errors.push('at least 1 digit');
+        }
+        if (!/[!@#$%^&*]/.test(password)) {
+            errors.push('at least 1 special character');
+        }
+
+        if (errors.length > 0) {
+            showError('password', 'Must include: ' + errors.join(', ') + '.');
+        }
+    });
+
+    document.getElementById('phone').addEventListener('input', function () {
+        const phone = this.value.trim();
+        if (!/^\d{0,8}$/.test(phone)) {
+            showError('phone', 'Phone number must be exactly 8 digits and numeric.');
+        } else if (phone.length === 8) {
+            clearError('phone');
+        }
+    });
+
+    // Form submission handling
     form.addEventListener('submit', function (e) {
         clearErrors();
         let hasErrors = false;
@@ -13,61 +88,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const phone = document.getElementById('phone').value.trim();
         const userType = document.getElementById('user-type').value;
 
-        // Username validation
-        if (username.includes(' ')) {
-            showError('username', 'Username cannot contain spaces.');
-            hasErrors = true;
-        } else if (!/^[a-zA-Z0-9_-]{3,}$/.test(username)) {
-            showError('username', 'Username must be at least 3 characters and include only letters, numbers, underscores, or hyphens.');
-            hasErrors = true;
-        }
-
-        // First name validation
-        if (!/^[a-zA-Z]{2,}$/.test(firstname)) {
-            if (/\d/.test(firstname)) {
-                showError('firstname', 'First name cannot contain numbers.');
-            } else {
-                showError('firstname', 'First name must be at least 2 letters.');
-            }
-            hasErrors = true;
-        }
-
-        // Last name validation
-        if (!/^[a-zA-Z]{2,}$/.test(lastname)) {
-            if (/\d/.test(lastname)) {
-                showError('lastname', 'Last name cannot contain numbers.');
-            } else {
-                showError('lastname', 'Last name must be at least 2 letters.');
-            }
-            hasErrors = true;
-        }
-
-        // Email validation
-        if (!validateEmail(email)) {
-            showError('email', 'Invalid email format.');
-            hasErrors = true;
-        }
-
-        // Password validation
-        if (!validatePassword(password)) {
-            showError('password', 'Password must be at least 6 characters, include one uppercase letter and one digit.');
-            hasErrors = true;
-        }
-
-        // Phone validation
-        if (!/^\d+$/.test(phone)) {
-            showError('phone', 'Phone number can only contain digits.');
-            hasErrors = true;
-        } else if (phone.length < 7 || phone.length > 15) {
-            showError('phone', 'Phone number must be between 7 and 15 digits.');
-            hasErrors = true;
-        }
-
-        // User type validation
+        // Validate user type
         if (!userType) {
             showError('user-type', 'User type must be selected.');
             hasErrors = true;
         }
+
 
         if (!hasErrors) {
             e.preventDefault();
@@ -76,10 +102,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     showError('username', 'The username already exists.');
                     hasErrors = true;
                 }
+
                 if (response.emailExists) {
                     showError('email', 'The email already exists.');
                     hasErrors = true;
                 }
+
                 if (!hasErrors) {
                     form.submit();
                 }
@@ -89,18 +117,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    function showError(inputId, message) {
-        const input = document.getElementById(inputId);
-        const errorDiv = input.parentNode.querySelector('.error-message');
-        if (errorDiv) {
-            errorDiv.innerText = message;
-        }
+    function validateUsername(username) {
+        return /^[a-zA-Z0-9_-]{3,}$/.test(username) && !username.includes(' ');
     }
 
-    function clearErrors() {
-        document.querySelectorAll('.error-message').forEach(function (div) {
-            div.innerText = '';
-        });
+    function validateName(name) {
+        return /^[a-zA-Z]{2,}$/.test(name);
     }
 
     function validateEmail(email) {
@@ -108,9 +130,24 @@ document.addEventListener("DOMContentLoaded", function () {
         return re.test(String(email).toLowerCase());
     }
 
-    function validatePassword(password) {
-        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
-        return re.test(password);
+    function showError(inputId, message) {
+        const errorDiv = document.getElementById(inputId + '-error');
+        if (errorDiv) {
+            errorDiv.innerText = message;
+        }
+    }
+
+    function clearError(inputId) {
+        const errorDiv = document.getElementById(inputId + '-error');
+        if (errorDiv) {
+            errorDiv.innerText = '';
+        }
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.error-message').forEach(function (div) {
+            div.innerText = '';
+        });
     }
 
     function checkUserExists(username, email) {
@@ -129,3 +166,18 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+// === ReCAPTCHA Callback Functions ===
+window.enableRegisterButton = function () {
+    const registerButton = document.getElementById('register-button');
+    if (registerButton) {
+        registerButton.disabled = false;
+    }
+};
+
+window.disableRegisterButton = function () {
+    const registerButton = document.getElementById('register-button');
+    if (registerButton) {
+        registerButton.disabled = true;
+    }
+};
