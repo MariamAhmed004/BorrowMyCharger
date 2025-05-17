@@ -18,6 +18,16 @@ COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
+# Create both uploads directories
+RUN mkdir -p /var/www/html/uploads/charge-points && \
+    mkdir -p /var/www/html/uploads/charge_points
+
+# Change ownership to the web server user (www-data)
+RUN chown -R www-data:www-data /var/www/html/uploads
+
+# Set permissions
+RUN chmod -R 755 /var/www/html/uploads
+
 # Copy all files
 COPY . .
 
@@ -27,4 +37,3 @@ RUN composer install --no-dev --optimize-autoloader \
 
 # Expose port 80
 EXPOSE 80
-
