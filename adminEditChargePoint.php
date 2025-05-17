@@ -36,7 +36,7 @@ $chargePointModel = new chargePointManagement();
             } else {
                 // Local development environment
                 return [
-                    'upload_dir' => __DIR__ . '/uploads/charge_points/',
+                    'upload_dir' => __DIR__ . '/var/www/html/uploads/charge_points/',
                     'web_path' => 'uploads/charge_points/',
                     'permissions' => 0755
                 ];
