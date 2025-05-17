@@ -136,6 +136,16 @@ $view->uniqueNames = $profilesModel->getUniqueNames();
 $view->accountStatuses = $profilesModel->getAccountStatuses();
 $view->roles = $profilesModel->getRoles();
 
-// Load the view
+// Check if this is an AJAX request
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
+// For AJAX requests, only load the table content without layout
+if ($isAjax) {
+    require_once 'Views/view-all-profiles.phtml';
+    exit;
+}
+
+// For regular requests, load the full page
 require_once 'Views/view-all-profiles.phtml';
 ?>

@@ -71,6 +71,12 @@ function updatePaginationLinks() {
             href.search = params.toString();
             link.setAttribute('href', href.search);
             
+            // Add click handler for AJAX pagination
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                loadProfilesWithAjax(link.getAttribute('href'));
+            });
+            
             console.log("Updated link:", link.getAttribute('href'));
         }
     });
@@ -97,10 +103,89 @@ function applyFilters() {
     url.search = params.toString();
     
     console.log("Applying filters: ", { nameFilter, roleFilter, statusFilter });
-    console.log("Navigating to: ", url.toString());
     
-    // Navigate to the filtered URL
-    window.location.href = url.toString();
+    // Use AJAX to load filtered results instead of navigating
+    loadProfilesWithAjax(url.search);
+    
+    // Update browser URL without refreshing
+    window.history.pushState({}, '', url.toString());
+}
+
+function loadProfilesWithAjax(queryString) {
+    // Create XHR
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', window.location.pathname + queryString, true);
+    
+    // Set custom header to indicate AJAX request
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            // Create a temporary container for the response HTML
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = xhr.responseText;
+            
+            // Extract the table content from the response
+            const newTableContainer = tempContainer.querySelector('#tableContainer');
+            if (newTableContainer) {
+                document.getElementById('tableContainer').innerHTML = newTableContainer.innerHTML;
+            }
+            
+            // Update pagination if present
+            const newPagination = tempContainer.querySelector('nav[aria-label="User profiles pagination"]');
+            const currentPagination = document.querySelector('nav[aria-label="User profiles pagination"]');
+            
+            if (currentPagination) {
+                if (newPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                    currentPagination.style.display = '';
+                } else {
+                    currentPagination.style.display = 'none';
+                }
+            }
+            
+            // Update records info text
+            const newRecordsInfo = tempContainer.querySelector('.text-muted');
+            if (newRecordsInfo && newRecordsInfo.textContent.includes('Showing')) {
+                const currentRecordsInfo = document.querySelector('.text-muted');
+                if (currentRecordsInfo) {
+                    currentRecordsInfo.textContent = newRecordsInfo.textContent;
+                }
+            }
+            
+            // Check for no results message
+            const noResultsMsg = document.getElementById('noResultsMessage');
+            const hasResults = document.querySelectorAll('#profilesTable tbody tr:not([colspan])').length > 0;
+            if (noResultsMsg) {
+                noResultsMsg.style.display = hasResults ? 'none' : 'block';
+            }
+            
+            // Re-attach event listeners for the new content
+            attachEventListeners();
+            
+            // Update pagination links with current filters
+            updatePaginationLinks();
+        } else {
+            console.error('Error loading filtered results:', xhr.statusText);
+        }
+    };
+    
+    xhr.onerror = function() {
+        console.error('Network error occurred');
+    };
+    
+    xhr.send();
+}
+
+function attachEventListeners() {
+    // Re-attach event listeners for action buttons
+    document.querySelectorAll('.suspend-link, .unsuspend-link, .approve-link').forEach(link => {
+        link.addEventListener('click', handleStatusAction);
+    });
+    
+    document.querySelectorAll('.delete-link').forEach(link => {
+        link.addEventListener('click', handleDeleteAction);
+    });
 }
 
 function handleStatusAction(event) {
@@ -253,14 +338,20 @@ function deleteUser(userId) {
                 // If this is the last item on the page and not the first page
                 const urlParams = new URLSearchParams(window.location.search);
                 const currentPage = parseInt(urlParams.get('page') || '1');
-                const totalPages = parseInt(document.querySelector('.pagination .page-item:last-child .page-link')?.textContent || currentPage);
-                const nextPage = Math.max(1, Math.min(currentPage, totalPages - 1));
                 
-                // Redirect to appropriate page while preserving filters
-                if (nextPage != currentPage) {
+                if (currentPage > 1) {
+                    // Load the previous page while preserving filters
                     const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('page', nextPage.toString());
-                    window.location.href = newUrl.toString();
+                    newUrl.searchParams.set('page', (currentPage - 1).toString());
+                    
+                    // Use AJAX to load the previous page
+                    loadProfilesWithAjax(newUrl.search);
+                    
+                    // Update browser URL without refreshing
+                    window.history.pushState({}, '', newUrl.toString());
+                    
+                    // Show success message
+                    alert(data.message);
                     return;
                 }
             }
@@ -293,6 +384,12 @@ function deleteUser(userId) {
                 if (recordsInfo && recordsInfo.textContent.includes('Showing')) {
                     recordsInfo.textContent = 'Showing 0 to 0 of 0 users';
                 }
+                
+                // Show no results message
+                const noResultsMsg = document.getElementById('noResultsMessage');
+                if (noResultsMsg) {
+                    noResultsMsg.style.display = 'block';
+                }
             }
             
             alert(data.message);
@@ -307,6 +404,11 @@ function deleteUser(userId) {
 }
 
 function clearFilters() {
-    // Simply navigate to the base page with no filters
-    window.location.href = window.location.pathname + '?page=1';
+    // Reset all filter dropdowns
+    document.getElementById('nameFilter').value = '';
+    document.getElementById('roleFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    
+    // Apply the empty filters
+    applyFilters();
 }
