@@ -43,15 +43,53 @@ class BorrowRequestModel {
      * @param int $statusId The new status ID (2 = Approved, 3 = Rejected)
      * @return bool True if update successful, false otherwise
      */
-    public function updateBookingStatus($bookingId, $statusId) {
-        $sql = "UPDATE Pro_Booking SET booking_status_id = :statusId WHERE booking_id = :bookingId";
+public function updateBookingStatus($bookingId, $statusId) {
+    try {
+        // Start a transaction for atomicity
+        $this->_dbHandle->beginTransaction();
         
-        $statement = $this->_dbHandle->prepare($sql);
-        $statement->bindParam(':statusId', $statusId, PDO::PARAM_INT);
-        $statement->bindParam(':bookingId', $bookingId, PDO::PARAM_INT);
+        // First, get the charge_point_id from the booking
+        $getBookingSql = "SELECT charge_point_id FROM Pro_Booking WHERE booking_id = :bookingId";
+        $getBookingStmt = $this->_dbHandle->prepare($getBookingSql);
+        $getBookingStmt->bindParam(':bookingId', $bookingId, PDO::PARAM_INT);
+        $getBookingStmt->execute();
         
-        return $statement->execute();
+        $booking = $getBookingStmt->fetch(PDO::FETCH_ASSOC);
+        $chargePointId = $booking['charge_point_id'];
+        
+        // Update the booking status
+        $updateBookingSql = "UPDATE Pro_Booking SET booking_status_id = :statusId WHERE booking_id = :bookingId";
+        $updateBookingStmt = $this->_dbHandle->prepare($updateBookingSql);
+        $updateBookingStmt->bindParam(':statusId', $statusId, PDO::PARAM_INT);
+        $updateBookingStmt->bindParam(':bookingId', $bookingId, PDO::PARAM_INT);
+        $bookingUpdateSuccess = $updateBookingStmt->execute();
+        
+        // If status is rejected (3), update charge point status to available (1)
+        if ($bookingUpdateSuccess && $statusId == 3 && $chargePointId) {
+            $updateChargePointSql = "UPDATE Pro_ChargePoint SET availability_status_id = 1 WHERE charge_point_id = :chargePointId";
+            $updateChargePointStmt = $this->_dbHandle->prepare($updateChargePointSql);
+            $updateChargePointStmt->bindParam(':chargePointId', $chargePointId, PDO::PARAM_INT);
+            $chargePointUpdateSuccess = $updateChargePointStmt->execute();
+            
+            if (!$chargePointUpdateSuccess) {
+                // If charge point update fails, roll back transaction
+                $this->_dbHandle->rollBack();
+                return false;
+            }
+        }
+        
+        // Commit the transaction
+        $this->_dbHandle->commit();
+        return true;
+        
+    } catch (PDOException $e) {
+        // Roll back the transaction if any error occurs
+        $this->_dbHandle->rollBack();
+        // Handle or log the error as needed
+        // error_log("Database error: " . $e->getMessage());
+        return false;
     }
+}
     
     /**
      * Check if a booking belongs to the homeowner

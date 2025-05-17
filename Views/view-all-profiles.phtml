@@ -39,6 +39,16 @@
         </div>
     </div>
 
+    <!-- Records info and pagination info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted">
+            Showing <?php echo $view->startRecord; ?> to <?php echo $view->endRecord; ?> of <?php echo $view->totalRecords; ?> users
+        </div>
+        <div class="text-muted">
+            Page <?php echo $view->currentPage; ?> of <?php echo $view->totalPages; ?>
+        </div>
+    </div>
+
     <div class="card" style="border: 1px solid var(--medium-gray); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
         <div class="card-header" style="background-color: var(--teal); color: white; border-bottom: 0;">
             <h4 class="mb-0">User Profiles</h4>
@@ -117,6 +127,61 @@
             </div>
         </div>
     </div>
+    
+    <!-- Pagination Controls -->
+    <?php if ($view->totalPages > 1): ?>
+    <nav aria-label="User profiles pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <!-- First Page -->
+            <?php if ($view->currentPage > 1): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=1">First</a>
+            </li>
+            <?php endif; ?>
+            
+            <!-- Previous Page -->
+            <?php if ($view->currentPage > 1): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?php echo $view->currentPage - 1; ?>">Previous</a>
+            </li>
+            <?php endif; ?>
+            
+            <!-- Page Numbers -->
+            <?php 
+            $startPage = max(1, $view->currentPage - 2);
+            $endPage = min($view->totalPages, $view->currentPage + 2);
+            
+            if ($startPage > 1) {
+                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            
+            for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <li class="page-item <?php echo ($i == $view->currentPage) ? 'active' : ''; ?>">
+                <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+            </li>
+            <?php endfor;
+            
+            if ($endPage < $view->totalPages) {
+                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            ?>
+            
+            <!-- Next Page -->
+            <?php if ($view->currentPage < $view->totalPages): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?php echo $view->currentPage + 1; ?>">Next</a>
+            </li>
+            <?php endif; ?>
+            
+            <!-- Last Page -->
+            <?php if ($view->currentPage < $view->totalPages): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?php echo $view->totalPages; ?>">Last</a>
+            </li>
+            <?php endif; ?>
+        </ul>
+    </nav>
+    <?php endif; ?>
     
     <!-- No results message (hidden by default) -->
     <div id="noResultsMessage" class="alert alert-warning my-4 text-center" style="display: none; border-color: var(--medium-gray);">

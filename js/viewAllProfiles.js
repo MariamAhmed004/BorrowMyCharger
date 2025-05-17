@@ -8,9 +8,100 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', handleDeleteAction);
     });
 
-    // Initialize filters
-    filterTable();
+    // Add event listeners for filters
+    document.getElementById('nameFilter').addEventListener('change', applyFilters);
+    document.getElementById('roleFilter').addEventListener('change', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    
+    // Set initial filter values from URL parameters
+    setInitialFilterValues();
+    
+    // Update pagination links with current filters
+    updatePaginationLinks();
 });
+
+function setInitialFilterValues() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const nameFilter = urlParams.get('name');
+    const roleFilter = urlParams.get('role');
+    const statusFilter = urlParams.get('status');
+    
+    if (nameFilter) {
+        document.getElementById('nameFilter').value = nameFilter;
+    }
+    
+    if (roleFilter) {
+        document.getElementById('roleFilter').value = roleFilter;
+    }
+    
+    if (statusFilter) {
+        document.getElementById('statusFilter').value = statusFilter;
+    }
+}
+
+function updatePaginationLinks() {
+    // Get current filter values
+    const nameFilter = document.getElementById('nameFilter').value;
+    const roleFilter = document.getElementById('roleFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    console.log("Updating pagination with filters:", { nameFilter, roleFilter, statusFilter });
+    
+    // Update all pagination links to include current filters
+    document.querySelectorAll('.pagination .page-link').forEach(link => {
+        if (!link.closest('.page-item').classList.contains('disabled') && 
+            !link.closest('.page-item').classList.contains('active')) {
+            
+            const href = new URL(link.getAttribute('href'), window.location.origin + window.location.pathname);
+            
+            // Preserve the page parameter from the original link
+            const page = new URLSearchParams(href.search).get('page');
+            
+            // Clear existing parameters and set new ones
+            href.search = '';
+            const params = new URLSearchParams();
+            
+            if (page) params.set('page', page);
+            // Always include filters in params, even if empty
+            params.set('name', nameFilter);
+            params.set('role', roleFilter);
+            params.set('status', statusFilter);
+            
+            href.search = params.toString();
+            link.setAttribute('href', href.search);
+            
+            console.log("Updated link:", link.getAttribute('href'));
+        }
+    });
+}
+
+function applyFilters() {
+    // Get filter values
+    const nameFilter = document.getElementById('nameFilter').value;
+    const roleFilter = document.getElementById('roleFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    // Create URL with filters
+    const url = new URL(window.location.pathname, window.location.origin);
+    const params = new URLSearchParams();
+    
+    // Always start at page 1 when applying new filters
+    params.set('page', '1');
+    
+    // Always include filters in params, even if empty
+    params.set('name', nameFilter);
+    params.set('role', roleFilter);
+    params.set('status', statusFilter);
+    
+    url.search = params.toString();
+    
+    console.log("Applying filters: ", { nameFilter, roleFilter, statusFilter });
+    console.log("Navigating to: ", url.toString());
+    
+    // Navigate to the filtered URL
+    window.location.href = url.toString();
+}
 
 function handleStatusAction(event) {
     event.preventDefault();
@@ -43,8 +134,10 @@ function updateUserStatus(userId, action, linkElement) {
     formData.append('action', action);
     formData.append('userId', userId);
     
-    // Send AJAX request
-    fetch(window.location.href, {
+    // Get current URL with all parameters
+    const url = window.location.href;
+    
+    fetch(url, {
         method: 'POST',
         body: formData
     })
@@ -141,13 +234,37 @@ function handleDeleteAction(event) {
 }
 
 function deleteUser(userId) {
-    fetch(window.location.href, {
+    // Get current URL with all parameters (preserves filters and pagination)
+    const url = window.location.href;
+    
+    fetch(url, {
         method: 'DELETE',
         body: new URLSearchParams({ id: userId })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Check if this was the last user on the current page
+            const table = document.getElementById("profilesTable");
+            const tbody = table.querySelector('tbody');
+            const currentRows = tbody.querySelectorAll('tr:not([colspan])');
+            
+            if (currentRows.length === 1) {
+                // If this is the last item on the page and not the first page
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentPage = parseInt(urlParams.get('page') || '1');
+                const totalPages = parseInt(document.querySelector('.pagination .page-item:last-child .page-link')?.textContent || currentPage);
+                const nextPage = Math.max(1, Math.min(currentPage, totalPages - 1));
+                
+                // Redirect to appropriate page while preserving filters
+                if (nextPage != currentPage) {
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('page', nextPage.toString());
+                    window.location.href = newUrl.toString();
+                    return;
+                }
+            }
+            
             // Remove the row from the table
             const rowToRemove = document.querySelector(`tr[data-user-id="${userId}"]`);
             if (rowToRemove) {
@@ -155,8 +272,6 @@ function deleteUser(userId) {
             }
             
             // Check if table is now empty
-            const table = document.getElementById("profilesTable");
-            const tbody = table.querySelector('tbody');
             const remainingUserRows = tbody.querySelectorAll('tr:not([colspan])');
             
             if (remainingUserRows.length === 0) {
@@ -166,10 +281,19 @@ function deleteUser(userId) {
                         <div class="alert alert-info my-3">No users found.</div>
                     </td>
                 </tr>`;
+                
+                // Hide pagination if no users left
+                const paginationNav = document.querySelector('nav[aria-label="User profiles pagination"]');
+                if (paginationNav) {
+                    paginationNav.style.display = 'none';
+                }
+                
+                // Update records info
+                const recordsInfo = document.querySelector('.text-muted');
+                if (recordsInfo && recordsInfo.textContent.includes('Showing')) {
+                    recordsInfo.textContent = 'Showing 0 to 0 of 0 users';
+                }
             }
-            
-            // Update filter display
-            filterTable();
             
             alert(data.message);
         } else {
@@ -182,70 +306,7 @@ function deleteUser(userId) {
     });
 }
 
-function filterTable() {
-    const nameFilter = document.getElementById("nameFilter").value.toLowerCase();
-    const roleFilter = document.getElementById("roleFilter").value.toLowerCase();
-    const statusFilter = document.getElementById("statusFilter").value.toLowerCase();
-
-    const table = document.getElementById("profilesTable");
-    const rows = table.getElementsByTagName("tr");
-    const noResultsMessage = document.getElementById("noResultsMessage");
-    
-    let visibleRowCount = 0;
-
-    // Skip header row (i=0)
-    for (let i = 1; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName("td");
-        
-        // Skip if this is the "No users found" message row when table is initially empty
-        if (cells.length === 1 && cells[0].getAttribute('colspan')) {
-            continue;
-        }
-        
-        const name = cells[0].textContent.toLowerCase();
-        const role = cells[3].textContent.toLowerCase();
-        const status = cells[4].textContent.toLowerCase().trim();
-
-        const nameMatch = nameFilter === "" || name.includes(nameFilter);
-        const roleMatch = roleFilter === "" || role.includes(roleFilter);
-        const statusMatch = statusFilter === "" || status.includes(statusFilter);
-
-        if (nameMatch && roleMatch && statusMatch) {
-            rows[i].style.display = "";
-            visibleRowCount++;
-        } else {
-            rows[i].style.display = "none";
-        }
-    }
-    
-    // Show/hide no results message
-    if (visibleRowCount === 0 && rows.length > 1) {
-        table.style.display = "none";
-        noResultsMessage.style.display = "block";
-    } else {
-        table.style.display = "table";
-        noResultsMessage.style.display = "none";
-    }
-}
-
 function clearFilters() {
-    document.getElementById("nameFilter").value = "";
-    document.getElementById("roleFilter").value = "";
-    document.getElementById("statusFilter").value = "";
-    
-    // Reset the table display
-    filterTable();
-    
-    // Ensure table is visible and no results message is hidden
-    const table = document.getElementById("profilesTable");
-    const noResultsMessage = document.getElementById("noResultsMessage");
-    
-    // Only show table if we have actual user data
-    const tbody = table.querySelector('tbody');
-    const remainingUserRows = tbody.querySelectorAll('tr:not([colspan])');
-    
-    if (remainingUserRows.length > 0) {
-        table.style.display = "table";
-        noResultsMessage.style.display = "none";
-    }
+    // Simply navigate to the base page with no filters
+    window.location.href = window.location.pathname + '?page=1';
 }

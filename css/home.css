@@ -116,3 +116,25 @@
     #navLinks ul li:hover {
         background: #0056b3;
     }
+
+    .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col-md-4 {
+    display: flex; /* Ensure columns use flexbox */
+}
+
+.team-thumb {
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+    justify-content: space-between; /* Distribute space evenly */
+    margin-bottom: 20px; /* Space between rows */
+    background-color: #f8f9fa; /* Optional: background color for visibility */
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: shadow for depth */
+    flex: 1; /* Allow cards to grow equally */
+    min-height: 300px; /* Set a minimum height for uniformity */
+}

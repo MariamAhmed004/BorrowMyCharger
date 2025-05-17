@@ -8,8 +8,8 @@ class Profiles {
         $this->_db = Database::getInstance()->getDbConnection();
     }
     
-    public function getAllProfiles() {
-    $stmt = $this->_db->prepare("
+   public function getAllProfiles($nameFilter = '', $roleFilter = '', $statusFilter = '') {
+    $query = "
         SELECT 
             u.user_id, 
             u.first_name, 
@@ -23,9 +23,49 @@ class Profiles {
         JOIN Pro_Role r ON u.role_id = r.role_id
         LEFT JOIN Pro_UserAccountStatus s ON u.user_account_status_id = s.user_account_status_id
         WHERE u.role_id IN (2, 3)
-    "); 
+    ";
+    
+    $params = [];
+    
+    // Add filters - improved name filter handling
+    if (!empty($nameFilter)) {
+        // Log the name filter for debugging
+        error_log("Using name filter: '$nameFilter'");
+        
+        // Search for the name in first_name, last_name, or concatenated full name
+        $query .= " AND (u.first_name LIKE :nameFilter 
+                     OR u.last_name LIKE :nameFilter 
+                     OR CONCAT(u.first_name, ' ', u.last_name) LIKE :nameFilter)";
+        $params[':nameFilter'] = '%' . $nameFilter . '%';
+    }
+    
+    if (!empty($roleFilter)) {
+        $query .= " AND r.role_title = :roleFilter";
+        $params[':roleFilter'] = $roleFilter;
+    }
+    
+    if (!empty($statusFilter)) {
+        $query .= " AND s.user_account_status_title = :statusFilter";
+        $params[':statusFilter'] = $statusFilter;
+    }
+    
+    error_log("Full SQL query: " . $query);
+    error_log("Parameters: " . print_r($params, true));
+    
+    $stmt = $this->_db->prepare($query);
+    
+    // Bind all parameters at once
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    
     $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Log count of results for debugging
+    error_log("Found " . count($results) . " results for the query");
+    
+    return $results;
 }
     public function getUniqueNames() {
         $stmt = $this->_db->prepare("SELECT DISTINCT CONCAT(first_name, ' ', last_name) AS full_name FROM Pro_User");

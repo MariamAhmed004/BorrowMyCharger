@@ -3,6 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 // Include the Profiles model
 require_once 'Models/allProfiles.php';
 
@@ -85,16 +86,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     exit;
 }
 
+// Pagination settings
+$recordsPerPage = 10;
+$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$currentPage = max(1, $currentPage); // Ensure page is at least 1
+
+// Get filter parameters and log them for debugging
+$nameFilter = isset($_GET['name']) ? trim($_GET['name']) : '';
+$roleFilter = isset($_GET['role']) ? trim($_GET['role']) : '';
+$statusFilter = isset($_GET['status']) ? trim($_GET['status']) : '';
+
+// Debug logging (can be removed in production)
+error_log("Filter values: name='$nameFilter', role='$roleFilter', status='$statusFilter'");
+
 // Prepare view data
 $view = new stdClass();
 $view->pageTitle = 'View All Profiles';
 $view->activePage = 'view-all-profiles';
 
-// Fetch data for the view
-$view->profiles = $profilesModel->getAllProfiles();
+// Fetch all profiles to get total count with filters
+$allProfiles = $profilesModel->getAllProfiles($nameFilter, $roleFilter, $statusFilter);
+$totalRecords = count($allProfiles);
+$totalPages = max(1, ceil($totalRecords / $recordsPerPage));
+
+// Ensure current page is valid
+$currentPage = min($currentPage, $totalPages); 
+
+// Calculate offset
+$offset = ($currentPage - 1) * $recordsPerPage;
+
+// Get profiles for current page
+$view->profiles = array_slice($allProfiles, $offset, $recordsPerPage);
+
+// Pagination data
+$view->currentPage = $currentPage;
+$view->totalPages = $totalPages;
+$view->totalRecords = $totalRecords;
+$view->recordsPerPage = $recordsPerPage;
+$view->startRecord = $totalRecords > 0 ? $offset + 1 : 0;
+$view->endRecord = min($offset + $recordsPerPage, $totalRecords);
+
+// Also add the filter values to the view for displaying and maintaining state
+$view->nameFilter = $nameFilter;
+$view->roleFilter = $roleFilter; 
+$view->statusFilter = $statusFilter;
+
+// Fetch other data for the view
 $view->uniqueNames = $profilesModel->getUniqueNames();
 $view->accountStatuses = $profilesModel->getAccountStatuses();
 $view->roles = $profilesModel->getRoles();
 
 // Load the view
 require_once 'Views/view-all-profiles.phtml';
+?>

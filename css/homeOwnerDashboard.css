@@ -1,12 +1,25 @@
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
 
-    .stats-card {
-        margin-bottom: 20px;
-        border: none;
-        background-color: #e9ecef;
-        padding: 20px;
-        border-radius: 5px;
-        transition: transform 0.3s;
-    }
+.col-md-3 {
+    display: flex; /* Ensure columns use flexbox */
+}
+
+.stats-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    border: none;
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 5px;
+    transition: transform 0.3s;
+    flex: 1; /* Allow cards to grow equally */
+    min-height: 150px; /* Set a minimum height for uniformity */
+}
     
     .stats-card:hover {
         transform: translateY(-5px);

@@ -23,8 +23,19 @@
     <div class="row">
         <div class="col-12">
             <div class="card charge-point-card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">Charge Points</h4>
+                    <div class="pagination-info">
+                        <span id="pagination-info-text">
+                            Showing <?php echo $view->startRecord; ?>-<?php echo $view->endRecord; ?> of <?php echo $view->totalRecords; ?> charge points
+                        </span>
+                        <select id="itemsPerPage" class="form-select form-select-sm d-inline-block ms-2" style="width: auto;">
+                            <option value="10" <?php echo $view->itemsPerPage == 10 ? 'selected' : ''; ?>>10 per page</option>
+                            <option value="25" <?php echo $view->itemsPerPage == 25 ? 'selected' : ''; ?>>25 per page</option>
+                            <option value="50" <?php echo $view->itemsPerPage == 50 ? 'selected' : ''; ?>>50 per page</option>
+                            <option value="100" <?php echo $view->itemsPerPage == 100 ? 'selected' : ''; ?>>100 per page</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -63,6 +74,65 @@
                         </table>
                     </div>
                 </div>
+                <?php if ($view->totalPages > 1): ?>
+                <div class="card-footer">
+                    <nav aria-label="Charge points pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <?php if ($view->currentPage > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" data-page="1" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" data-page="<?php echo $view->currentPage - 1; ?>" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+
+                            <?php
+                            $startPage = max(1, $view->currentPage - 2);
+                            $endPage = min($view->totalPages, $view->currentPage + 2);
+                            
+                            if ($startPage > 1) {
+                                echo '<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>';
+                                if ($startPage > 2) {
+                                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                }
+                            }
+                            
+                            for ($i = $startPage; $i <= $endPage; $i++):
+                            ?>
+                                <li class="page-item <?php echo $i == $view->currentPage ? 'active' : ''; ?>">
+                                    <a class="page-link" href="#" data-page="<?php echo $i; ?>"><?php echo $i; ?></a>
+                                </li>
+                            <?php endfor;
+                            
+                            if ($endPage < $view->totalPages) {
+                                if ($endPage < $view->totalPages - 1) {
+                                    echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                }
+                                echo '<li class="page-item"><a class="page-link" href="#" data-page="' . $view->totalPages . '">' . $view->totalPages . '</a></li>';
+                            }
+                            ?>
+
+                            <?php if ($view->currentPage < $view->totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" data-page="<?php echo $view->currentPage + 1; ?>" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" data-page="<?php echo $view->totalPages; ?>" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

@@ -32,6 +32,15 @@
                             <label class="fw-bold">City:</label>
                             <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['cityName']) ?></span>
                         </div>
+                             <div class="mb-3">
+                            <label class="fw-bold">Block:</label>
+                            <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['block']) ?></span>
+                        </div>
+                           </div>
+                             <div class="mb-3">
+                            <label class="fw-bold">Street:</label>
+                            <span class="ms-2"><?= htmlspecialchars($view->chargerDetails['streetName']) ?></span>
+                        </div>
                         <div class="mb-4">
                             <label class="fw-bold">Price:</label>
                             <span class="ms-2 badge bg-success"><?= htmlspecialchars($view->chargerDetails['pricePerKwh']) ?> BHD / kWh</span>

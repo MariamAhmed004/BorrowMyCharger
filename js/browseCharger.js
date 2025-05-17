@@ -156,23 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const id = parentElement.dataset.id;
         
         if (role === 'Guest') {
-          // Create a nicer alert using Bootstrap
-          const alertDiv = document.createElement('div');
-          alertDiv.className = 'alert alert-warning alert-dismissible fade show';
-          alertDiv.setAttribute('role', 'alert');
-          alertDiv.innerHTML = `
-            <strong>Login Required!</strong> Please log in to book a charge point.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          `;
-          
-          const container = document.querySelector('.container-custom');
-          container.insertBefore(alertDiv, container.firstChild);
-          
-          // Auto dismiss after 5 seconds
-          setTimeout(() => {
-            alertDiv.classList.remove('show');
-            setTimeout(() => alertDiv.remove(), 500);
-          }, 5000);
+       alert("Login Required! Please log in to book a charge point.");
         } else {
           window.location.href = 'book-charger.php?id=' + id;
         }
