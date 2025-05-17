@@ -39,18 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     
     // Validate form data
-    $price = filter_input(INPUT_POST, 'price_per_kwh', FILTER_VALIDATE_FLOAT);
-    $availabilityStatus = filter_input(INPUT_POST, 'availability_status_id', FILTER_VALIDATE_INT);
-    $streetName = filter_input(INPUT_POST, 'streetName', FILTER_SANITIZE_STRING);
-    $latitude = filter_input(INPUT_POST, 'latitude', FILTER_VALIDATE_FLOAT);
-    $longitude = filter_input(INPUT_POST, 'longitude', FILTER_VALIDATE_FLOAT);
-    $postcode = filter_input(INPUT_POST, 'postcode', FILTER_SANITIZE_STRING);
-    $cityId = filter_input(INPUT_POST, 'city_id', FILTER_VALIDATE_INT);
-    $houseNumber = filter_input(INPUT_POST, 'house_number', FILTER_VALIDATE_INT);
-    $road = filter_input(INPUT_POST, 'road', FILTER_VALIDATE_INT);
-    $block = filter_input(INPUT_POST, 'block', FILTER_VALIDATE_INT);
-    $chargePointAddressId = filter_input(INPUT_POST, 'charge_point_address_id', FILTER_VALIDATE_INT);
-    
+  $price = htmlspecialchars($_POST['price_per_kwh'], ENT_QUOTES, 'UTF-8');
+$availabilityStatus = htmlspecialchars($_POST['availability_status_id'], ENT_QUOTES, 'UTF-8');
+$streetName = htmlspecialchars($_POST['streetName'], ENT_QUOTES, 'UTF-8');
+$latitude = htmlspecialchars($_POST['latitude'], ENT_QUOTES, 'UTF-8');
+$longitude = htmlspecialchars($_POST['longitude'], ENT_QUOTES, 'UTF-8');
+$postcode = htmlspecialchars($_POST['postcode'], ENT_QUOTES, 'UTF-8');
+$cityId = htmlspecialchars($_POST['city_id'], ENT_QUOTES, 'UTF-8');
+$houseNumber = htmlspecialchars($_POST['house_number'], ENT_QUOTES, 'UTF-8');
+$road = htmlspecialchars($_POST['road'], ENT_QUOTES, 'UTF-8');
+$block = htmlspecialchars($_POST['block'], ENT_QUOTES, 'UTF-8');
+$chargePointAddressId = htmlspecialchars($_POST['charge_point_address_id'], ENT_QUOTES, 'UTF-8');
     // Validate required fields
     if (!$price || !$availabilityStatus || !$streetName || !$latitude || !$longitude || !$postcode || !$cityId || !$houseNumber || !$road || !$block || !$chargePointAddressId) {
         $error = 'Please fill in all required fields correctly';
