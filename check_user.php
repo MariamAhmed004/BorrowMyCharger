@@ -1,5 +1,5 @@
 <?php
-require_once 'Models/Register.php';
+require_once 'Models/register.php';
 
 header('Content-Type: application/json');
 
