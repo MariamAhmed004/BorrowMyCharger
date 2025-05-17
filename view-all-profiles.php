@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 // Include the Profiles model
-require_once 'Models/allprofiles.php';
+require_once 'Models/allProfiles.php';
 
 // Create instance of Profiles model
 $profilesModel = new Profiles();
