@@ -1,4 +1,3 @@
-
 <?php
 require_once('Models/chargePointManagement.php');
 require_once('Models/Cities.php');
@@ -27,7 +26,6 @@ if (!isset($_GET['user_id']) || empty($_GET['user_id'])) {
     header('Location: adminManageChargePoint.php');
     exit;
 }
-
 function getUploadConfig() {
     // Check if we're in Docker (production)
     $isDocker = file_exists('/.dockerenv');
@@ -56,22 +54,16 @@ function getUploadConfig() {
         ];
     }
 }
-
 // Get the homeowner ID from the query string
 $homeownerId = intval($_GET['user_id']);
 $view->homeownerId = $homeownerId;
 
 $chargePointModel = new chargePointManagement();
 $availabilityStatuses = $chargePointModel->getAvailabilityStatuses();
-
-// Store configuration for later use if needed
 $config = getUploadConfig();
-$view->runningMode = $config['mode']; // Can be used in the view if needed
-
 // Check if form was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // Process uploaded image if any
+   // Process uploaded image if any
     $pictureUrl = 'images/chargePoint1.jpg'; // Default image
     
     if (isset($_FILES['charge_point_picture']) && $_FILES['charge_point_picture']['error'] === UPLOAD_ERR_OK) {
@@ -121,45 +113,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Only proceed if there are no upload errors
-    if (!isset($view->message)) {
-        // Prepare data for charge point
-        $chargePointData = [
-            'price_per_kwh' => $_POST['price_per_kwh'],
-            'charge_point_picture_url' => $pictureUrl,
-            'postcode' => $_POST['postcode'],
-            'latitude' => $_POST['latitude'],
-            'longitude' => $_POST['longitude'],
-            'streetName' => $_POST['streetName'],
-            'city_id' => $_POST['city_id'],
-            'house_number' => $_POST['house_number'],
-            'road' => $_POST['road'],
-            'block' => $_POST['block']
-        ];
-        
-        try {
-            // Add the charge point
-            $chargePointId = $chargePointModel->addChargePoint($homeownerId, $chargePointData);
-            
-            // Process availability times
-            if (isset($_POST['availability_times']) && is_array($_POST['availability_times'])) {
-                foreach ($_POST['availability_times'] as $dayId => $timeString) {
-                    $times = explode(',', $timeString);
-                    $times = array_unique(array_filter(array_map('trim', $times))); // Remove duplicates and trim
-                    // Update availability times
-                    $chargePointModel->updateAvailabilityTimes($dayId, $times, $chargePointId);
-                }
+    // Prepare data for charge point
+    $chargePointData = [
+        'price_per_kwh' => $_POST['price_per_kwh'],
+        'charge_point_picture_url' => $pictureUrl,
+        'postcode' => $_POST['postcode'],
+        'latitude' => $_POST['latitude'],
+        'longitude' => $_POST['longitude'],
+        'streetName' => $_POST['streetName'],
+        'city_id' => $_POST['city_id'],
+        'house_number' => $_POST['house_number'],
+        'road' => $_POST['road'],
+        'block' => $_POST['block']
+    ];
+    
+    try {
+     // Add the charge point
+        $chargePointId = $chargePointModel->addChargePoint($homeownerId, $chargePointData);
+     // Process availability times
+        if (isset($_POST['availability_times']) && is_array($_POST['availability_times'])) {
+            foreach ($_POST['availability_times'] as $dayId => $timeString) {
+                $times = explode(',', $timeString);
+                $times = array_unique(array_filter(array_map('trim', $times))); // Remove duplicates and trim
+                // Update availability times
+                $chargePointModel->updateAvailabilityTimes($dayId, $times, $chargePointId);
             }
-
-            $_SESSION['message'] = 'Charge point added successfully.';
-            $_SESSION['messageType'] = 'success';
-            header('Location: charge-point-management.php');
-            exit;
-            
-        } catch (Exception $e) {
-            $view->message = 'Error: ' . $e->getMessage();
-            $view->messageType = 'error';
         }
+
+        $_SESSION['message'] = 'Charge point added successfully.';
+        $_SESSION['messageType'] = 'success';
+        header('Location: charge-point-management.php');
+        exit;
+        
+    } catch (Exception $e) {
+        $view->message = 'Error: ' . $e->getMessage();
+        $view->messageType = 'error';
     }
 }
 
