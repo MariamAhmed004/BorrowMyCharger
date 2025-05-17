@@ -4,7 +4,7 @@ session_start();
 
 // Require the models
 require_once 'Models/Cities.php';
-require_once 'Models/BrowseCharger.php';
+require_once 'Models/browseCharger.php';
 
 // Create view object
 $view = new stdClass();
