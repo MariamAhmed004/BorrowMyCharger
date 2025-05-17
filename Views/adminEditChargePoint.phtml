@@ -42,11 +42,11 @@
                             <!-- Left Column -->
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="price_per_kwh" class="form-label">Price per kWh</label>
+                                    <label for="price_per_kwh" class="form-label">Price per kWh (max is 20)</label>
                                     <div class="input-group">
                                         <span class="input-group-text">BD</span>
                                         <input type="number" class="form-control" id="price_per_kwh" name="price_per_kwh" 
-                                            step="0.01" min="0" value="<?php echo htmlspecialchars($chargePoint['price_per_kwh'] ?? ''); ?>" required>
+                                            step="0.01" min="0.01" max="20" value="<?php echo htmlspecialchars($chargePoint['price_per_kwh'] ?? ''); ?>" required>
                                     </div>
                                     <div class="invalid-feedback">Please enter a valid price.</div>
                                 </div>

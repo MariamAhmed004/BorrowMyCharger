@@ -44,7 +44,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text">BD</span>
                                         <input type="number" class="form-control" id="price_per_kwh" name="price_per_kwh" 
-                                            step="0.01" min="0" required>
+                                            step="0.01" min="0.01" max="20" required>
                                     </div>
                                     <div class="invalid-feedback">Please enter a valid price.</div>
                                 </div>
@@ -87,7 +87,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="charge_point_picture" class="form-label">Upload Picture</label>
-                                    <input type="file" class="form-control" id="charge_point_picture" name="charge_point_picture">
+                                    <input type="file" class="form-control" id="charge_point_picture" name="charge_point_picture" required>
                                     <div class="form-text">Supported formats: JPG, PNG, GIF (max 5MB)</div>
                                 </div>
                                                                 <div class="mb-3">
