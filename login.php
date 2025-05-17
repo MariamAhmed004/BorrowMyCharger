@@ -1,5 +1,5 @@
 <?php
-require_once 'Models/Login.php';
+require_once 'Models/login.php';
 
 $view = new stdClass();
 $view->pageTitle = 'Login';
