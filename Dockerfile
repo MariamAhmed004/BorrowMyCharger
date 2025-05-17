@@ -6,22 +6,25 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     zip \
-    && docker-php-ext-install zip pdo pdo_mysql
+    && docker-php-ext-install zip pdo pdo_mysql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache rewrite module
 RUN a2enmod rewrite
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /
+WORKDIR /var/www/html
 
 # Copy all files
 COPY . .
 
 # Install PHP packages
-RUN composer install
+RUN composer install --no-dev --optimize-autoloader \
+    && composer clear-cache
 
 # Expose port 80
 EXPOSE 80
+
