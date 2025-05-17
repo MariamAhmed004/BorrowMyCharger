@@ -7,6 +7,28 @@ class ChargePointController {
     public function __construct() {
         $this->_chargePointModel = new ChargePoint();
     }
+    
+        private function getUploadConfig() {
+        // Detect if we're in a Docker/production environment
+        $isDocker = file_exists('/.dockerenv') || getenv('DOCKER') === 'true';
+        $isProduction = getenv('APP_ENV') === 'production' || !empty(getenv('RENDER'));
+        
+        if ($isDocker || $isProduction) {
+            // Production/Docker environment
+            return [
+                'upload_dir' => '/var/www/html/uploads/charge_points/',
+                'web_path' => 'uploads/charge_points/',
+                'permissions' => 0775
+            ];
+        } else {
+            // Local development environment
+            return [
+                'upload_dir' => __DIR__ . '/uploads/charge_points/',
+                'web_path' => 'uploads/charge_points/',
+                'permissions' => 0755
+            ];
+        }
+    }
 
     public function indexAction() {
         // Check if user is logged in
@@ -197,7 +219,7 @@ class ChargePointController {
         return $errors;
     }
 
-    private function uploadChargePointPicture() {
+      private function uploadChargePointPicture() {
         // Check if file was uploaded
         if (!isset($_FILES['charge_point_picture']) || $_FILES['charge_point_picture']['error'] !== UPLOAD_ERR_OK) {
             // If no new file, return the existing URL if it exists
@@ -206,16 +228,45 @@ class ChargePointController {
 
         $file = $_FILES['charge_point_picture'];
         
-        // Validate file type
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        // Enhanced file validation
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        
+        // Check file type
         if (!in_array($file['type'], $allowedTypes)) {
+            error_log('Invalid file type: ' . $file['type']);
+            return false;
+        }
+        
+        // Check file extension
+        $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($fileExtension, $allowedExtensions)) {
+            error_log('Invalid file extension: ' . $fileExtension);
+            return false;
+        }
+        
+        // Check file size (limit to 5MB)
+        if ($file['size'] > 5 * 1024 * 1024) {
+            error_log('File too large: ' . $file['size'] . ' bytes');
             return false;
         }
 
+        // Get configuration based on environment
+        $config = $this->getUploadConfig();
+        $uploadDir = $config['upload_dir'];
+        
         // Create upload directory if it doesn't exist
-        $uploadDir = 'uploads/charge_points/';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+            if (!mkdir($uploadDir, $config['permissions'], true)) {
+                error_log('Failed to create upload directory: ' . $uploadDir);
+                return false;
+            }
+            
+            // Set ownership only in production/Docker environment
+            if (function_exists('chown') && (file_exists('/.dockerenv') || getenv('RENDER'))) {
+                @chown($uploadDir, 'www-data');
+                @chgrp($uploadDir, 'www-data');
+            }
         }
 
         // Generate unique filename
@@ -224,9 +275,17 @@ class ChargePointController {
 
         // Move uploaded file
         if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            return $uploadPath;
+            // Set proper permissions on the uploaded file
+            @chmod($uploadPath, 0644);
+            
+            // Return the web-accessible path (relative path for database storage)
+            return $config['web_path'] . $fileName;
+        } else {
+            // Log the error for debugging
+            $lastError = error_get_last();
+            error_log('Failed to move uploaded file: ' . ($lastError['message'] ?? 'Unknown error'));
+            error_log('Source: ' . $file['tmp_name'] . ', Destination: ' . $uploadPath);
+            return false;
         }
-
-        return false;
     }
 }

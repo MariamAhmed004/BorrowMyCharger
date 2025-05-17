@@ -18,22 +18,24 @@ COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Create both uploads directories
-RUN mkdir -p /var/www/html/uploads/charge-points && \
-    mkdir -p /var/www/html/uploads/charge_points
+# Copy application files first (before creating directories)
+COPY . .
+
+# Create uploads directory with correct path (matching PHP code)
+RUN mkdir -p /var/www/html/uploads/charge_points
 
 # Change ownership to the web server user (www-data)
 RUN chown -R www-data:www-data /var/www/html/uploads
 
-# Set permissions
-RUN chmod -R 755 /var/www/html/uploads
-
-# Copy all files
-COPY . .
+# Set proper permissions (775 for directories, 644 for files)
+RUN chmod -R 775 /var/www/html/uploads
 
 # Install PHP packages
 RUN composer install --no-dev --optimize-autoloader \
     && composer clear-cache
+
+# Set proper ownership for the entire application
+RUN chown -R www-data:www-data /var/www/html
 
 # Expose port 80
 EXPOSE 80

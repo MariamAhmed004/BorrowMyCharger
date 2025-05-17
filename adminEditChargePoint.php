@@ -21,7 +21,27 @@ $availabilityStatuses = [];
 // Fetch appropriate cities
 $view->cities = Cities::getCities();
 $chargePointModel = new chargePointManagement();
-
+        function getUploadConfig() {
+            // Detect if we're in a Docker/production environment
+            $isDocker = file_exists('/.dockerenv') || getenv('DOCKER') === 'true';
+            $isProduction = getenv('APP_ENV') === 'production' || !empty(getenv('RENDER'));
+            
+            if ($isDocker || $isProduction) {
+                // Production/Docker environment
+                return [
+                    'upload_dir' => '/var/www/html/uploads/charge_points/',
+                    'web_path' => 'uploads/charge_points/',
+                    'permissions' => 0775
+                ];
+            } else {
+                // Local development environment
+                return [
+                    'upload_dir' => __DIR__ . '/uploads/charge_points/',
+                    'web_path' => 'uploads/charge_points/',
+                    'permissions' => 0755
+                ];
+            }
+        }
 // Check if ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     $_SESSION['message'] = 'Invalid charge point ID';
@@ -60,10 +80,11 @@ $chargePointAddressId = htmlspecialchars($_POST['charge_point_address_id'], ENT_
             exit;
         }
     } else {
-        // Handle file upload if a new image was provided
+      // Handle file upload if a new image was provided
         $picturePath = null;
         if (!empty($_FILES['charge_point_picture']['name'])) {
-            $uploadDir = 'uploads/charge_points/';
+            $config = getUploadConfig();
+            $uploadDir = $config['upload_dir'];
             $fileName = uniqid() . '_' . time() . '_' . basename($_FILES['charge_point_picture']['name']);
             $targetFilePath = $uploadDir . $fileName;
             $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
@@ -73,23 +94,58 @@ $chargePointAddressId = htmlspecialchars($_POST['charge_point_address_id'], ENT_
             if (in_array(strtolower($fileType), $allowedTypes)) {
                 // Create directory if it doesn't exist
                 if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
+                    if (!mkdir($uploadDir, $config['permissions'], true)) {
+                        $error = 'Failed to create upload directory';
+                        if ($isAjax) {
+                            header('Content-Type: application/json');
+                            echo json_encode(['success' => false, 'message' => $error]);
+                            exit;
+                        }
+                    }
+                    
+                    // Set ownership only in production/Docker environment
+                    if (function_exists('chown') && (file_exists('/.dockerenv') || getenv('RENDER'))) {
+                        @chown($uploadDir, 'www-data');
+                        @chgrp($uploadDir, 'www-data');
+                    }
                 }
                 
-                if (move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $targetFilePath)) {
-                    $picturePath = $targetFilePath;
-                } else {
-                    $error = 'Failed to upload image';
-                    
+                // Check file size (limit to 5MB)
+                if ($_FILES['charge_point_picture']['size'] > 5 * 1024 * 1024) {
+                    $error = 'File size must be less than 5MB';
                     if ($isAjax) {
                         header('Content-Type: application/json');
                         echo json_encode(['success' => false, 'message' => $error]);
                         exit;
                     }
+                } else {
+                    // Check if the temp file exists and is readable
+                    if (is_uploaded_file($_FILES['charge_point_picture']['tmp_name'])) {
+                        if (move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $targetFilePath)) {
+                            // Store relative path for database (works both locally and in production)
+                            $picturePath = $config['web_path'] . $fileName;
+                            
+                            // Set proper permissions on the uploaded file
+                            @chmod($targetFilePath, 0644);
+                        } else {
+                            $error = 'Failed to upload image. Error: ' . (error_get_last()['message'] ?? 'Unknown error');
+                            if ($isAjax) {
+                                header('Content-Type: application/json');
+                                echo json_encode(['success' => false, 'message' => $error]);
+                                exit;
+                            }
+                        }
+                    } else {
+                        $error = 'Invalid file upload or file too large';
+                        if ($isAjax) {
+                            header('Content-Type: application/json');
+                            echo json_encode(['success' => false, 'message' => $error]);
+                            exit;
+                        }
+                    }
                 }
             } else {
                 $error = 'Only JPG, JPEG, PNG, and GIF files are allowed';
-                
                 if ($isAjax) {
                     header('Content-Type: application/json');
                     echo json_encode(['success' => false, 'message' => $error]);
@@ -97,7 +153,6 @@ $chargePointAddressId = htmlspecialchars($_POST['charge_point_address_id'], ENT_
                 }
             }
         }
-        
         // Begin database operations
         try {
             // Update charge point

@@ -26,7 +26,34 @@ if (!isset($_GET['user_id']) || empty($_GET['user_id'])) {
     header('Location: adminManageChargePoint.php');
     exit;
 }
-
+function getUploadConfig() {
+    // Check if we're in Docker (production)
+    $isDocker = file_exists('/.dockerenv');
+    
+    // Check if we're on Render hosting
+    $isRender = !empty(getenv('RENDER'));
+    
+    // Check if this is a production environment
+    $isProduction = $isDocker || $isRender;
+    
+    if ($isProduction) {
+        // We're in production (Docker/Render)
+        echo "Running in: PRODUCTION mode<br>";
+        return [
+            'upload_dir' => '/var/www/html/uploads/charge_points/',
+            'web_path' => 'uploads/charge_points/',
+            'permissions' => 0775
+        ];
+    } else {
+        // We're in local development
+        echo "Running in: LOCAL DEVELOPMENT mode<br>";
+        return [
+            'upload_dir' => __DIR__ . '/uploads/charge_points/',
+            'web_path' => 'uploads/charge_points/',
+            'permissions' => 0755
+        ];
+    }
+}
 // Get the homeowner ID from the query string
 $homeownerId = intval($_GET['user_id']);
 $view->homeownerId = $homeownerId;
@@ -40,18 +67,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pictureUrl = 'images/chargePoint1.jpg'; // Default image
     
     if (isset($_FILES['charge_point_picture']) && $_FILES['charge_point_picture']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = 'uploads/charge_points/';
+        $config = getUploadConfig();
+        $uploadDir = $config['upload_dir'];
         
         // Create directory if it doesn't exist
         if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+            if (!mkdir($uploadDir, $config['permissions'], true)) {
+                $view->message = 'Failed to create upload directory';
+                $view->messageType = 'error';
+                require('Views/adminAddChargePoint.phtml');
+                exit;
+            }
+            
+            // Set ownership only in production/Docker environment
+            if (function_exists('chown') && (file_exists('/.dockerenv') || getenv('RENDER'))) {
+                @chown($uploadDir, 'www-data');
+                @chgrp($uploadDir, 'www-data');
+            }
         }
         
         $fileName = uniqid() . '_' . basename($_FILES['charge_point_picture']['name']);
         $uploadFile = $uploadDir . $fileName;
         
-        if (move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $uploadFile)) {
-            $pictureUrl = $uploadFile;
+        // Additional validation
+        $fileType = pathinfo($uploadFile, PATHINFO_EXTENSION);
+        $allowedTypes = ['jpg', 'png', 'jpeg', 'gif'];
+        
+        if (in_array(strtolower($fileType), $allowedTypes)) {
+            // Check file size (limit to 5MB)
+            if ($_FILES['charge_point_picture']['size'] <= 5 * 1024 * 1024) {
+                if (move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $uploadFile)) {
+                    $pictureUrl = $config['web_path'] . $fileName;
+                    @chmod($uploadFile, 0644);
+                } else {
+                    error_log('Upload failed: ' . error_get_last()['message'] ?? 'Unknown error');
+                }
+            }
         }
     }
     
