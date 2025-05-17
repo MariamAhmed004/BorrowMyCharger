@@ -53,7 +53,7 @@ $chargePointAddressId = htmlspecialchars($_POST['charge_point_address_id'], ENT_
     // Validate required fields
     if (!$price || !$availabilityStatus || !$streetName || !$latitude || !$longitude || !$postcode || !$cityId || !$houseNumber || !$road || !$block || !$chargePointAddressId) {
         $error = 'Please fill in all required fields correctly';
-        
+        //
         if ($isAjax) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => $error]);
