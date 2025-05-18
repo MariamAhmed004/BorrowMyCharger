@@ -4,7 +4,12 @@ require_once('Models/Cities.php');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
+// Check if the session variable is not set or if the role is not 'Admin'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 // Check if user is logged in 
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');

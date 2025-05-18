@@ -38,19 +38,19 @@
 
     /* Add background images for each carousel item */
     #carouselItem1 {
-        background-image: url('/images/homepage/home-charger-1.jpg');
+        background-image: url('../images/homepage/home-charger-1.jpg');
     }
 
     #carouselItem2 {
-        background-image: url('/images/homepage/home-charger-2.jpg');
+        background-image: url('../images/homepage/home-charger-2.jpg');
     }
 
     #carouselItem3 {
-        background-image: url('/images/homepage/home-charger-3.jpg');
+        background-image: url('../images/homepage/home-charger-3.jpg');
     }
 
     #carouselItem4 {
-        background-image: url('/images/homepage/home-charger-5.jpg');
+        background-image: url('../images/homepage/home-charger-5.jpg');
     }
 
     .carouselContent::after {
@@ -137,4 +137,54 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: shadow for depth */
     flex: 1; /* Allow cards to grow equally */
     min-height: 300px; /* Set a minimum height for uniformity */
+}
+
+/* CTA Section Styles */
+#cta {
+    padding: 60px 0;
+}
+
+#cta .col-md-4 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0 !important;
+}
+
+/* Sign Up Button Styles */
+.cta-signup-btn {
+    background-color: #868942 !important;
+    color: white !important;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    min-width: 160px;
+}
+
+.cta-signup-btn:hover {
+    background-color: #757636 !important;
+    color: white !important;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(134, 137, 66, 0.3);
+}
+
+.cta-signup-btn:focus,
+.cta-signup-btn:active {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(134, 137, 66, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cta-signup-btn {
+        padding: 10px 25px;
+        font-size: 15px;
+        min-width: 140px;
+    }
 }

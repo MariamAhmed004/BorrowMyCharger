@@ -3,21 +3,83 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/chargePoint1.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/register.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/PasswordReset.php</file>
             <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/browseCharger.js</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/adminAddChargePoint.php</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/userProfile.js</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/chargePoint1.php</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/profile.php</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/browse-charger.phtml</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/adminEditChargePoint.php</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/my-charge-point.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/BookingHistory.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/css/home.css</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/index.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/home_homeowner.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/homeRentalUser.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/dashboard_admin.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/register.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/adminDeleteChargePoint.php</file>
             <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/adminAddChargePoint.js</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/chargePoint1.js</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/my-charge-point.php</file>
-            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/template/header.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/booking-history.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/systemReports.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/login.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/status-polling.js</file>
             <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/profile.phtml</file>
             <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/adminEditChargePoint.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/register.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/borrow-request.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/book-charger.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/browseCharger.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/booking-details.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/userProfile.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/chargePoint1.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/css/my-charge-point.css</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/css/borrowRequestDetails.css</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/booking-history.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/profile.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/Database.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/browse-charger.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/composer.lock</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/adminEditChargePoint.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/home_homeowner.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/chargePoint1.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/RentalUser-Home.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/system-reports.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/admin-actions.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/systemReportsController.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/home.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/PasswordReset.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/borrow-request.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/map.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/my-charge-point.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/register.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/HomeOwnerHome.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/check-status.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/leaflet/leaflet-src.esm.js.map</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/ProfileController.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/my-charge-point.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/home_rentaluser.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/borrow-request-details.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/check-availability.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/index.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/css/browse-charger.css</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/chargePoint1.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/book-charger.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/login.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/adminAddChargePoint.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/composer.json</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/css/homeRentalUser.css</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/chargePointManagement.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/BookCharger.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/system-reports.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/faq.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/css/book-charger.css</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/browse-charger.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/home_rentaluser.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/booking-history.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/view-all-profiles.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/borrow-request.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/charge-point-management.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/book-charger.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/borrow-request-details.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/BorrowRequestModel.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/template/header.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/css/header.css</file>
         </group>
     </open-files>
 </project-private>

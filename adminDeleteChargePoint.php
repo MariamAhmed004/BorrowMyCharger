@@ -6,6 +6,12 @@ ini_set('display_errors', 0); // Don't display errors to avoid breaking JSON
 ini_set('log_errors', 1);
 
 session_start();
+// Check if the session variable is not set or if the role is not 'Admin'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 require_once 'Models/chargePointManagement.php';
 
 // Set content type to JSON

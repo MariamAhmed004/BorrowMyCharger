@@ -3,7 +3,12 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
+// Check if the session variable is not set or if the role is not 'Admin'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 // Include the dashboard model
 require_once 'Models/AdminDashboard.php';
 $dashboardModel = new AdminDashboard();

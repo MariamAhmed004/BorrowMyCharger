@@ -1,0 +1,13 @@
+ :root {
+            --dark-gray: #61656F;
+            --medium-gray: #748771;
+            --deep-emerald: #044827;
+            --teal: #2F6867;
+            --light-gray: #E8E8E8;
+        }
+
+        .nav-link.active {
+            color: #fff; /* Change text color */
+            background-color: var(--teal); /* Change background color */
+            border-radius: 5px; /* Optional: add border-radius */
+        }

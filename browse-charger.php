@@ -12,7 +12,11 @@ $view->pageTitle = 'Browse Charger';
 $view->activePage = 'browse-charger';
 
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Guest';
-
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'RentalUser'|| $_SESSION['role'] !== 'Guest') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 
 // Fetch appropriate cities
 $view->cities = Cities::getCities();

@@ -1,8 +1,16 @@
 <?php
 require_once('Models/chargePoint1.php');
+
 // Start the session only if it is not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+// Check if the session variable is not set or if the role is not 'HomeOwner'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'HomeOwner') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
 }
 
 $view = new stdClass();

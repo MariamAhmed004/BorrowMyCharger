@@ -2,16 +2,18 @@
 require_once 'Models/Database.php';
 require_once 'Models/BookingHistory.php';
 session_start();
-
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'RentalUser') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 $view = new stdClass();
 $view->pageTitle = 'booking-history';
 $view->activePage = 'booking-history';
 
 $userId = $_SESSION['user_id'] ?? null;
 
-// Uncomment this for debugging
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
+
 
 // Handle AJAX request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -4,6 +4,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Check if the session variable is not set or if the role is not 'HomeOwner'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'HomeOwner') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
+
 // Fetch the user ID from the session
 $userId = $_SESSION['user_id'] ?? null;
 

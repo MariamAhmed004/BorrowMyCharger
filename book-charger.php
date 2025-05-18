@@ -2,7 +2,12 @@
 
 // Start session to access user data
 session_start();
-
+// Check if the session variable is not set or if the role is not 'Admin'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'RentalUser') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 // Handle navigation to the book charger page
 $view = new stdClass();
 $view->pageTitle = 'Book Charger';

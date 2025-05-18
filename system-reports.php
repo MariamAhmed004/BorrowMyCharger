@@ -12,6 +12,13 @@ if (!isset($_SESSION['user_id']) ) {
     exit();
 }
 
+// Check if the session variable is not set or if the role is not 'Admin'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
+
 // Create controller
 $systemReportsController = new SystemReportsController($view);
 

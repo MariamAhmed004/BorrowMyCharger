@@ -3,7 +3,11 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'RentalUser') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 //fetch the user ID from the session
 $userId = $_SESSION['user_id'] ?? null;
 

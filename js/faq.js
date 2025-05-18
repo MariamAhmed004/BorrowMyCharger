@@ -17,8 +17,7 @@
         }
     }
     
-    // Initialize the first FAQ item as open (optional)
+    // Initialize the first FAQ item as open 
     document.addEventListener('DOMContentLoaded', function() {
-        // Uncomment the line below if you want the first FAQ item to be open by default
-        // document.querySelector('.faq-item').classList.add('active');
+       
     });
