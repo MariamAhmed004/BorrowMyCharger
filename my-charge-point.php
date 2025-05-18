@@ -53,6 +53,36 @@ $view->availabilityStatuses = $chargePointModel->getAvailabilityStatuses();
 // Render the view
 require_once('Views/my-charge-point.phtml');
 
+
+function getUploadConfig() {
+    // Check if we're in Docker (production)
+    $isDocker = file_exists('/.dockerenv');
+    
+    // Check if we're on Render hosting
+    $isRender = !empty(getenv('RENDER'));
+    
+    // Check if this is a production environment
+    $isProduction = $isDocker || $isRender;
+    
+    if ($isProduction) {
+        // We're in production (Docker/Render) - removed the echo statement
+        return [
+            'upload_dir' => '/var/www/html/uploads/charge_points/',
+            'web_path' => 'uploads/charge_points/',
+            'permissions' => 0775,
+            'mode' => 'PRODUCTION'
+        ];
+    } else {
+        // We're in local development - removed the echo statement
+        return [
+            'upload_dir' => __DIR__ . '/uploads/charge_points/',
+            'web_path' => 'uploads/charge_points/',
+            'permissions' => 0755,
+            'mode' => 'LOCAL DEVELOPMENT'
+        ];
+    }
+}
+
 /**
  * Process available days and times data from the form
  * @return array Processed availability data in format suitable for database operations
@@ -140,7 +170,8 @@ function handleAddChargePoint($model, $userId) {
 
     // Process available days and times
     $availabilityData = processAvailableDaysTimes();
-$data['availability'] = $availabilityData;
+    $data['availability'] = $availabilityData;
+    
     // Additional validation
     foreach ($data as $key => $value) {
         if ($key !== 'streetName' && $key !== 'postcode' && $key !== 'price_per_kwh') {
@@ -157,23 +188,83 @@ $data['availability'] = $availabilityData;
         ];
     }
 
-    // Image upload logic
-    $uploadDir = 'uploads/charge-points/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
-    $fileName = uniqid() . '_' . basename($_FILES['charge_point_picture']['name']);
-    $uploadPath = $uploadDir . $fileName;
+    // Enhanced image upload logic
+    $config = getUploadConfig();
+    $pictureUrl = 'images/chargePoint1.jpg'; // Default image
 
-    if (!move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $uploadPath)) {
+    if (isset($_FILES['charge_point_picture']) && $_FILES['charge_point_picture']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = $config['upload_dir'];
+        
+        // Create directory if it doesn't exist
+        if (!file_exists($uploadDir)) {
+            if (!mkdir($uploadDir, $config['permissions'], true)) {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to create upload directory'
+                ];
+            }
+            
+            // Set ownership only in production/Docker environment
+            if (function_exists('chown') && (file_exists('/.dockerenv') || getenv('RENDER'))) {
+                @chown($uploadDir, 'www-data');
+                @chgrp($uploadDir, 'www-data');
+            }
+        }
+        
+        $fileName = uniqid() . '_' . basename($_FILES['charge_point_picture']['name']);
+        $uploadPath = $uploadDir . $fileName;
+        
+        // Additional validation
+        $fileType = pathinfo($uploadPath, PATHINFO_EXTENSION);
+        $allowedTypes = ['jpg', 'png', 'jpeg', 'gif'];
+        
+        if (in_array(strtolower($fileType), $allowedTypes)) {
+            // Check file size (limit to 5MB)
+            if ($_FILES['charge_point_picture']['size'] <= 5 * 1024 * 1024) {
+                if (move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $uploadPath)) {
+                    $pictureUrl = $config['web_path'] . $fileName;
+                    @chmod($uploadPath, 0644);
+                } else {
+                    error_log('Upload failed: ' . (error_get_last()['message'] ?? 'Unknown error'));
+                    return [
+                        'success' => false,
+                        'message' => 'Failed to upload image file'
+                    ];
+                }
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'File size too large. Maximum allowed size is 5MB.'
+                ];
+            }
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Invalid file type. Only JPG, PNG, JPEG, and GIF files are allowed.'
+            ];
+        }
+    } elseif (isset($_FILES['charge_point_picture']) && $_FILES['charge_point_picture']['error'] !== UPLOAD_ERR_NO_FILE) {
+        // Handle other upload errors
+        $uploadErrors = [
+            UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize directive',
+            UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE directive',
+            UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+            UPLOAD_ERR_EXTENSION => 'File upload stopped by extension'
+        ];
+        
+        $errorCode = $_FILES['charge_point_picture']['error'];
+        $errorMessage = $uploadErrors[$errorCode] ?? 'Unknown upload error';
+        
         return [
-            'success' => false, 
-            'message' => 'Failed to upload image'
+            'success' => false,
+            'message' => "Upload error: {$errorMessage}"
         ];
     }
 
     // Add charge point picture URL to data
-    $data['charge_point_picture_url'] = $uploadPath;
+    $data['charge_point_picture_url'] = $pictureUrl;
 
     try {
         // Add charge point
@@ -192,7 +283,7 @@ $data['availability'] = $availabilityData;
             ];
         } else {
             // Remove uploaded image if charge point creation fails
-            if (file_exists($uploadPath)) {
+            if ($pictureUrl !== 'images/chargePoint1.jpg' && file_exists($uploadPath)) {
                 unlink($uploadPath);
             }
             return [
@@ -202,13 +293,12 @@ $data['availability'] = $availabilityData;
         }
     } catch (Exception $e) {
         // Remove uploaded image on error
-        if (file_exists($uploadPath)) {
+        if ($pictureUrl !== 'images/chargePoint1.jpg' && file_exists($uploadPath)) {
             unlink($uploadPath);
         }
         throw $e;
     }
 }
-
 /**
  * Handle update charge point action
  */
@@ -273,7 +363,8 @@ function handleUpdateChargePoint($model, $userId) {
 
     // Process available days and times
     $availabilityData = processAvailableDaysTimes();
-$data['availability'] = $availabilityData;
+    $data['availability'] = $availabilityData;
+    
     // Additional validation
     foreach ($data as $key => $value) {
         if ($key !== 'charge_point_id' && $key !== 'streetName' && $key !== 'postcode' && $key !== 'price_per_kwh') {
@@ -290,22 +381,79 @@ $data['availability'] = $availabilityData;
         ];
     }
 
-    // Handle image upload (optional)
+    // Enhanced image upload logic (optional for updates)
+    $config = getUploadConfig();
     $uploadPath = $_POST['existing_picture_url'] ?? '';
+    
     if (isset($_FILES['charge_point_picture']) && $_FILES['charge_point_picture']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = 'uploads/charge-points/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $fileName = uniqid() . '_' . basename($_FILES['charge_point_picture']['name']);
-        $uploadPath = $uploadDir . $fileName;
+        $uploadDir = $config['upload_dir'];
         
-        if (!move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $uploadPath)) {
+        // Create directory if it doesn't exist
+        if (!file_exists($uploadDir)) {
+            if (!mkdir($uploadDir, $config['permissions'], true)) {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to create upload directory'
+                ];
+            }
+            
+            // Set ownership only in production/Docker environment
+            if (function_exists('chown') && (file_exists('/.dockerenv') || getenv('RENDER'))) {
+                @chown($uploadDir, 'www-data');
+                @chgrp($uploadDir, 'www-data');
+            }
+        }
+        
+        $fileName = uniqid() . '_' . basename($_FILES['charge_point_picture']['name']);
+        $newUploadPath = $uploadDir . $fileName;
+        
+        // Additional validation
+        $fileType = pathinfo($newUploadPath, PATHINFO_EXTENSION);
+        $allowedTypes = ['jpg', 'png', 'jpeg', 'gif'];
+        
+        if (in_array(strtolower($fileType), $allowedTypes)) {
+            // Check file size (limit to 5MB)
+            if ($_FILES['charge_point_picture']['size'] <= 5 * 1024 * 1024) {
+                if (move_uploaded_file($_FILES['charge_point_picture']['tmp_name'], $newUploadPath)) {
+                    $uploadPath = $config['web_path'] . $fileName;
+                    @chmod($newUploadPath, 0644);
+                } else {
+                    error_log('Upload failed: ' . (error_get_last()['message'] ?? 'Unknown error'));
+                    return [
+                        'success' => false,
+                        'message' => 'Failed to upload image file'
+                    ];
+                }
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'File size too large. Maximum allowed size is 5MB.'
+                ];
+            }
+        } else {
             return [
-                'success' => false, 
-                'message' => 'Failed to upload image'
+                'success' => false,
+                'message' => 'Invalid file type. Only JPG, PNG, JPEG, and GIF files are allowed.'
             ];
         }
+    } elseif (isset($_FILES['charge_point_picture']) && $_FILES['charge_point_picture']['error'] !== UPLOAD_ERR_NO_FILE) {
+        // Handle other upload errors
+        $uploadErrors = [
+            UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize directive',
+            UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE directive',
+            UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+            UPLOAD_ERR_EXTENSION => 'File upload stopped by extension'
+        ];
+        
+        $errorCode = $_FILES['charge_point_picture']['error'];
+        $errorMessage = $uploadErrors[$errorCode] ?? 'Unknown upload error';
+        
+        return [
+            'success' => false,
+            'message' => "Upload error: {$errorMessage}"
+        ];
     }
 
     // Add charge point picture URL to data
@@ -338,13 +486,12 @@ $data['availability'] = $availabilityData;
         }
     } catch (Exception $e) {
         // If this is a new image that failed, delete it
-        if ($uploadPath !== $_POST['existing_picture_url'] && file_exists($uploadPath)) {
-            unlink($uploadPath);
+        if (isset($newUploadPath) && $uploadPath !== $_POST['existing_picture_url'] && file_exists($newUploadPath)) {
+            unlink($newUploadPath);
         }
         throw $e;
     }
 }
-
 /**
  * Handle delete charge point action
  */

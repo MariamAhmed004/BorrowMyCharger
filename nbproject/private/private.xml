@@ -3,10 +3,21 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/maryam/Desktop/lastC/BorrowMyCharger/Dockerfile</file>
-            <file>file:/Users/maryam/Desktop/lastC/BorrowMyCharger/adminAddChargePoint.php</file>
-            <file>file:/Users/maryam/Desktop/lastC/BorrowMyCharger/adminEditChargePoint.php</file>
-            <file>file:/Users/maryam/Desktop/lastC/BorrowMyCharger/chargePoint1.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Models/chargePoint1.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/browseCharger.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/adminAddChargePoint.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/userProfile.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/chargePoint1.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/profile.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/browse-charger.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/adminEditChargePoint.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/my-charge-point.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/adminAddChargePoint.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/chargePoint1.js</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/my-charge-point.php</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/template/header.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/Views/profile.phtml</file>
+            <file>file:/Users/maryam/Desktop/HaHa/BorrowMyCharger/js/adminEditChargePoint.js</file>
         </group>
     </open-files>
 </project-private>

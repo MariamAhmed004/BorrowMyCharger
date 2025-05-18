@@ -1,11 +1,25 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Function to escape HTML entities
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
     // Function to show a Bootstrap alert that disappears after 5 seconds
     function showBootstrapAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alertContainer');
+        const escapedMessage = escapeHtml(message);
+        const escapedType = escapeHtml(type);
         alertContainer.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
+            <div class="alert alert-${escapedType} alert-dismissible fade show" role="alert">
+                ${escapedMessage}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `;
@@ -61,13 +75,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const lastName = document.getElementById('last_name');
         const phoneNumber = document.getElementById('phone_number');
 
-        // Validation patterns
-        const nameRegex = /^[A-Za-z]+(?:[\s-][A-Za-z]+)*$/;
+        // Validation patterns - updated to not allow spaces
+        const nameRegex = /^[A-Za-z]+$/; // Only letters, no spaces or special characters
         const phoneRegex = /^\d{8,}$/; // Only digits, at least 8
 
         // Validate first name
         if (!firstName.value.trim()) {
             showError(firstName, 'First name is required');
+        } else if (firstName.value.trim().includes(' ')) {
+            showError(firstName, 'First name cannot contain spaces');
         } else if (!nameRegex.test(firstName.value.trim())) {
             showError(firstName, 'First name must contain only letters');
         }
@@ -75,6 +91,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Validate last name
         if (!lastName.value.trim()) {
             showError(lastName, 'Last name is required');
+        } else if (lastName.value.trim().includes(' ')) {
+            showError(lastName, 'Last name cannot contain spaces');
         } else if (!nameRegex.test(lastName.value.trim())) {
             showError(lastName, 'Last name must contain only letters');
         }
@@ -89,32 +107,29 @@ document.addEventListener('DOMContentLoaded', function () {
         // Function to display validation error
         function showError(input, message) {
             const errorDiv = document.getElementById(`${input.id}_error`);
-            errorDiv.textContent = message;
+            errorDiv.textContent = message; // textContent automatically escapes HTML
             input.classList.add('is-invalid');
             isValid = false;
         }
 
-  
-if (!isValid) {
-        e.preventDefault();
-    } else {
-        e.preventDefault(); // Temporarily prevent submission
-        showBootstrapAlert('Profile updated successfully!', 'success');
+        if (!isValid) {
+            e.preventDefault();
+        } else {
+            e.preventDefault(); // Temporarily prevent submission
+            showBootstrapAlert('Profile updated successfully!', 'success');
 
-        // Delay form submission by 1.5 seconds to show the alert
-        setTimeout(() => {
-            form.submit(); // Submit the form programmatically
-        }, 1500);
+            // Delay form submission by 1.5 seconds to show the alert
+            setTimeout(() => {
+                form.submit(); // Submit the form programmatically
+            }, 1500);
 
-        // Hide save button and reset edit mode
-        saveButton.classList.add('d-none');
-        editButton.textContent = 'Edit Profile';
-    }
-
-
+            // Hide save button and reset edit mode
+            saveButton.classList.add('d-none');
+            editButton.textContent = 'Edit Profile';
+        }
     });
 
-    // Confirm before deleting account
+    // Confirm before deleting account - removed checkbox requirement
     deleteForm.addEventListener('submit', function (e) {
         if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
             e.preventDefault();
