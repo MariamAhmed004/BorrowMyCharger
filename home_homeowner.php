@@ -10,7 +10,12 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php?error=unauthorized');
     exit();
 }
-
+// Check if the session variable is not set or if the role is not 'homeowner'
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'HomeOwner') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
 require_once 'Models/HomeOwnerHome.php';
 
 // Get the homeowner ID from session

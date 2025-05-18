@@ -3,6 +3,13 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'RentalUser') {
+    // Redirect to index.php
+    header('Location: index.php');
+    exit(); 
+}
+
 require_once 'Models/RentalUser-Home.php';
 $userId = $_SESSION['user_id'];
 //handle from the header navigation to the html page
