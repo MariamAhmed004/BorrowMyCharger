@@ -1,6 +1,6 @@
 <?php
 require_once 'Models/chargePoint1.php';
-
+//this file is to be deleted :) 
 class ChargePointController {
     private $_chargePointModel;
 

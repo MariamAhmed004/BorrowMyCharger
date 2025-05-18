@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Validate first name
         if (!firstName.value.trim()) {
             showError(firstName, 'First name is required');
+        } else if (firstName.value.trim().length < 3) {
+            showError(firstName, 'First name must be at least 3 letters');
         } else if (firstName.value.trim().includes(' ')) {
             showError(firstName, 'First name cannot contain spaces');
         } else if (!nameRegex.test(firstName.value.trim())) {
@@ -91,6 +93,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Validate last name
         if (!lastName.value.trim()) {
             showError(lastName, 'Last name is required');
+        } else if (lastName.value.trim().length < 3) {
+            showError(lastName, 'Last name must be at least 3 letters');
         } else if (lastName.value.trim().includes(' ')) {
             showError(lastName, 'Last name cannot contain spaces');
         } else if (!nameRegex.test(lastName.value.trim())) {
