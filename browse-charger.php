@@ -12,7 +12,8 @@ $view->pageTitle = 'Browse Charger';
 $view->activePage = 'browse-charger';
 
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Guest';
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'RentalUser'|| $_SESSION['role'] !== 'Guest') {
+// Check if the role is neither 'RentalUser' nor 'Guest'
+if ($role !== 'RentalUser' && $role !== 'Guest') {
     // Redirect to index.php
     header('Location: index.php');
     exit(); 
